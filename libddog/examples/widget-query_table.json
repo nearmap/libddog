@@ -1,0 +1,28 @@
+{
+    "definition": {
+        "has_search_bar": "auto",
+        "requests": [
+            {
+                "aggregator": "avg",
+                "cell_display_mode": [
+                    "bar"
+                ],
+                "limit": 50,
+                "order": "desc",
+                "q": "avg:system.cpu.user{*} by {service}"
+            }
+        ],
+        "time": {},
+        "title": "",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "query_table"
+    },
+    "id": 5589804046501848,
+    "layout": {
+        "height": 4,
+        "width": 4,
+        "x": 8,
+        "y": 0
+    }
+}

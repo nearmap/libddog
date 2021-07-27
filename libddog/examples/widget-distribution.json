@@ -1,0 +1,37 @@
+{
+    "definition": {
+        "markers": [],
+        "requests": [
+            {
+                "q": "avg:system.cpu.user{*} by {service}",
+                "style": {
+                    "palette": "dog_classic"
+                }
+            }
+        ],
+        "time": {},
+        "title": "",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "distribution",
+        "xaxis": {
+            "include_zero": true,
+            "max": "auto",
+            "min": "auto",
+            "scale": "linear"
+        },
+        "yaxis": {
+            "include_zero": true,
+            "max": "auto",
+            "min": "auto",
+            "scale": "linear"
+        }
+    },
+    "id": 2457704332232248,
+    "layout": {
+        "height": 2,
+        "width": 4,
+        "x": 4,
+        "y": 4
+    }
+}

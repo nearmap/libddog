@@ -1,0 +1,114 @@
+{
+    "definition": {
+        "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+        ],
+        "legend_layout": "auto",
+        "markers": [],
+        "requests": [
+            {
+                "display_type": "line",
+                "queries": [
+                    {
+                        "data_source": "metrics",
+                        "name": "query1",
+                        "query": "avg:system.cpu.user{*}"
+                    }
+                ],
+                "response_format": "timeseries",
+                "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                }
+            },
+            {
+                "display_type": "line",
+                "formulas": [
+                    {
+                        "formula": "query0"
+                    },
+                    {
+                        "formula": "query1"
+                    }
+                ],
+                "on_right_yaxis": false,
+                "queries": [
+                    {
+                        "data_source": "metrics",
+                        "name": "query0",
+                        "query": "avg:system.cpu.user{*}"
+                    },
+                    {
+                        "data_source": "metrics",
+                        "name": "query1",
+                        "query": "avg:Veneer.goroutines{*}"
+                    }
+                ],
+                "response_format": "timeseries",
+                "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                }
+            },
+            {
+                "display_type": "line",
+                "formulas": [
+                    {
+                        "formula": "query0"
+                    },
+                    {
+                        "formula": "query1"
+                    },
+                    {
+                        "formula": "query0 + query1"
+                    }
+                ],
+                "on_right_yaxis": false,
+                "queries": [
+                    {
+                        "data_source": "metrics",
+                        "name": "query0",
+                        "query": "avg:system.cpu.user{*}"
+                    },
+                    {
+                        "data_source": "metrics",
+                        "name": "query1",
+                        "query": "avg:Veneer.goroutines{*}"
+                    }
+                ],
+                "response_format": "timeseries",
+                "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                }
+            }
+        ],
+        "show_legend": true,
+        "time": {},
+        "title": "",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+            "include_zero": true,
+            "label": "",
+            "max": "auto",
+            "min": "auto",
+            "scale": "linear"
+        }
+    },
+    "id": 2563745122625308,
+    "layout": {
+        "height": 2,
+        "width": 4,
+        "x": 0,
+        "y": 0
+    }
+}
