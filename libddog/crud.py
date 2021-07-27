@@ -3,6 +3,7 @@ import pprint
 from typing import Any, Optional
 
 import datadog
+
 from libddog.model.dashboards import Dashboard
 
 
