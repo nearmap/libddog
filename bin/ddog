@@ -17,12 +17,15 @@ from libddog.command_line.dashboards import (CommandLineError, ConsoleWriter,
 @click.group()
 @click.pass_context
 def cli(ctx):
+    "Datadog dashboard automation cli"
     pass
 
 
 @click.group()
 @click.pass_context
 def dash(ctx):
+    "Datadog management actions"
+
     ctx.dash_mgr = DashboardManager(proj_path='.')
     ctx.writer = ConsoleWriter()
 

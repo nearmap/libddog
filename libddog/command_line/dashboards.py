@@ -2,10 +2,43 @@ import importlib
 import os
 import sys
 from types import ModuleType
-from typing import List, Union
+from typing import Any, List, Tuple, Union
 
+from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
+from libddog.metrics.query import Query
+
+
+def count_groups(obj: Union[Dashboard, Widget]) -> int:
+    if isinstance(obj, Dashboard):
+        return sum([count_groups(w) for w in obj.widgets])
+    elif isinstance(obj, Group):
+        return 1 + sum([count_groups(w) for w in obj.widgets])
+    elif isinstance(obj, Widget):
+        return 0
+
+
+def count_widgets(obj: Union[Dashboard, Widget]) -> int:
+    if isinstance(obj, Dashboard):
+        return sum([count_widgets(w) for w in obj.widgets])
+    elif isinstance(obj, Group):
+        return sum([count_widgets(w) for w in obj.widgets])
+    elif isinstance(obj, Widget):
+        return 1
+
+
+def count_queries(obj: Union[Dashboard, Widget, Request, Query]) -> int:
+    if isinstance(obj, Dashboard):
+        return sum([count_queries(w) for w in obj.widgets])
+    elif isinstance(obj, Group):
+        return sum([count_queries(w) for w in obj.widgets])
+    elif isinstance(obj, Widget):
+        return sum([count_queries(req) for req in getattr(obj, "requests", [])])
+    elif isinstance(obj, Request):
+        return sum([count_queries(q) for q in obj.queries])
+    elif isinstance(obj, Query):
+        return 1
 
 
 class CommandLineError(Exception):
@@ -16,7 +49,7 @@ class CommandLineError(Exception):
         self.args = args
 
     @property
-    def message(self):
+    def message(self) -> str:
         return self.msg % self.args
 
 
@@ -24,7 +57,7 @@ class ConsoleWriter:
     def __init__(self) -> None:
         pass
 
-    def errorln(self, msg, *args) -> None:
+    def errorln(self, msg: str, *args: Any) -> None:
         msg = msg % args
         line = f"{msg}\n"
         sys.stderr.write(line)
@@ -52,44 +85,24 @@ class DashboardManager:
 
         return dashes_module
 
-    def count_groups(self, dash: Dashboard) -> int:
-        def count(obj: Union[Dashboard, Widget]) -> int:
-            if isinstance(obj, Group):
-                return 1 + sum([count(w) for w in obj.widgets])
-            elif isinstance(obj, Widget):
-                return 0
-            elif isinstance(obj, Dashboard):
-                return sum([count(w) for w in obj.widgets])
-
-        return count(dash)
-
-    def count_widgets(self, dash: Dashboard) -> int:
-        def count(obj: Union[Dashboard, Widget]) -> int:
-            if isinstance(obj, Group):
-                return sum([count(w) for w in obj.widgets])
-            elif isinstance(obj, Widget):
-                return 1
-            elif isinstance(obj, Dashboard):
-                return sum([count(w) for w in obj.widgets])
-
-        return count(dash)
-
-    def list_definitions(self):
+    def list_definitions(self) -> None:
         module = self.load_definitions_module()
         dashes: List[Dashboard] = module.get_dashboards()
 
-        fmt = "%-11s  %6s  %7s  %s"
+        fmt = "%-11s  %6s  %7s  %7s  %s"
 
-        self.writer.println(fmt, "ID", "GROUPS", "WIDGETS", "TITLE")
+        self.writer.println(fmt, "ID", "GROUPS", "WIDGETS", "QUERIES", "TITLE")
 
         for dash in dashes:
-            n_widgets = self.count_widgets(dash)
-            n_groups = self.count_groups(dash)
+            n_widgets = count_widgets(dash)
+            n_groups = count_groups(dash)
+            n_queries = count_queries(dash)
 
             self.writer.println(
                 fmt,
                 dash.id,
                 n_groups,
                 n_widgets,
+                n_queries,
                 dash.title,
             )
