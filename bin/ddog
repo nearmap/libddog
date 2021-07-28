@@ -7,12 +7,45 @@ try:
 except ImportError:
     sys.path.append('.')
 
-import libddog
+# isort: split
+import click
+
+from libddog.command_line.dashboards import (CommandLineError, ConsoleWriter,
+                                             DashboardManager)
 
 
-def main():
-    print(f"libddog version: {libddog.__version__}")
+@click.group()
+@click.pass_context
+def cli(ctx):
+    pass
+
+
+@click.group()
+@click.pass_context
+def dash(ctx):
+    ctx.dash_mgr = DashboardManager(proj_path='.')
+    ctx.writer = ConsoleWriter()
+
+
+@click.command()
+@click.pass_context
+def list_defs(ctx):
+    "List dashboard definitions"
+
+    mgr = ctx.parent.dash_mgr
+    writer = ctx.parent.writer
+
+    try:
+        mgr.list_definitions()
+    except CommandLineError as exc:
+        writer.errorln(exc.message)
+        sys.exit(2)
+
+
+
+cli.add_command(dash)
+dash.add_command(list_defs)
 
 
 if __name__ == '__main__':
-    main()
+    cli()

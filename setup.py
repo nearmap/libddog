@@ -12,6 +12,7 @@ setup(
     packages=find_packages("."),
     package_dir={"": "."},
     install_requires=[
+        "click==8.0.1",
         "datadog==0.41.0",
         "humanize==3.6.0",
         "python-dateutil==2.8.1",
