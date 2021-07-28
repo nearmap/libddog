@@ -1,7 +1,7 @@
 import enum
 from typing import Any, Dict
 
-from libddog.model.enums import BackgroundColor, TextAlign, TickEdge, VerticalAlign
+from libddog.dashboards.enums import BackgroundColor, TextAlign, TickEdge, VerticalAlign
 
 
 class NotePreset(enum.Enum):

@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional, Sequence, Set
 
-from libddog.model.bases import Renderable
-from libddog.model.enums import (
+from libddog.common.bases import Renderable
+from libddog.common.errors import UnresolvedFormulaIdentifiers
+from libddog.dashboards.enums import (
     Comparator,
     ConditionalFormatPalette,
     DisplayType,
@@ -10,8 +11,7 @@ from libddog.model.enums import (
     Palette,
     Scale,
 )
-from libddog.model.errors import UnresolvedFormulaIdentifiers
-from libddog.model.query import Query
+from libddog.metrics.query import Query
 from libddog.parsing.parse_formula import parse_formula_identifiers
 
 
@@ -24,7 +24,7 @@ class Size:
 
     @classmethod
     def get_defaults(cls) -> Dict[Any, Any]:
-        from libddog.model.widgets import Note, QueryValue, Timeseries
+        from libddog.dashboards.widgets import Note, QueryValue, Timeseries
 
         return {
             Note: (2, 2),

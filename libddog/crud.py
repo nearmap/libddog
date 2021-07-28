@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import datadog
 
-from libddog.model.dashboards import Dashboard
+from libddog.dashboards import Dashboard
 
 
 class DashboardManager:

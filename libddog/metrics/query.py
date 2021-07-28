@@ -1,7 +1,7 @@
 import enum
 from typing import Any, Dict, List, Optional
 
-from libddog.model.bases import Renderable
+from libddog.common.bases import Renderable
 
 
 class ASTNode:

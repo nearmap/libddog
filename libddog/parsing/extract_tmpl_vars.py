@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterator
 
-from libddog.model.components import TemplateVariableDefinition
+from libddog.dashboards.components import TemplateVariableDefinition
 
 
 def get_template_vars(doc: Dict[Any, Any]) -> Iterator[TemplateVariableDefinition]:
