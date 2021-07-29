@@ -8,8 +8,8 @@ from libddog.metrics.query import (
     Query,
     Rollup,
     RollupFunc,
-    TagFilterCond,
-    TVarFilterCond,
+    Tag,
+    TmplVar,
 )
 
 __all__ = (
@@ -22,6 +22,6 @@ __all__ = (
     "Query",
     "Rollup",
     "RollupFunc",
-    "TVarFilterCond",
-    "TagFilterCond",
+    "TmplVar",
+    "Tag",
 )
