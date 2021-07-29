@@ -15,6 +15,7 @@ from libddog.command_line.dashboards import (
     ConsoleWriter,
     DashboardManagerCli,
 )
+from libddog.command_line.options import attach_help_option
 
 
 @click.group()
@@ -61,13 +62,16 @@ def list_defs(ctx):
     is_flag=True,
     help="Only display which dashboards would be updated, do not actually update them",
 )
-@click.help_option("-h", "--help")  # TODO: use everywhere
 @click.pass_context
 def update_live(ctx, title: str, dry_run: bool = False):
     "Update live dashboards in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
     writer: ConsoleWriter = ctx.parent.writer
+
+    if not title:
+        writer.errorln("Must pass --title")
+        sys.exit(2)
 
     try:
         mgr.update_live(title_pat=title, dry_run=dry_run)
@@ -79,7 +83,7 @@ def update_live(ctx, title: str, dry_run: bool = False):
 cli.add_command(dash)
 dash.add_command(list_defs)
 dash.add_command(update_live)
-
+attach_help_option(cli)
 
 if __name__ == "__main__":
     cli()
