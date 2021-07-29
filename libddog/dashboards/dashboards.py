@@ -1,9 +1,12 @@
 import json
 from typing import Any, Dict, List, Optional, Sequence
 
-from libddog.model.bases import Renderable
-from libddog.model.components import TemplateVariableDefinition, TemplateVariablesPreset
-from libddog.model.widgets import Widget
+from libddog.common.bases import Renderable
+from libddog.dashboards.components import (
+    TemplateVariableDefinition,
+    TemplateVariablesPreset,
+)
+from libddog.dashboards.widgets import Widget
 
 
 class Dashboard(Renderable):

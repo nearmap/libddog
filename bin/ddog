@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+
+import sys
+
+try:
+    import libddog
+except ImportError:
+    sys.path.append(".")
+
+# isort: split
+import click
+
+from libddog.command_line.dashboards import (
+    CommandLineError,
+    ConsoleWriter,
+    DashboardManagerCli,
+)
+from libddog.command_line.options import attach_help_option
+
+
+@click.group()
+@click.pass_context
+def cli(ctx):
+    "Datadog dashboard automation cli"
+    pass
+
+
+@click.group()
+@click.pass_context
+def dash(ctx):
+    "Datadog management actions"
+
+    ctx.dash_mgr = DashboardManagerCli(proj_path=".")
+    ctx.writer = ConsoleWriter()
+
+
+@click.command()
+@click.pass_context
+def list_defs(ctx):
+    "List dashboard definitions in this project"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    try:
+        mgr.list_definitions()
+    except CommandLineError as exc:
+        writer.errorln(exc.message, exc=exc.exc)
+        sys.exit(2)
+
+
+@click.command()
+@click.option(
+    "-t",
+    "--title",
+    help="Select dashboards to update by title, matched like a wildcard",
+)
+@click.option(
+    "-n",
+    "--dry-run",
+    default=False,
+    is_flag=True,
+    help="Only display which dashboards would be updated, do not actually update them",
+)
+@click.pass_context
+def update_live(ctx, title: str, dry_run: bool = False):
+    "Update live dashboards in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    if not title:
+        writer.errorln("Must pass --title")
+        sys.exit(2)
+
+    try:
+        mgr.update_live(title_pat=title, dry_run=dry_run)
+    except CommandLineError as exc:
+        writer.errorln(exc.message, exc=exc.exc)
+        sys.exit(2)
+
+
+cli.add_command(dash)
+dash.add_command(list_defs)
+dash.add_command(update_live)
+attach_help_option(cli)
+
+if __name__ == "__main__":
+    cli()

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-isort .  # sort imports
-black .  # all other code formatting
+isort . bin/*  # sort imports
+black . bin/*  # all other code formatting

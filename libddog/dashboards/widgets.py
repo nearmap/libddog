@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Sequence
 
-from libddog.model.components import Layout, Position, Request, Size, YAxis
-from libddog.model.enums import (
+from libddog.dashboards.components import Layout, Position, Request, Size, YAxis
+from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
     ResponseFormat,
@@ -10,8 +10,8 @@ from libddog.model.enums import (
     TitleAlign,
     VerticalAlign,
 )
-from libddog.model.presets import NotePreset
-from libddog.model.query import Query
+from libddog.dashboards.presets import NotePreset
+from libddog.metrics.query import Query
 
 
 class Widget:
