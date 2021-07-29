@@ -2,7 +2,6 @@ import fnmatch
 import importlib
 import os
 import sys
-import traceback
 from types import ModuleType
 from typing import Any, List, Optional, Union
 
