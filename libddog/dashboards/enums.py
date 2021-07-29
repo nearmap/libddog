@@ -2,9 +2,20 @@ import enum
 
 
 class BackgroundColor(enum.Enum):
-    YELLOW = "yellow"
+    BLUE = "blue"
+    GREEN = "green"
+    ORANGE = "orange"
+    PINK = "pink"
+    PURPLE = "purple"
     WHITE = "white"
-    # have not validated the other alternatives yet
+    YELLOW = "yellow"
+    VIVID_BLUE = "vivid_blue"
+    VIVID_GREEN = "vivid_green"
+    VIVID_ORANGE = "vivid_orange"
+    VIVID_PINK = "vivid_pink"
+    VIVID_PURPLE = "vivid_purple"
+    VIVID_YELLOW = "vivid_yellow"
+    TRANSPARENT = "transparent"
 
 
 class Comparator(enum.Enum):
@@ -60,18 +71,22 @@ class ResponseFormat(enum.Enum):
 
 class Scale(enum.Enum):
     LINEAR = "linear"
-    # have not validated the other alternatives yet
+    LOG = "log"
+    POW = "pow"
+    SQRT = "sqrt"
 
 
 class TextAlign(enum.Enum):
     LEFT = "left"
-    # have not validated the other alternatives yet
+    CENTER = 'center'
+    RIGHT = 'right'
 
 
 class TickEdge(enum.Enum):
+    RIGHT = "right"
     LEFT = "left"
+    BOTTOM = "bottom"
     TOP = "top"
-    # have not validated the other alternatives yet
 
 
 class TitleAlign(enum.Enum):
@@ -80,6 +95,6 @@ class TitleAlign(enum.Enum):
 
 
 class VerticalAlign(enum.Enum):
+    BOTTOM = "bottom"
     CENTER = "center"
     TOP = "top"
-    # have not validated the other alternatives yet
