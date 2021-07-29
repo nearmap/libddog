@@ -66,7 +66,7 @@ class ConsoleWriter:
         msg = msg % args
 
         if exc:
-            msg = f"{msg}: {exc}"
+            msg = f"{msg}: {exc!r}"
 
         line = f"{msg}\n"
 

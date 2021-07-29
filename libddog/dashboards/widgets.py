@@ -336,6 +336,6 @@ class Group(Widget):
         }
 
         if self.background_color:
-            dct['background_color'] = self.background_color.value
+            dct["definition"]["background_color"] = self.background_color.value
 
         return dct

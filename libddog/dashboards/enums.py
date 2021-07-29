@@ -78,8 +78,8 @@ class Scale(enum.Enum):
 
 class TextAlign(enum.Enum):
     LEFT = "left"
-    CENTER = 'center'
-    RIGHT = 'right'
+    CENTER = "center"
+    RIGHT = "right"
 
 
 class TickEdge(enum.Enum):
