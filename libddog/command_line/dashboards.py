@@ -5,6 +5,7 @@ import sys
 from types import ModuleType
 from typing import Any, List, Optional, Union
 
+from libddog.command_line.errors import ExceptionState
 from libddog.crud import DashboardManager
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
@@ -53,6 +54,9 @@ class CommandLineError(Exception):
         self.args = args
         self.exc = exc
 
+        # if we're in an exception context then save the state
+        self.exc_state = ExceptionState.create()
+
     @property
     def message(self) -> str:
         return self.msg % self.args
@@ -63,14 +67,26 @@ class ConsoleWriter:
         pass
 
     def errorln(self, msg: str, *args: Any, exc: Optional[Exception] = None) -> None:
+        exc_state = None
         msg = msg % args
 
         if exc:
-            msg = f"{msg}: {exc}"
+            msg = f"{msg}: {exc!r}"
+
+            # if we have a saved traceback then use it
+            if isinstance(exc, CommandLineError):
+                exc_state = exc.exc_state
+
+        # if we don't have a traceback try to extract it now
+        if not exc_state:
+            exc_state = ExceptionState.create()
 
         line = f"{msg}\n"
-
         sys.stderr.write(line)
+
+        if exc_state:
+            exc_state.print(file=sys.stderr)
+
         sys.stderr.flush()
 
     println = errorln

@@ -21,7 +21,7 @@ class FilterCond(ASTNode):
     pass
 
 
-class TagFilterCond(FilterCond):
+class Tag(FilterCond):
     def __init__(self, *, tag: str, value: str) -> None:
         self.tag = tag
         self.value = value
@@ -30,7 +30,7 @@ class TagFilterCond(FilterCond):
         return "%s:%s" % (self.tag, self.value)
 
 
-class TVarFilterCond(FilterCond):
+class TmplVar(FilterCond):
     """A filter using a template variable."""
 
     def __init__(self, *, tvar: str) -> None:

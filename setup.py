@@ -11,6 +11,7 @@ setup(
     url="https://github.com/nearmap/libddog",
     packages=find_packages("."),
     package_dir={"": "."},
+    package_data={"libddog": ["py.typed"]},
     install_requires=[
         "click==8.0.1",
         "datadog==0.41.0",

@@ -75,7 +75,11 @@ class Layout(Renderable):
 
 class Style(Renderable):
     def __init__(
-        self, *, line_type: LineType, line_width: LineWidth, palette: Palette
+        self,
+        *,
+        line_type: LineType = LineType.SOLID,
+        line_width: LineWidth = LineWidth.NORMAL,
+        palette: Palette = Palette.CLASSIC,
     ) -> None:
         self.line_type = line_type
         self.line_width = line_width
@@ -169,10 +173,8 @@ class Request(Renderable):
         formulas: Optional[List[Formula]] = None,
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
+        style: Optional[Style] = None,
         on_right_yaxis: bool = False,
-        line_type: LineType = LineType.SOLID,
-        line_width: LineWidth = LineWidth.NORMAL,
-        palette: Palette = Palette.CLASSIC,
     ) -> None:
         assert query or queries
 
@@ -180,13 +182,10 @@ class Request(Renderable):
         self.query = query
         self.queries = queries or [query]
         self.formulas = formulas or []
-        self.display_type = display_type
-
-        # TODO: make style a param instead
-        self.style = Style(line_type=line_type, line_width=line_width, palette=palette)
-
-        self.on_right_yaxis = on_right_yaxis
         self.conditional_formats = conditional_formats or []
+        self.display_type = display_type
+        self.style = style or Style()
+        self.on_right_yaxis = on_right_yaxis
 
     def as_dict(self) -> Dict[str, Any]:
         # if we have only queries but no formulas then synthesize a formula per query

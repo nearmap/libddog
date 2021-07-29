@@ -317,14 +317,16 @@ class Group(Widget):
         *,
         title: str,
         layout_type: LayoutType = LayoutType.ORDERED,
+        background_color: Optional[BackgroundColor] = None,
         widgets: Optional[Sequence[Widget]] = None,
     ) -> None:
         self.title = title
         self.layout_type = layout_type
+        self.background_color = background_color
         self.widgets = widgets or []
 
     def as_dict(self) -> Dict[str, Any]:
-        return {
+        dct = {
             "definition": {
                 "title": self.title,
                 "type": "group",
@@ -332,3 +334,8 @@ class Group(Widget):
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
         }
+
+        if self.background_color:
+            dct["definition"]["background_color"] = self.background_color.value
+
+        return dct
