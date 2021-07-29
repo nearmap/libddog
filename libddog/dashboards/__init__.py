@@ -28,7 +28,7 @@ from libddog.dashboards.enums import (
     VerticalAlign,
 )
 from libddog.dashboards.presets import NotePreset
-from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries
+from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries, Widget
 
 __all__ = (
     "BackgroundColor",
@@ -60,5 +60,6 @@ __all__ = (
     "Timeseries",
     "TitleAlign",
     "VerticalAlign",
+    "Widget",
     "YAxis",
 )
