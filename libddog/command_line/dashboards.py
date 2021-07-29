@@ -1,9 +1,11 @@
+import fnmatch
 import importlib
 import os
 import sys
 from types import ModuleType
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Optional, Union
 
+from libddog.crud import DashboardManager
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
@@ -42,11 +44,14 @@ def count_queries(obj: Union[Dashboard, Widget, Request, Query]) -> int:
 
 
 class CommandLineError(Exception):
-    def __init__(self, msg: str, *args: object) -> None:
+    def __init__(
+        self, msg: str, *args: object, exc: Optional[Exception] = None
+    ) -> None:
         super().__init__()
 
         self.msg = msg
         self.args = args
+        self.exc = exc
 
     @property
     def message(self) -> str:
@@ -57,16 +62,21 @@ class ConsoleWriter:
     def __init__(self) -> None:
         pass
 
-    def errorln(self, msg: str, *args: Any) -> None:
+    def errorln(self, msg: str, *args: Any, exc: Optional[Exception] = None) -> None:
         msg = msg % args
+
+        if exc:
+            msg = f"{msg}: {exc}"
+
         line = f"{msg}\n"
+
         sys.stderr.write(line)
         sys.stderr.flush()
 
     println = errorln
 
 
-class DashboardManager:
+class DashboardManagerCli:
     def __init__(self, proj_path: str) -> None:
         self.proj_path = os.path.abspath(proj_path)
         self.writer = ConsoleWriter()
@@ -76,6 +86,7 @@ class DashboardManager:
         self.import_path = f"{self.containing_dir}.{self.definition_module}"
 
     def load_definitions_module(self) -> ModuleType:
+        # import the module
         try:
             dashes_module = importlib.import_module(self.import_path)
         except ModuleNotFoundError:
@@ -83,12 +94,33 @@ class DashboardManager:
                 "Failed to import definition module at %r", self.import_path
             )
 
+        # try calling get_dashboards
+        try:
+            dashes = dashes_module.get_dashboards()  # type: ignore
+            for dash in dashes:
+                if not isinstance(dash, Dashboard):
+                    raise TypeError("Value returned was not a Dashboard: %r" % dash)
+        except Exception as exc:
+            raise CommandLineError(
+                "Failed call to get_dashboards() in definition module at %r",
+                self.import_path,
+                exc=exc,
+            )
+
         return dashes_module
 
-    def list_definitions(self) -> None:
+    def load_definitions(self) -> List[Dashboard]:
         module = self.load_definitions_module()
-        dashes: List[Dashboard] = module.get_dashboards()
+        dashes: List[Dashboard] = module.get_dashboards()  # type: ignore
+        return dashes
 
+    def filter_definitions(
+        self, pattern: str, dashes: List[Dashboard]
+    ) -> List[Dashboard]:
+        return [dash for dash in dashes if fnmatch.fnmatch(dash.title, pattern)]
+
+    def list_definitions(self) -> None:
+        dashes = self.load_definitions()
         fmt = "%-11s  %6s  %7s  %7s  %s"
 
         self.writer.println(fmt, "ID", "GROUPS", "WIDGETS", "QUERIES", "TITLE")
@@ -106,3 +138,21 @@ class DashboardManager:
                 n_queries,
                 dash.title,
             )
+
+    def update_live(self, *, title_pat: str, dry_run: bool = False) -> None:
+        dashes = self.load_definitions()
+        dashes = self.filter_definitions(title_pat, dashes)
+
+        verb = "Updating" if not dry_run else "Dry run: Updating"
+
+        mgr = DashboardManager()
+        mgr.load_credentials_from_environment()
+
+        for dash in dashes:
+            msg = f"{verb} dashboard {dash.id!r} entitled {dash.title!r}"
+            self.writer.println(msg)
+
+            if dry_run:
+                continue
+
+            mgr.update(dash)
