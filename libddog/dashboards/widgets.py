@@ -334,6 +334,7 @@ class Group(Widget):
                 "layout_type": self.layout_type.value,
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
+            # todo: layout: {...}
         }
 
         if self.background_color:
