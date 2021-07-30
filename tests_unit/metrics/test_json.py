@@ -44,17 +44,17 @@ def test_minimal__without_name() -> None:
         agg=Aggregation(func=AggFunc.MAX),
     )
 
-    q1 = query1.as_dict()
-    q2 = query2.as_dict()
+    dct1 = query1.as_dict()
+    dct2 = query2.as_dict()
 
-    assert dict_matcher(q1, name="q1") == {
+    assert dict_matcher(dct1, name="q1") == {
         "aggregator": "avg",
         "data_source": "metrics",
         "name": "q1",
         "query": "avg:aws.ec2.cpuutilization",
     }
 
-    assert dict_matcher(q2, name="q2") == {
+    assert dict_matcher(dct2, name="q2") == {
         "aggregator": "max",
         "data_source": "metrics",
         "name": "q2",
@@ -62,4 +62,4 @@ def test_minimal__without_name() -> None:
     }
 
     # generated names are unique for each query
-    assert q1["name"] != q2["name"]
+    assert dct1["name"] != dct2["name"]
