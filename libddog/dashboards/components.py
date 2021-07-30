@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set
 
 from libddog.common.bases import Renderable
 from libddog.common.errors import UnresolvedFormulaIdentifiers
+from libddog.common.types import JsonDict
 from libddog.dashboards.enums import (
     Comparator,
     ConditionalFormatPalette,
@@ -62,7 +63,7 @@ class Layout(Renderable):
         self.size = size
         self.pos = pos
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "layout": {
                 "x": self.pos.x,
@@ -85,7 +86,7 @@ class Style(Renderable):
         self.line_width = line_width
         self.palette = palette
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "line_type": self.line_type.value,
             "line_width": self.line_width.value,
@@ -109,7 +110,7 @@ class YAxis(Renderable):
         self.min = min
         self.max = max
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "include_zero": self.include_zero,
             "scale": self.scale.value,
@@ -139,7 +140,7 @@ class Formula(Renderable):
                 "identifiers %r not present in %r" % (missing_idents, self.text)
             )
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {"formula": self.text}
         if self.alias:
             dct["alias"] = self.alias
@@ -155,7 +156,7 @@ class ConditionalFormat(Renderable):
         self.value = value
         self.palette = palette
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "comparator": self.comparator.value,
             "value": self.value,
@@ -187,7 +188,7 @@ class Request(Renderable):
         self.style = style or Style()
         self.on_right_yaxis = on_right_yaxis
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         # if we have only queries but no formulas then synthesize a formula per query
         formulas = self.formulas
         if not formulas:
@@ -218,7 +219,7 @@ class TemplateVariableDefinition(Renderable):
         self.tag = tag
         self.default_value = default_value
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> JsonDict:
         return {"name": self.name, "prefix": self.tag, "default": self.default_value}
 
 
@@ -227,7 +228,7 @@ class PopulatedTemplateVariable(Renderable):
         self.tmpl_var = tmpl_var
         self.value = value
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> JsonDict:
         return {"name": self.tmpl_var.name, "value": self.value}
 
 
@@ -238,7 +239,7 @@ class TemplateVariablesPreset(Renderable):
         self.name = name
         self.populated_vars = populated_vars
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "name": self.name,
             "template_variables": [tmp.as_dict() for tmp in self.populated_vars],

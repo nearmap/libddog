@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Sequence
 
+from libddog.common.types import JsonDict
 from libddog.dashboards.components import Layout, Position, Request, Size, YAxis
 from libddog.dashboards.enums import (
     BackgroundColor,
@@ -21,10 +22,10 @@ class Widget:
     A visual component on a dashboard.
     """
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         raise NotImplementedError
 
-    def add_layout(self, dct: Dict[str, Any], size: Size, pos: Position) -> None:
+    def add_layout(self, dct: JsonDict, size: Size, pos: Position) -> None:
         """
         Transforms:
 
@@ -66,13 +67,13 @@ class Widget:
             if key not in allowed_atts:
                 del dct[key]
 
-    def query_as_dict(self, query: Query) -> Dict[str, Any]:
+    def query_as_dict(self, query: Query) -> JsonDict:
         dct = query.as_dict()
         allowed_atts = self._get_allowed_atts(query)
         self._filter_dict_keys(dct, allowed_atts)
         return dct
 
-    def request_as_dict(self, request: Request) -> Dict[str, Any]:
+    def request_as_dict(self, request: Request) -> JsonDict:
         dct = request.as_dict()
         allowed_atts = self._get_allowed_atts(request)
         self._filter_dict_keys(dct, allowed_atts)
@@ -146,7 +147,7 @@ class Note(Widget):
 
         return self.__class__(**kwargs)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         instance = self.apply_preset()
         # from this point on: use 'instance' not 'self'
 
@@ -218,7 +219,7 @@ class QueryValue(Widget):
         dct["response_format"] = ResponseFormat.SCALAR.value
         return dct
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "autoscale": self.autoscale,
@@ -289,7 +290,7 @@ class Timeseries(Widget):
         dct["response_format"] = ResponseFormat.TIMESERIES.value
         return dct
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "legend_columns": self.legend_columns,
@@ -325,7 +326,7 @@ class Group(Widget):
         self.background_color = background_color
         self.widgets = widgets or []
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "title": self.title,

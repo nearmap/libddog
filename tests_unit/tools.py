@@ -1,6 +1,4 @@
-from typing import Any, Dict
-
-JsonDict = Dict[str, Any]
+from libddog.common.types import JsonDict
 
 
 def dict_matcher(dct: JsonDict, **kwargs: str) -> JsonDict:
