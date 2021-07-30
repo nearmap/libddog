@@ -89,7 +89,7 @@ class Aggregation(ASTNode):
     ) -> None:
         self.func = func
         self.by = by
-        self.as_ = as_
+        self.as_ = as_  # 'as' is a keyword in Python
 
 
 class RollupFunc(enum.Enum):
@@ -116,6 +116,11 @@ class Rollup(ASTNode):
             period_s,
         ]
         args = [arg for arg in args if arg]
+
+        # func == DEFAULT and period_s unset
+        if not args:
+            return ""
+
         return ".rollup(%s)" % ", ".join(args)
 
 
@@ -144,8 +149,8 @@ class Query(ASTNode, Renderable):
         self.query = query
 
     def get_next_unique_name(self) -> str:
-        counter = self._instance_counter
-        self._instance_counter += 1
+        counter = self.__class__._instance_counter
+        self.__class__._instance_counter += 1
         return "q%s" % counter
 
     def codegen(self) -> str:
@@ -171,10 +176,8 @@ class Query(ASTNode, Renderable):
         dct = {
             "aggregator": self.agg.func.value,
             "data_source": self.data_source,
+            "name": self.name,
             "query": self.codegen(),
         }
-
-        if self.name:
-            dct["name"] = self.name
 
         return dct
