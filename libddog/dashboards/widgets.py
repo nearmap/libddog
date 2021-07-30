@@ -120,14 +120,17 @@ class Note(Widget):
 
         preset_defaults = NotePreset.get_defaults().get(self.preset)
         if not preset_defaults:
-            raise NotImplementedError(self.preset.value)
+            raise NotImplementedError(self.preset)
 
         # sanity check: make sure present default attributes do exist
         for attname in preset_defaults.keys():
             if not hasattr(self, attname):
                 raise RuntimeError("Invalid att name in preset: %s" % attname)
 
+        # the effective values of the attributes
         kwargs = {}
+
+        # get all the attribute names on 'self'
         attnames = [
             att
             for att in dir(self)
@@ -141,6 +144,8 @@ class Note(Widget):
             # defaults instead
             if value is None:
                 value = preset_defaults.get(attname)
+
+                # if it's present in the present it must be set
                 assert value is not None
 
             kwargs[attname] = value
