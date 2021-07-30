@@ -1,3 +1,3 @@
 #!/bin/sh
 
-py.test $@
+py.test tests_unit/ $@

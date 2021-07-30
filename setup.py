@@ -9,7 +9,7 @@ setup(
     author="Martin Matusiak",
     author_email="martin.matusiak@nearmap.com",
     url="https://github.com/nearmap/libddog",
-    packages=find_packages("."),
+    packages=find_packages("libddog"),
     package_dir={"": "."},
     package_data={"libddog": ["py.typed"]},
     install_requires=[

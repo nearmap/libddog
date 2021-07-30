@@ -11,7 +11,7 @@ from libddog.metrics import (
     Tag,
     TmplVar,
 )
-from tests.tools import dict_matcher
+from tests_unit.tools import dict_matcher
 
 
 def test_exhaustive__with_name() -> None:
@@ -61,4 +61,5 @@ def test_minimal__without_name() -> None:
         "query": "max:aws.ec2.memory",
     }
 
+    # generated names are unique for each query
     assert q1["name"] != q2["name"]
