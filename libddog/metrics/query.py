@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from libddog.common.bases import Renderable
 
 
-class ASTNode:
+class ASTNode:  # TODO: rename to 'QueryNode'
     def codegen(self) -> str:
         raise NotImplemented
 
@@ -136,8 +136,8 @@ class Query(ASTNode, Renderable):
         rollup: Optional[Rollup] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
-        aggregator: str = "unused",  # ignore me
-        query: str = "unused",  # ignore me
+        aggregator: str = "unused",  # TODO: remove
+        query: str = "unused",  # TODO: remove
     ) -> None:
         self.metric = metric
         self.filter = filter

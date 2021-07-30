@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-
 JsonDict = Dict[str, Any]
+
 
 def dict_matcher(dct: JsonDict, **kwargs: str) -> JsonDict:
     """
