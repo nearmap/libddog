@@ -1,5 +1,4 @@
-from libddog.dashboards import Group, Note
-from libddog.dashboards.enums import BackgroundColor, LayoutType
+from libddog.dashboards import BackgroundColor, Group, LayoutType, Note
 
 
 def test_group_minimal():

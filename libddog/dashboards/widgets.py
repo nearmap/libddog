@@ -285,7 +285,7 @@ class Timeseries(Widget):
         self.size = Size.backfill(self, size)
         self.pos = pos or Position()
 
-    def request_as_dict(self, request: Request) -> Dict[str, Any]:
+    def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
         dct["response_format"] = ResponseFormat.TIMESERIES.value
         return dct
@@ -334,7 +334,7 @@ class Group(Widget):
                 "layout_type": self.layout_type.value,
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
-            # todo: layout: {...}
+            # TODO: layout: {...}
         }
 
         if self.background_color:
