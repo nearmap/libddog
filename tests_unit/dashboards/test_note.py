@@ -10,7 +10,7 @@ from libddog.dashboards import (
 )
 
 
-def test_note_minimal():
+def test_note_minimal() -> None:
     note = Note(
         content="this is a note",
     )
@@ -31,7 +31,7 @@ def test_note_minimal():
     }
 
 
-def test_note_exhaustive():
+def test_note_exhaustive() -> None:
     # override all the values such that they differ from the preset
     note = Note(
         content="this is a note",
@@ -63,7 +63,7 @@ def test_note_exhaustive():
     }
 
 
-def test_note__no_preset_equals_default_preset():
+def test_note__no_preset_equals_default_preset() -> None:
     note_no_preset = Note(
         content="this is a note",
     )
@@ -76,7 +76,7 @@ def test_note__no_preset_equals_default_preset():
     assert note_no_preset.as_dict() == note_default.as_dict()
 
 
-def test_note_caption__minimal():
+def test_note_caption__minimal() -> None:
     note = Note(
         content="this is a note",
         preset=NotePreset.CAPTION,
@@ -98,7 +98,7 @@ def test_note_caption__minimal():
     }
 
 
-def test_note_header__minimal():
+def test_note_header__minimal() -> None:
     note = Note(
         content="this is a note",
         preset=NotePreset.HEADER,
@@ -120,7 +120,7 @@ def test_note_header__minimal():
     }
 
 
-def test_note_annotation__minimal():
+def test_note_annotation__minimal() -> None:
     note = Note(
         content="this is a note",
         preset=NotePreset.ANNOTATION,

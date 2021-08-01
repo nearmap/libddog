@@ -270,7 +270,7 @@ class Timeseries(Widget):
         title_align: TitleAlign = TitleAlign.LEFT,
         show_legend: bool = True,
         legend_layout: Optional[str] = None,  # TODO: make enum
-        legend_columns: Optional[Sequence[str]] = None,
+        legend_columns: Optional[Sequence[str]] = None,  # TODO: what is this?
         requests: List[Request],
         yaxis: Optional[YAxis] = None,
         # TODO: markers

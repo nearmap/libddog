@@ -1,0 +1,78 @@
+from libddog.dashboards import Position, QueryValue, Request, Size, TitleAlign
+from libddog.metrics import AggFunc, Aggregation, Metric, Query
+
+
+def test_query_value_minimal() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        agg=Aggregation(func=AggFunc.AVG),
+        name="q1",
+    )
+
+    qv = QueryValue(
+        title="nodes",
+        requests=[Request(queries=[query])],
+    )
+
+    assert qv.as_dict() == {
+        "definition": {
+            "autoscale": True,
+            "precision": 2,
+            "requests": [
+                {
+                    "conditional_formats": [],
+                    "formulas": [{"formula": "q1"}],
+                    "queries": [query.as_dict()],
+                    "response_format": "scalar",
+                }
+            ],
+            "time": {},
+            "title": "nodes",
+            "title_align": "left",
+            "title_size": "16",
+            "type": "query_value",
+        },
+        "layout": {"height": 2, "width": 2, "x": 0, "y": 0},
+    }
+
+
+def test_query_value_exhaustive() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        agg=Aggregation(func=AggFunc.AVG),
+        name="q1",
+    )
+
+    qv = QueryValue(
+        title="nodes",
+        title_size=11,
+        title_align=TitleAlign.LEFT,
+        autoscale=False,
+        custom_unit="lightyears",
+        precision=7,
+        requests=[Request(queries=[query])],
+        size=Size(width=4, height=1),
+        pos=Position(x=3, y=2),
+    )
+
+    assert qv.as_dict() == {
+        "definition": {
+            "autoscale": False,
+            "custom_unit": "lightyears",
+            "precision": 7,
+            "requests": [
+                {
+                    "conditional_formats": [],
+                    "formulas": [{"formula": "q1"}],
+                    "queries": [query.as_dict()],
+                    "response_format": "scalar",
+                }
+            ],
+            "time": {},
+            "title": "nodes",
+            "title_align": "left",
+            "title_size": "11",
+            "type": "query_value",
+        },
+        "layout": {"height": 1, "width": 4, "x": 3, "y": 2},
+    }
