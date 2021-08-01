@@ -55,6 +55,3 @@ class Dashboard(Renderable):
         dct = self.as_dict()
         block = json.dumps(dct, sort_keys=True, indent=2)
         return block
-
-    def as_kwargs_to_official_client(self) -> JsonDict:
-        return self.as_dict()
