@@ -137,7 +137,8 @@ class Formula(Renderable):
         missing_idents = idents - resolved_idents
         if missing_idents:
             raise UnresolvedFormulaIdentifiers(
-                "identifiers %r not present in %r" % (missing_idents, self.text)
+                "identifier(s) %r in the formula %r not present in any query"
+                % (missing_idents, self.text)
             )
 
     def as_dict(self) -> JsonDict:
