@@ -54,6 +54,21 @@ class LineWidth(enum.Enum):
     THICK = "thick"
 
 
+class LiveSpan(enum.Enum):
+    GLOBAL_TIME = ""  # intentionally the empty string
+    LAST_1M = "1m"
+    LAST_5M = "5m"
+    LAST_15M = "15m"
+    LAST_1H = "1h"
+    LAST_4H = "4h"
+    LAST_1D = "1d"
+    LAST_2D = "2d"
+    LAST_1W = "1w"
+    LAST_3MO = "3mo"
+    LAST_6MO = "6mo"
+    LAST_1Y = "1y"
+
+
 class Palette(enum.Enum):
     CLASSIC = "dog_classic"
     COOL = "cool"

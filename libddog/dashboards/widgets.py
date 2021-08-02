@@ -1,10 +1,11 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.types import JsonDict
-from libddog.dashboards.components import Layout, Position, Request, Size, YAxis
+from libddog.dashboards.components import Layout, Position, Request, Size, Time, YAxis
 from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
+    LiveSpan,
     ResponseFormat,
     TextAlign,
     TickEdge,
@@ -201,7 +202,7 @@ class QueryValue(Widget):
         title: str,
         title_size: int = 16,
         title_align: TitleAlign = TitleAlign.LEFT,
-        # time   # TODO: not yet modeled
+        time: Optional[Time] = None,
         autoscale: bool = True,
         custom_unit: Optional[str] = None,
         precision: int = 2,
@@ -212,6 +213,7 @@ class QueryValue(Widget):
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
+        self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
         self.autoscale = autoscale
         self.custom_unit = custom_unit
         self.precision = precision

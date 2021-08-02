@@ -9,6 +9,7 @@ from libddog.dashboards.enums import (
     DisplayType,
     LineType,
     LineWidth,
+    LiveSpan,
     Palette,
     Scale,
 )
@@ -70,6 +71,21 @@ class Layout(Renderable):
                 "y": self.pos.y,
                 "width": self.size.width,
                 "height": self.size.height,
+            },
+        }
+
+
+class Time(Renderable):
+    def __init__(self, *, live_span: LiveSpan) -> None:
+        self.live_span = live_span
+
+    def as_dict(self) -> JsonDict:
+        if self.live_span == LiveSpan.GLOBAL_TIME:
+            return {}
+
+        return {
+            "time": {
+                "live_span": self.live_span.value,
             },
         }
 

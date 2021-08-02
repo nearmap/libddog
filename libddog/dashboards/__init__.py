@@ -8,6 +8,7 @@ from libddog.dashboards.components import (
     Style,
     TemplateVariableDefinition,
     TemplateVariablesPreset,
+    Time,
     YAxis,
 )
 from libddog.dashboards.dashboards import Dashboard
@@ -19,6 +20,7 @@ from libddog.dashboards.enums import (
     LayoutType,
     LineType,
     LineWidth,
+    LiveSpan,
     Palette,
     ResponseFormat,
     Scale,
@@ -42,6 +44,7 @@ __all__ = (
     "LayoutType",
     "LineType",
     "LineWidth",
+    "LiveSpan",
     "Note",
     "NotePreset",
     "Palette",
@@ -57,6 +60,7 @@ __all__ = (
     "TemplateVariablesPreset",
     "TextAlign",
     "TickEdge",
+    "Time",
     "Timeseries",
     "TitleAlign",
     "VerticalAlign",
