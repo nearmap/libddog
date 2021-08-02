@@ -75,7 +75,9 @@ class Palette(enum.Enum):
     WARM = "warm"
     PURPLE = "purple"
     ORANGE = "orange"
-    GRAY = "grey"  # yes the typo is intentional lol
+    # yes the typo is intentional lol. In the Datadog UI it's spelled gray, in
+    # json it's spelled grey
+    GRAY = "grey"
 
 
 class ResponseFormat(enum.Enum):
