@@ -1,4 +1,12 @@
-from libddog.dashboards import Position, QueryValue, Request, Size, TitleAlign
+from libddog.dashboards import (
+    LiveSpan,
+    Position,
+    QueryValue,
+    Request,
+    Size,
+    Time,
+    TitleAlign,
+)
 from libddog.metrics import AggFunc, Aggregation, Metric, Query
 
 
@@ -47,6 +55,7 @@ def test_query_value__exhaustive() -> None:
         title="nodes",
         title_size=11,
         title_align=TitleAlign.LEFT,
+        time=Time(live_span=LiveSpan.LAST_1D),
         autoscale=False,
         custom_unit="lightyears",
         precision=7,
@@ -68,7 +77,7 @@ def test_query_value__exhaustive() -> None:
                     "response_format": "scalar",
                 }
             ],
-            "time": {},
+            "time": {"live_span": "1d"},
             "title": "nodes",
             "title_align": "left",
             "title_size": "11",
