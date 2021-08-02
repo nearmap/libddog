@@ -232,7 +232,7 @@ class QueryValue(Widget):
                 "autoscale": self.autoscale,
                 "precision": self.precision,
                 "requests": [self.request_as_dict(req) for req in self.requests],
-                "time": {},
+                "time": self.time.as_dict(),
                 "title": self.title,
                 "title_align": self.title_align.value,
                 "title_size": str(self.title_size),

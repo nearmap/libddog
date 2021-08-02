@@ -84,9 +84,7 @@ class Time(Renderable):
             return {}
 
         return {
-            "time": {
-                "live_span": self.live_span.value,
-            },
+            "live_span": self.live_span.value,
         }
 
 
