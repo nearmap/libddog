@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: sudo apt-get install python3-venv
+      - run: sudo apt-get install -y python3-venv
       - run: python -m venv ve
       - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: sudo apt-get install python3-venv
+      - run: sudo apt-get install -y python3-venv git
       - run: python -m venv ve
       - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: sudo apt-get install python3-venv
+      - run: sudo apt-get install -y python3-venv
       - run: python -m venv ve
       - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
