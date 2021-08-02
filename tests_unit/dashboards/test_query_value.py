@@ -2,7 +2,7 @@ from libddog.dashboards import Position, QueryValue, Request, Size, TitleAlign
 from libddog.metrics import AggFunc, Aggregation, Metric, Query
 
 
-def test_query_value_minimal() -> None:
+def test_query_value__minimal() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
@@ -36,7 +36,7 @@ def test_query_value_minimal() -> None:
     }
 
 
-def test_query_value_exhaustive() -> None:
+def test_query_value__exhaustive() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),

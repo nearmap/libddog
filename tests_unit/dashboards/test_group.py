@@ -1,7 +1,7 @@
 from libddog.dashboards import BackgroundColor, Group, LayoutType, Note
 
 
-def test_group_minimal() -> None:
+def test_group__minimal() -> None:
     group = Group(
         title="EC2 instances",
         layout_type=LayoutType.ORDERED,
@@ -17,7 +17,7 @@ def test_group_minimal() -> None:
     }
 
 
-def test_group_exhaustive() -> None:
+def test_group__exhaustive() -> None:
     note1 = Note(
         content="first note",
     )

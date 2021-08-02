@@ -10,7 +10,7 @@ from libddog.dashboards import (
 from libddog.metrics import AggFunc, Aggregation, Metric, Query
 
 
-def test_timeseries_minimal() -> None:
+def test_timeseries__minimal() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
@@ -61,7 +61,7 @@ def test_timeseries_minimal() -> None:
     }
 
 
-def test_timeseries_exhaustive() -> None:
+def test_timeseries__exhaustive() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),

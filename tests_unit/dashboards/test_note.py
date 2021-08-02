@@ -10,7 +10,7 @@ from libddog.dashboards import (
 )
 
 
-def test_note_minimal() -> None:
+def test_note__minimal() -> None:
     note = Note(
         content="this is a note",
     )
@@ -31,7 +31,7 @@ def test_note_minimal() -> None:
     }
 
 
-def test_note_exhaustive() -> None:
+def test_note__exhaustive() -> None:
     # override all the values such that they differ from the preset
     note = Note(
         content="this is a note",

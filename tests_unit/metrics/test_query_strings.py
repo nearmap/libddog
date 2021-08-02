@@ -15,7 +15,7 @@ from libddog.metrics import (
 # 'empty' and 'full' states
 
 
-def test_minimal() -> None:
+def test__minimal() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
@@ -24,7 +24,7 @@ def test_minimal() -> None:
     assert query.codegen() == "avg:aws.ec2.cpuutilization"
 
 
-def test_exhaustive() -> None:
+def test__exhaustive() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
@@ -41,7 +41,7 @@ def test_exhaustive() -> None:
 # start with the 'full' state and remove parts, covering most combinations
 
 
-def test_exhaustive__no_filter() -> None:
+def test__exhaustive__no_filter() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
@@ -53,7 +53,7 @@ def test_exhaustive__no_filter() -> None:
     )
 
 
-def test_exhaustive__filter_with_tmplvar_only() -> None:
+def test__exhaustive__filter_with_tmplvar_only() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az")]),
@@ -66,7 +66,7 @@ def test_exhaustive__filter_with_tmplvar_only() -> None:
     )
 
 
-def test_exhaustive__agg_with_func_and_by_only() -> None:
+def test__exhaustive__agg_with_func_and_by_only() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
@@ -79,7 +79,7 @@ def test_exhaustive__agg_with_func_and_by_only() -> None:
     )
 
 
-def test_exhaustive__agg_with_func_and_as_only() -> None:
+def test__exhaustive__agg_with_func_and_as_only() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
@@ -92,7 +92,7 @@ def test_exhaustive__agg_with_func_and_as_only() -> None:
     )
 
 
-def test_exhaustive__agg_with_func_only() -> None:
+def test__exhaustive__agg_with_func_only() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
@@ -105,7 +105,7 @@ def test_exhaustive__agg_with_func_only() -> None:
     )
 
 
-def test_exhaustive__no_rollup() -> None:
+def test__exhaustive__no_rollup() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
@@ -117,7 +117,7 @@ def test_exhaustive__no_rollup() -> None:
     )
 
 
-def test_exhaustive__rollup_with_func_only() -> None:
+def test__exhaustive__rollup_with_func_only() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
