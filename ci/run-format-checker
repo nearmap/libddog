@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eux
+
+./reformat
+
+if [[ -n $(git diff --stat) ]]; then
+    echo "Repo state dirty after ./reformat:"
+    git diff
+
+    exit 1
+fi
