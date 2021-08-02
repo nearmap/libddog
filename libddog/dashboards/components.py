@@ -184,19 +184,15 @@ class Request(Renderable):
         self,
         *,
         title: Optional[str] = None,
-        query: Optional[Query] = None,
-        queries: Optional[List[Query]] = None,
+        queries: List[Query],
         formulas: Optional[List[Formula]] = None,
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
         style: Optional[Style] = None,
         on_right_yaxis: bool = False,
     ) -> None:
-        assert query or queries
-
         self.title = title
-        self.query = query
-        self.queries = queries or [query]
+        self.queries = queries
         self.formulas = formulas or []
         self.conditional_formats = conditional_formats or []
         self.display_type = display_type
