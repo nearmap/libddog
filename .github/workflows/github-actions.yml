@@ -8,6 +8,7 @@ jobs:
         uses: actions/checkout@v2
       - run: sudo apt-get install python3-venv
       - run: python -m venv ve
+      - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
       - run: ./unittests
         env:
@@ -20,6 +21,7 @@ jobs:
         uses: actions/checkout@v2
       - run: sudo apt-get install python3-venv
       - run: python -m venv ve
+      - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
       - run: ./check
         env:
