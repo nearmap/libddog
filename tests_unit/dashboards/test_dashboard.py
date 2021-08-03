@@ -1,4 +1,9 @@
-from libddog.dashboards import Dashboard, PopulatedTemplateVariable, TemplateVariableDefinition, TemplateVariablesPreset,
+from libddog.dashboards import (
+    Dashboard,
+    PopulatedTemplateVariable,
+    TemplateVariableDefinition,
+    TemplateVariablesPreset,
+)
 
 
 def test_dashboard__minimal() -> None:
@@ -81,7 +86,6 @@ def test_dashboard__templ_vars_without_preset() -> None:
         "title": "EC2 instances",
         "widgets": [],
     }
-
 
 
 def test_dashboard__infer_templ_vars_from_templ_preset() -> None:
