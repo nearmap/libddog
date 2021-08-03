@@ -3,6 +3,7 @@ import enum
 
 class BackgroundColor(enum.Enum):
     BLUE = "blue"
+    GRAY = "gray"
     GREEN = "green"
     ORANGE = "orange"
     PINK = "pink"
@@ -15,6 +16,7 @@ class BackgroundColor(enum.Enum):
     VIVID_PINK = "vivid_pink"
     VIVID_PURPLE = "vivid_purple"
     VIVID_YELLOW = "vivid_yellow"
+    NEUTRAL = "white"
     TRANSPARENT = "transparent"
 
 
