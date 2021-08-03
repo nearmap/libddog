@@ -25,7 +25,6 @@ class Dashboard(Renderable):
         self.title = title
         self.desc = desc
         self.widgets = widgets or []
-        # pass tmpl_var_presets instead
         self.tmpl_var_defs = tmpl_var_defs or []
         self.tmpl_var_presets = tmpl_var_presets or []
 
