@@ -9,8 +9,8 @@ jobs:
       - run: sudo apt-get install -y python3-venv
       - run: python -m venv ve
       - run: echo "ve/bin" >> $GITHUB_PATH
-      - run: ve/bin/pip install -r requirements.txt
-      - run: ve/bin/pip install -r dev-requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pip install -r dev-requirements.txt
       - run: ci/run-format-checker
 
   run-type-checker:
