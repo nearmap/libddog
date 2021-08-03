@@ -5,7 +5,6 @@ set -eux
 ./reformat
 
 # is git installed and on the $PATH?
-echo $PATH
 git help &> /dev/null
 
 if [[ -n $(git diff --stat) ]]; then
