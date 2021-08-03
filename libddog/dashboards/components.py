@@ -225,6 +225,16 @@ class Request(Renderable):
 
 
 class TemplateVariableDefinition(Renderable):
+    """
+    Represents a template variable (ie. a tag that can be used as a filter in
+    metrics queries everywhere on the dashboard).
+
+    `tag` is the name of the tag and `name` is its display name.
+    `default_value` is the value that will be filled in when the dashboard page
+    is loaded (provided the url does not contain a value for this template
+    variable).
+    """
+
     def __init__(self, *, name: str, tag: str, default_value: str) -> None:
         self.name = name
         self.tag = tag
@@ -235,6 +245,13 @@ class TemplateVariableDefinition(Renderable):
 
 
 class PopulatedTemplateVariable(Renderable):
+    """
+    Groups a template variable with a particular value.
+
+    This type does not exists in Datadog (UI or API), it's just a helper type in
+    libddog.
+    """
+
     def __init__(self, *, tmpl_var: TemplateVariableDefinition, value: str) -> None:
         self.tmpl_var = tmpl_var
         self.value = value
@@ -244,6 +261,12 @@ class PopulatedTemplateVariable(Renderable):
 
 
 class TemplateVariablesPreset(Renderable):
+    """
+    Gives a `name` to a *set* of populated template variables, which allows
+    changing multiple template vars simultaneously by changing the preset in the
+    drop-down on the dashboard.
+    """
+
     def __init__(
         self, *, name: str, populated_vars: List[PopulatedTemplateVariable]
     ) -> None:
