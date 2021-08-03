@@ -71,6 +71,19 @@ class LiveSpan(enum.Enum):
     LAST_1Y = "1y"
 
 
+class MarkerLineStyle(enum.Enum):
+    SOLID = "solid"
+    BOLD = "bold"
+    DASHED = "dashed"
+
+
+class MarkerSeverity(enum.Enum):
+    ERROR = "error"
+    WARNING = "warning"
+    OK = "ok"
+    INFO = "info"
+
+
 class Palette(enum.Enum):
     CLASSIC = "dog_classic"
     COOL = "cool"

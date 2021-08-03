@@ -1,7 +1,15 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.types import JsonDict
-from libddog.dashboards.components import Layout, Position, Request, Size, Time, YAxis
+from libddog.dashboards.components import (
+    Layout,
+    Marker,
+    Position,
+    Request,
+    Size,
+    Time,
+    YAxis,
+)
 from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
@@ -275,7 +283,7 @@ class Timeseries(Widget):
         legend_columns: Optional[Sequence[str]] = None,  # TODO: what is this?
         requests: List[Request],
         yaxis: Optional[YAxis] = None,
-        # TODO: markers
+        markers: Optional[Sequence[Marker]] = None,
         size: Optional[Size] = None,
         pos: Optional[Position] = None,
     ) -> None:
@@ -289,6 +297,7 @@ class Timeseries(Widget):
         self.legend_columns = legend_columns or ["avg", "min", "max", "value", "sum"]
         self.requests = requests
         self.yaxis = yaxis or YAxis()
+        self.markers = markers or []
         self.size = Size.backfill(self, size)
         self.pos = pos or Position()
 
@@ -302,7 +311,7 @@ class Timeseries(Widget):
             "definition": {
                 "legend_columns": self.legend_columns,
                 "legend_layout": self.legend_layout,
-                "markers": [],  # TODO
+                "markers": [marker.as_dict() for marker in self.markers],
                 "requests": [self.request_as_dict(req) for req in self.requests],
                 "show_legend": self.show_legend,
                 "title": self.title,

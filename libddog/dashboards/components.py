@@ -10,6 +10,8 @@ from libddog.dashboards.enums import (
     LineType,
     LineWidth,
     LiveSpan,
+    MarkerLineStyle,
+    MarkerSeverity,
     Palette,
     Scale,
 )
@@ -72,6 +74,56 @@ class Layout(Renderable):
                 "width": self.size.width,
                 "height": self.size.height,
             },
+        }
+
+
+class Marker(Renderable):
+    pass
+
+
+class LineMarker(Marker):
+    def __init__(
+        self,
+        *,
+        value: int,
+        label: str = "",
+        severity: MarkerSeverity = MarkerSeverity.ERROR,
+        line_style: MarkerLineStyle = MarkerLineStyle.DASHED,
+    ) -> None:
+        self.value = value
+        self.label = label
+        self.severity = severity
+        self.line_style = line_style
+
+    def as_dict(self) -> JsonDict:
+        return {
+            "display_type": "%s %s" % (self.severity.value, self.line_style.value),
+            "label": self.label,
+            "value": "y = %s" % self.value,
+        }
+
+
+class RangeMarker(Marker):
+    def __init__(
+        self,
+        *,
+        lower: int,
+        upper: int,
+        label: str = "",
+        severity: MarkerSeverity = MarkerSeverity.WARNING,
+        line_style: MarkerLineStyle = MarkerLineStyle.DASHED,
+    ) -> None:
+        self.lower = lower
+        self.upper = upper
+        self.label = label
+        self.severity = severity
+        self.line_style = line_style
+
+    def as_dict(self) -> JsonDict:
+        return {
+            "display_type": "%s %s" % (self.severity.value, self.line_style.value),
+            "label": self.label,
+            "value": "%s < y < %s" % (self.lower, self.upper),
         }
 
 
