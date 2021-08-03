@@ -1,19 +1,6 @@
 name: libddog tests
 on: [push]
 jobs:
-  run-unit-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - run: sudo apt-get install -y python3-venv
-      - run: python -m venv ve
-      - run: ve/bin/pip install -r requirements.txt
-      - run: ve/bin/pip install -r dev-requirements.txt
-      - run: ./unittests
-        env:
-          PATH: $PATH:ve/bin
-
   run-format-checker:
     runs-on: ubuntu-latest
     steps:
@@ -37,5 +24,31 @@ jobs:
       - run: ve/bin/pip install -r requirements.txt
       - run: ve/bin/pip install -r dev-requirements.txt
       - run: ./check
+        env:
+          PATH: $PATH:ve/bin
+
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: sudo apt-get install -y python3-venv
+      - run: python -m venv ve
+      - run: ve/bin/pip install -r requirements.txt
+      - run: ve/bin/pip install -r dev-requirements.txt
+      - run: ./unittests
+        env:
+          PATH: $PATH:ve/bin
+
+  run-unit-tests-under-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: sudo apt-get install -y python3-venv
+      - run: python -m venv ve
+      - run: ve/bin/pip install -r requirements.txt
+      - run: ve/bin/pip install -r dev-requirements.txt
+      - run: ./unittests_coverage
         env:
           PATH: $PATH:ve/bin
