@@ -1,4 +1,3 @@
-import json
 from typing import List, Optional, Sequence
 
 from libddog.common.bases import Renderable
