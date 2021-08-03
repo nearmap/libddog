@@ -50,8 +50,3 @@ class Dashboard(Renderable):
             "notify_list": [],
             "reflow_type": "fixed",
         }
-
-    def as_json(self) -> str:
-        dct = self.as_dict()
-        block = json.dumps(dct, sort_keys=True, indent=2)
-        return block
