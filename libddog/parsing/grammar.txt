@@ -1,0 +1,64 @@
+program		        = expr
+
+
+expr                = formula / func_call / paren_expr
+formula             = expr_ex_formula ( ws binop ws expr )*
+expr_ex_formula     = func_call / paren_expr / operand
+func_call           = func_name "(" ws expr ( ws "," ws expr )* ws ")"
+paren_expr          = "(" ws expr ws ")"
+operand             = query / string / integer
+
+
+binop               = "+" / "-" / "*" / "/" / ","
+func_name           = "abs" / "anomalies" / "count_nonzero" / "count_not_null"
+                      / "day_before" / "default_zero" / "diff" / "ewma_5" 
+                      / "exclude_null" / "forecast" / "hour_before" / "per_minute"
+                      / "per_second" / "timeshift" / "top10" / "top" / "week_before"
+
+
+query               = agg? metric_name filter? by? as? query_func*
+
+agg                 = agg_func ":"
+agg_func 	        = "avg" / "max" / "min" / "sum"
+
+metric_name 	    = metric_name_fst ( "." metric_name_rest? )*
+
+filter              = "{" ws filter_item ( ws "," ws filter_item )* ws "}"
+filter_item         = tvar_name / filter_keyval / "*" / "$"
+filter_keyval       = "!"? tag_name ( ":" tag_value )?
+
+by                  = ~r"\s*" "by" ws "{" ws by_item ( ws "," ws by_item )* ws "}"
+by_item             = tvar_name / tag_name
+
+as                  = "." "as_" as_func "(" ")"
+as_func             = "rate" / "count"
+
+query_func          = rollup / fill
+
+rollup              = "." "rollup" "(" ws rollup_func ( ws "," ws integer )? ws ")"
+rollup_func         = "avg" / "count" / "max" / "min" / "sum"
+
+fill                = "." "fill" "(" ws fill_arg ( ws "," ws integer )? ws ")"
+fill_arg            = "last" / "linear" / "null" / "zero" / integer
+
+
+# used in metric names
+metric_name_fst         = ~"[_a-zA-Z][_a-zA-Z0-9]*"
+metric_name_rest        = ~"[_a-zA-Z0-9]+"
+
+tag_name                = ~"[_a-zA-Z][-_./a-zA-Z0-9]*"
+
+# can either begin or end with a wildcard, or be just a wildcard by itself
+tag_value               = tag_value_prefix / tag_value_suffix
+tag_value_prefix        = "*" ~"[-./:_a-zA-Z0-9]*"
+tag_value_suffix        = ~"[-./:_a-zA-Z0-9]+" "*"?
+
+# template variables
+tvar_name               = "$" tag_name
+
+
+string                  = string_double_quoted / string_single_quoted
+string_single_quoted    = '"' ~'[^"]*' '"'
+string_double_quoted    = "'" ~"[^']*" "'"
+integer                 = "-"? ~"[0-9]+"
+ws                      = ~r"\s*"
