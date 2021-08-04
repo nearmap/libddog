@@ -2,12 +2,16 @@ from typing import Any, Dict, List, Optional, Sequence, Set
 
 from libddog.common.bases import Renderable
 from libddog.common.errors import UnresolvedFormulaIdentifiers
+from libddog.common.types import JsonDict
 from libddog.dashboards.enums import (
     Comparator,
     ConditionalFormatPalette,
     DisplayType,
     LineType,
     LineWidth,
+    LiveSpan,
+    MarkerLineStyle,
+    MarkerSeverity,
     Palette,
     Scale,
 )
@@ -62,7 +66,7 @@ class Layout(Renderable):
         self.size = size
         self.pos = pos
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "layout": {
                 "x": self.pos.x,
@@ -70,6 +74,69 @@ class Layout(Renderable):
                 "width": self.size.width,
                 "height": self.size.height,
             },
+        }
+
+
+class Marker(Renderable):
+    pass
+
+
+class LineMarker(Marker):
+    def __init__(
+        self,
+        *,
+        value: int,
+        label: str = "",
+        severity: MarkerSeverity = MarkerSeverity.ERROR,
+        line_style: MarkerLineStyle = MarkerLineStyle.DASHED,
+    ) -> None:
+        self.value = value
+        self.label = label
+        self.severity = severity
+        self.line_style = line_style
+
+    def as_dict(self) -> JsonDict:
+        return {
+            "display_type": "%s %s" % (self.severity.value, self.line_style.value),
+            "label": self.label,
+            "value": "y = %s" % self.value,
+        }
+
+
+class RangeMarker(Marker):
+    def __init__(
+        self,
+        *,
+        lower: int,
+        upper: int,
+        label: str = "",
+        severity: MarkerSeverity = MarkerSeverity.WARNING,
+        line_style: MarkerLineStyle = MarkerLineStyle.DASHED,
+    ) -> None:
+        self.lower = lower
+        self.upper = upper
+        self.label = label
+        self.severity = severity
+        self.line_style = line_style
+
+    def as_dict(self) -> JsonDict:
+        return {
+            "display_type": "%s %s" % (self.severity.value, self.line_style.value),
+            "label": self.label,
+            "value": "%s < y < %s" % (self.lower, self.upper),
+        }
+
+
+class Time(Renderable):
+    def __init__(self, *, live_span: LiveSpan) -> None:
+        self.live_span = live_span
+
+    def as_dict(self) -> JsonDict:
+        if self.live_span == LiveSpan.GLOBAL_TIME:
+            return {}
+
+        return {
+            "live_span": self.live_span.value,
         }
 
 
@@ -85,7 +152,7 @@ class Style(Renderable):
         self.line_width = line_width
         self.palette = palette
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "line_type": self.line_type.value,
             "line_width": self.line_width.value,
@@ -109,7 +176,7 @@ class YAxis(Renderable):
         self.min = min
         self.max = max
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "include_zero": self.include_zero,
             "scale": self.scale.value,
@@ -136,10 +203,11 @@ class Formula(Renderable):
         missing_idents = idents - resolved_idents
         if missing_idents:
             raise UnresolvedFormulaIdentifiers(
-                "identifiers %r not present in %r" % (missing_idents, self.text)
+                "identifier(s) %r in the formula %r not present in any query"
+                % (missing_idents, self.text)
             )
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {"formula": self.text}
         if self.alias:
             dct["alias"] = self.alias
@@ -155,7 +223,7 @@ class ConditionalFormat(Renderable):
         self.value = value
         self.palette = palette
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "comparator": self.comparator.value,
             "value": self.value,
@@ -168,26 +236,22 @@ class Request(Renderable):
         self,
         *,
         title: Optional[str] = None,
-        query: Optional[Query] = None,
-        queries: Optional[List[Query]] = None,
+        queries: List[Query],
         formulas: Optional[List[Formula]] = None,
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
         style: Optional[Style] = None,
         on_right_yaxis: bool = False,
     ) -> None:
-        assert query or queries
-
         self.title = title
-        self.query = query
-        self.queries = queries or [query]
+        self.queries = queries
         self.formulas = formulas or []
         self.conditional_formats = conditional_formats or []
         self.display_type = display_type
         self.style = style or Style()
         self.on_right_yaxis = on_right_yaxis
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         # if we have only queries but no formulas then synthesize a formula per query
         formulas = self.formulas
         if not formulas:
@@ -213,32 +277,55 @@ class Request(Renderable):
 
 
 class TemplateVariableDefinition(Renderable):
+    """
+    Represents a template variable (ie. a tag that can be used as a filter in
+    metrics queries everywhere on the dashboard).
+
+    `tag` is the name of the tag and `name` is its display name.
+    `default_value` is the value that will be filled in when the dashboard page
+    is loaded (provided the url does not contain a value for this template
+    variable).
+    """
+
     def __init__(self, *, name: str, tag: str, default_value: str) -> None:
         self.name = name
         self.tag = tag
         self.default_value = default_value
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> JsonDict:
         return {"name": self.name, "prefix": self.tag, "default": self.default_value}
 
 
 class PopulatedTemplateVariable(Renderable):
+    """
+    Groups a template variable with a particular value.
+
+    This type does not exists in Datadog (UI or API), it's just a helper type in
+    libddog.
+    """
+
     def __init__(self, *, tmpl_var: TemplateVariableDefinition, value: str) -> None:
         self.tmpl_var = tmpl_var
         self.value = value
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> JsonDict:
         return {"name": self.tmpl_var.name, "value": self.value}
 
 
 class TemplateVariablesPreset(Renderable):
+    """
+    Gives a `name` to a *set* of populated template variables, which allows
+    changing multiple template vars simultaneously by changing the preset in the
+    drop-down on the dashboard.
+    """
+
     def __init__(
         self, *, name: str, populated_vars: List[PopulatedTemplateVariable]
     ) -> None:
         self.name = name
         self.populated_vars = populated_vars
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "name": self.name,
             "template_variables": [tmp.as_dict() for tmp in self.populated_vars],

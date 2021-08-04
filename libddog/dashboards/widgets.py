@@ -1,9 +1,19 @@
 from typing import Any, Dict, List, Optional, Sequence
 
-from libddog.dashboards.components import Layout, Position, Request, Size, YAxis
+from libddog.common.types import JsonDict
+from libddog.dashboards.components import (
+    Layout,
+    Marker,
+    Position,
+    Request,
+    Size,
+    Time,
+    YAxis,
+)
 from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
+    LiveSpan,
     ResponseFormat,
     TextAlign,
     TickEdge,
@@ -21,10 +31,10 @@ class Widget:
     A visual component on a dashboard.
     """
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         raise NotImplementedError
 
-    def add_layout(self, dct: Dict[str, Any], size: Size, pos: Position) -> None:
+    def add_layout(self, dct: JsonDict, size: Size, pos: Position) -> None:
         """
         Transforms:
 
@@ -66,13 +76,13 @@ class Widget:
             if key not in allowed_atts:
                 del dct[key]
 
-    def query_as_dict(self, query: Query) -> Dict[str, Any]:
+    def query_as_dict(self, query: Query) -> JsonDict:
         dct = query.as_dict()
         allowed_atts = self._get_allowed_atts(query)
         self._filter_dict_keys(dct, allowed_atts)
         return dct
 
-    def request_as_dict(self, request: Request) -> Dict[str, Any]:
+    def request_as_dict(self, request: Request) -> JsonDict:
         dct = request.as_dict()
         allowed_atts = self._get_allowed_atts(request)
         self._filter_dict_keys(dct, allowed_atts)
@@ -119,14 +129,17 @@ class Note(Widget):
 
         preset_defaults = NotePreset.get_defaults().get(self.preset)
         if not preset_defaults:
-            raise NotImplementedError(self.preset.value)
+            raise NotImplementedError(self.preset)
 
         # sanity check: make sure present default attributes do exist
         for attname in preset_defaults.keys():
             if not hasattr(self, attname):
                 raise RuntimeError("Invalid att name in preset: %s" % attname)
 
+        # the effective values of the attributes
         kwargs = {}
+
+        # get all the attribute names on 'self'
         attnames = [
             att
             for att in dir(self)
@@ -140,13 +153,15 @@ class Note(Widget):
             # defaults instead
             if value is None:
                 value = preset_defaults.get(attname)
+
+                # if it's present in the present it must be set
                 assert value is not None
 
             kwargs[attname] = value
 
         return self.__class__(**kwargs)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         instance = self.apply_preset()
         # from this point on: use 'instance' not 'self'
 
@@ -195,7 +210,7 @@ class QueryValue(Widget):
         title: str,
         title_size: int = 16,
         title_align: TitleAlign = TitleAlign.LEFT,
-        # time   # TODO: not yet modeled
+        time: Optional[Time] = None,
         autoscale: bool = True,
         custom_unit: Optional[str] = None,
         precision: int = 2,
@@ -206,6 +221,7 @@ class QueryValue(Widget):
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
+        self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
         self.autoscale = autoscale
         self.custom_unit = custom_unit
         self.precision = precision
@@ -218,13 +234,13 @@ class QueryValue(Widget):
         dct["response_format"] = ResponseFormat.SCALAR.value
         return dct
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "autoscale": self.autoscale,
                 "precision": self.precision,
                 "requests": [self.request_as_dict(req) for req in self.requests],
-                "time": {},
+                "time": self.time.as_dict(),
                 "title": self.title,
                 "title_align": self.title_align.value,
                 "title_size": str(self.title_size),
@@ -264,10 +280,10 @@ class Timeseries(Widget):
         title_align: TitleAlign = TitleAlign.LEFT,
         show_legend: bool = True,
         legend_layout: Optional[str] = None,  # TODO: make enum
-        legend_columns: Optional[Sequence[str]] = None,
+        legend_columns: Optional[Sequence[str]] = None,  # TODO: what is this?
         requests: List[Request],
         yaxis: Optional[YAxis] = None,
-        # TODO: markers
+        markers: Optional[Sequence[Marker]] = None,
         size: Optional[Size] = None,
         pos: Optional[Position] = None,
     ) -> None:
@@ -281,20 +297,21 @@ class Timeseries(Widget):
         self.legend_columns = legend_columns or ["avg", "min", "max", "value", "sum"]
         self.requests = requests
         self.yaxis = yaxis or YAxis()
+        self.markers = markers or []
         self.size = Size.backfill(self, size)
         self.pos = pos or Position()
 
-    def request_as_dict(self, request: Request) -> Dict[str, Any]:
+    def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
         dct["response_format"] = ResponseFormat.TIMESERIES.value
         return dct
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "legend_columns": self.legend_columns,
                 "legend_layout": self.legend_layout,
-                "markers": [],  # TODO
+                "markers": [marker.as_dict() for marker in self.markers],
                 "requests": [self.request_as_dict(req) for req in self.requests],
                 "show_legend": self.show_legend,
                 "title": self.title,
@@ -325,7 +342,7 @@ class Group(Widget):
         self.background_color = background_color
         self.widgets = widgets or []
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
                 "title": self.title,
@@ -333,6 +350,7 @@ class Group(Widget):
                 "layout_type": self.layout_type.value,
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
+            # TODO: layout: {...}
         }
 
         if self.background_color:

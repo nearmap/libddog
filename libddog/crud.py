@@ -53,7 +53,7 @@ class DashboardManager:
                 "Cannot update dashboard without an .id attribute: %r" % dashboard.title
             )
 
-        client_kwargs = dashboard.as_kwargs_to_official_client()
+        client_kwargs = dashboard.as_dict()
 
         try:
             resp = datadog.api.Dashboard.update(**client_kwargs)  # type: ignore

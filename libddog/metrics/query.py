@@ -4,12 +4,12 @@ from typing import Any, Dict, List, Optional
 from libddog.common.bases import Renderable
 
 
-class ASTNode:
+class QueryNode:
     def codegen(self) -> str:
         raise NotImplemented
 
 
-class Metric(ASTNode):
+class Metric(QueryNode):
     def __init__(self, *, name: str) -> None:
         self.name = name
 
@@ -17,7 +17,7 @@ class Metric(ASTNode):
         return self.name
 
 
-class FilterCond(ASTNode):
+class FilterCond(QueryNode):
     pass
 
 
@@ -42,7 +42,7 @@ class TmplVar(FilterCond):
         return "$%s" % self.tvar
 
 
-class Filter(ASTNode):
+class Filter(QueryNode):
     def __init__(self, *, conds: List[FilterCond]) -> None:
         self.conds = conds
 
@@ -67,7 +67,7 @@ class AggFunc(enum.Enum):
         return self.value
 
 
-class By(ASTNode):
+class By(QueryNode):
     def __init__(self, *, tags: List[str]) -> None:
         self.tags = tags
 
@@ -83,13 +83,13 @@ class As(enum.Enum):
         return ".as_%s()" % self.value
 
 
-class Aggregation(ASTNode):
+class Aggregation(QueryNode):
     def __init__(
         self, *, func: AggFunc, by: Optional[By] = None, as_: Optional[As] = None
     ) -> None:
         self.func = func
         self.by = by
-        self.as_ = as_
+        self.as_ = as_  # 'as' is a keyword in Python
 
 
 class RollupFunc(enum.Enum):
@@ -104,7 +104,7 @@ class RollupFunc(enum.Enum):
         return self.value
 
 
-class Rollup(ASTNode):
+class Rollup(QueryNode):
     def __init__(self, *, func: RollupFunc, period_s: Optional[int] = None) -> None:
         self.func = func
         self.period_s = period_s
@@ -116,10 +116,15 @@ class Rollup(ASTNode):
             period_s,
         ]
         args = [arg for arg in args if arg]
+
+        # func == DEFAULT and period_s unset
+        if not args:
+            return ""
+
         return ".rollup(%s)" % ", ".join(args)
 
 
-class Query(ASTNode, Renderable):
+class Query(QueryNode, Renderable):
     _instance_counter = 1
 
     def __init__(
@@ -131,8 +136,8 @@ class Query(ASTNode, Renderable):
         rollup: Optional[Rollup] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
-        aggregator: str = "unused",  # ignore me
-        query: str = "unused",  # ignore me
+        aggregator: str = "unused",  # TODO: remove
+        query: str = "unused",  # TODO: remove
     ) -> None:
         self.metric = metric
         self.filter = filter
@@ -144,8 +149,8 @@ class Query(ASTNode, Renderable):
         self.query = query
 
     def get_next_unique_name(self) -> str:
-        counter = self._instance_counter
-        self._instance_counter += 1
+        counter = self.__class__._instance_counter
+        self.__class__._instance_counter += 1
         return "q%s" % counter
 
     def codegen(self) -> str:
@@ -171,10 +176,8 @@ class Query(ASTNode, Renderable):
         dct = {
             "aggregator": self.agg.func.value,
             "data_source": self.data_source,
+            "name": self.name,
             "query": self.codegen(),
         }
-
-        if self.name:
-            dct["name"] = self.name
 
         return dct

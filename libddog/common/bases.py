@@ -1,6 +1,6 @@
-from typing import Any, Dict
+from libddog.common.types import JsonDict
 
 
 class Renderable:
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         raise NotImplementedError

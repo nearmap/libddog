@@ -102,12 +102,17 @@ class DashboardManagerCli:
         self.import_path = f"{self.containing_dir}.{self.definition_module}"
 
     def load_definitions_module(self) -> ModuleType:
+        # add '.' to sys.path to make 'config' importable
+        cwd = os.path.abspath(os.getcwd())
+        if cwd not in sys.path:
+            sys.path.append(cwd)
+
         # import the module
         try:
             dashes_module = importlib.import_module(self.import_path)
         except ModuleNotFoundError:
             raise CommandLineError(
-                "Failed to import definition module at %r", self.import_path
+                "Failed to import definition module %r", self.import_path
             )
 
         # try calling get_dashboards

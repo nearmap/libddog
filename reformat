@@ -1,0 +1,4 @@
+#!/bin/sh
+
+isort bin/* libddog/ tests_*/  # sort imports
+black bin/* libddog/ tests_*/  # all other code formatting

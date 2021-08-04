@@ -3,6 +3,7 @@ import enum
 
 class BackgroundColor(enum.Enum):
     BLUE = "blue"
+    GRAY = "gray"
     GREEN = "green"
     ORANGE = "orange"
     PINK = "pink"
@@ -15,6 +16,7 @@ class BackgroundColor(enum.Enum):
     VIVID_PINK = "vivid_pink"
     VIVID_PURPLE = "vivid_purple"
     VIVID_YELLOW = "vivid_yellow"
+    NEUTRAL = "white"
     TRANSPARENT = "transparent"
 
 
@@ -54,13 +56,43 @@ class LineWidth(enum.Enum):
     THICK = "thick"
 
 
+class LiveSpan(enum.Enum):
+    GLOBAL_TIME = ""  # intentionally the empty string
+    LAST_1M = "1m"
+    LAST_5M = "5m"
+    LAST_15M = "15m"
+    LAST_1H = "1h"
+    LAST_4H = "4h"
+    LAST_1D = "1d"
+    LAST_2D = "2d"
+    LAST_1W = "1w"
+    LAST_3MO = "3mo"
+    LAST_6MO = "6mo"
+    LAST_1Y = "1y"
+
+
+class MarkerLineStyle(enum.Enum):
+    SOLID = "solid"
+    BOLD = "bold"
+    DASHED = "dashed"
+
+
+class MarkerSeverity(enum.Enum):
+    ERROR = "error"
+    WARNING = "warning"
+    OK = "ok"
+    INFO = "info"
+
+
 class Palette(enum.Enum):
     CLASSIC = "dog_classic"
     COOL = "cool"
     WARM = "warm"
     PURPLE = "purple"
     ORANGE = "orange"
-    GRAY = "grey"  # yes the typo is intentional lol
+    # yes the typo is intentional lol. In the Datadog UI it's spelled gray, in
+    # json it's spelled grey
+    GRAY = "grey"
 
 
 class ResponseFormat(enum.Enum):

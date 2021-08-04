@@ -1,7 +1,7 @@
-import json
-from typing import Any, Dict, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
 from libddog.common.bases import Renderable
+from libddog.common.types import JsonDict
 from libddog.dashboards.components import (
     TemplateVariableDefinition,
     TemplateVariablesPreset,
@@ -24,7 +24,6 @@ class Dashboard(Renderable):
         self.title = title
         self.desc = desc
         self.widgets = widgets or []
-        # pass tmpl_var_presets instead
         self.tmpl_var_defs = tmpl_var_defs or []
         self.tmpl_var_presets = tmpl_var_presets or []
 
@@ -34,7 +33,7 @@ class Dashboard(Renderable):
                 if populated_var.tmpl_var not in self.tmpl_var_defs:
                     self.tmpl_var_defs.append(populated_var.tmpl_var)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> JsonDict:
         return {
             "id": self.id,
             "title": self.title,
@@ -49,11 +48,3 @@ class Dashboard(Renderable):
             "notify_list": [],
             "reflow_type": "fixed",
         }
-
-    def as_json(self) -> str:
-        dct = self.as_dict()
-        block = json.dumps(dct, sort_keys=True, indent=2)
-        return block
-
-    def as_kwargs_to_official_client(self) -> Dict[str, Any]:
-        return self.as_dict()
