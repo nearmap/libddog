@@ -1,5 +1,10 @@
 from libddog.dashboards import (
+    LineMarker,
+    Marker,
+    MarkerLineStyle,
+    MarkerSeverity,
     Position,
+    RangeMarker,
     Request,
     Scale,
     Size,
@@ -82,6 +87,21 @@ def test_timeseries__exhaustive() -> None:
             min=1,
             max=99,
         ),
+        markers=[
+            LineMarker(
+                value=90,
+                label="ok zone threshold",
+                severity=MarkerSeverity.OK,
+                line_style=MarkerLineStyle.BOLD,
+            ),
+            RangeMarker(
+                lower=95,
+                upper=99,
+                label="warning zone",
+                severity=MarkerSeverity.WARNING,
+                line_style=MarkerLineStyle.DASHED,
+            ),
+        ],
         size=Size(width=1, height=4),
         pos=Position(x=2, y=3),
     )
@@ -90,7 +110,18 @@ def test_timeseries__exhaustive() -> None:
         "definition": {
             "legend_columns": ["avg", "sum"],
             "legend_layout": "auto",
-            "markers": [],
+            "markers": [
+                {
+                    "display_type": "ok bold",
+                    "label": "ok zone threshold",
+                    "value": "y = 90",
+                },
+                {
+                    "display_type": "warning dashed",
+                    "label": "warning zone",
+                    "value": "95 < y < 99",
+                },
+            ],
             "requests": [
                 {
                     "display_type": "line",
