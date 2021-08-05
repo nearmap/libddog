@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import sys
+
+try:
+    import libddog
+except ImportError:
+    sys.path.append(".")
+
+# isort: split
+import json
+import os
+
+from libddog.parsing.extract_queries import get_queries
+from libddog.parsing.query import QueryParser
+
+
+def main(download_dir) -> None:
+    parser = QueryParser()
+    doc_dct = {}
+
+    for fn in os.listdir(download_dir):
+        fp = os.path.join(download_dir, fn)
+
+        print("Parsing: %s" % fp)
+
+        with open(fp, "r") as fl:
+            doc = json.load(fl)
+
+        doc_id = doc["id"]
+        doc_dct[doc_id] = doc
+
+        for qf in get_queries(doc):
+            # print(qf.query)
+            try:
+                parser.parse(qf.query)
+            except:
+                sys.stderr.write("FAILED: %s\n" % qf.query)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])

@@ -11,11 +11,15 @@ setup(
     url="https://github.com/nearmap/libddog",
     packages=find_packages(".", exclude=("tests_*",)),
     package_dir={"": "."},
-    package_data={"libddog": ["py.typed"]},
+    package_data={
+        "libddog": ["py.typed"],
+        "libddog.parsing": ["grammar.txt"]
+    },
     install_requires=[
         "click==8.0.1",
         "datadog==0.41.0",
         "humanize==3.6.0",
+        "parsimonious==0.8.1",
         "python-dateutil==2.8.1",
     ],
     # don't install as zipped egg
