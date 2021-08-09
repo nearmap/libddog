@@ -5,7 +5,7 @@ from parsimonious.exceptions import IncompleteParseError, ParseError
 from libddog.parsing.query import QueryParser
 
 
-def test_parser() -> None:
+def test_grammar() -> None:
     single_query_cases = [
         ("minimal query", "avg:svcname"),
         ("suspect: no aggregation", "svcname"),

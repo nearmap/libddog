@@ -17,17 +17,30 @@ class Metric(QueryNode):
         return self.name
 
 
+class FilterOperator(enum.Enum):
+    EQUAL = 1
+    NOT_EQUAL = 2
+
+
 class FilterCond(QueryNode):
     pass
 
 
 class Tag(FilterCond):
-    def __init__(self, *, tag: str, value: str) -> None:
+    def __init__(
+        self, *, tag: str, value: str, operator: FilterOperator = FilterOperator.EQUAL
+    ) -> None:
         self.tag = tag
         self.value = value
+        self.operator = operator
 
     def codegen(self) -> str:
-        return "%s:%s" % (self.tag, self.value)
+        key = self.tag
+
+        if self.operator is FilterOperator.NOT_EQUAL:
+            key = f"!{key}"
+
+        return f"{key}:{self.value}"
 
 
 class TmplVar(FilterCond):
@@ -104,7 +117,11 @@ class RollupFunc(enum.Enum):
         return self.value
 
 
-class Rollup(QueryNode):
+class QueryFunc(QueryNode):
+    pass
+
+
+class Rollup(QueryFunc):
     def __init__(self, *, func: RollupFunc, period_s: Optional[int] = None) -> None:
         self.func = func
         self.period_s = period_s
@@ -122,6 +139,25 @@ class Rollup(QueryNode):
             return ""
 
         return ".rollup(%s)" % ", ".join(args)
+
+
+class FillFunc(enum.Enum):
+    LINEAR = "linear"
+    LAST = "last"
+    ZERO = "zero"
+    NULL = "null"
+
+
+class Fill(QueryFunc):
+    def __init__(self, *, func: FillFunc, limit_s: int = 300) -> None:
+        self.func = func
+        self.limit_s = limit_s
+
+    def codegen(self) -> str:
+        limit_s = "%s" % self.limit_s if self.limit_s else ""
+        args = [self.func.value, limit_s]
+        args = [arg for arg in args if arg]
+        return ".fill(%s)" % ", ".join(args)
 
 
 class Query(QueryNode, Renderable):
