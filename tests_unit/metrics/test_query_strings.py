@@ -3,6 +3,8 @@ from libddog.metrics import (
     Aggregation,
     As,
     By,
+    Fill,
+    FillFunc,
     Filter,
     Metric,
     Query,
@@ -29,12 +31,12 @@ def test__exhaustive() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110), Fill(func=FillFunc.LAST, limit_s=112)],
     )
 
     assert query.codegen() == (
         "avg:aws.ec2.cpuutilization{$az, role:cache} "
-        "by {az, role}.as_count().rollup(max, 110)"
+        "by {az, role}.as_count().rollup(max, 110).fill(last, 112)"
     )
 
 
@@ -45,7 +47,7 @@ def test__exhaustive__no_filter() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
     )
 
     assert query.codegen() == (
@@ -58,7 +60,7 @@ def test__exhaustive__filter_with_tmplvar_only() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
     )
 
     assert query.codegen() == (
@@ -71,7 +73,7 @@ def test__exhaustive__agg_with_func_and_by_only() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"])),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
     )
 
     assert query.codegen() == (
@@ -84,7 +86,7 @@ def test__exhaustive__agg_with_func_and_as_only() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
     )
 
     assert query.codegen() == (
@@ -97,7 +99,7 @@ def test__exhaustive__agg_with_func_only() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
     )
 
     assert query.codegen() == (
@@ -122,12 +124,54 @@ def test__exhaustive__rollup_with_func_only() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX),
+        funcs=[Rollup(func=RollupFunc.MAX)],
     )
 
     assert query.codegen() == (
         "avg:aws.ec2.cpuutilization{$az, role:cache} "
         "by {az, role}.as_count().rollup(max)"
+    )
+
+
+def test__exhaustive__no_fill() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
+        agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
+    )
+
+    assert query.codegen() == (
+        "avg:aws.ec2.cpuutilization{$az, role:cache} "
+        "by {az, role}.as_count().rollup(max, 110)"
+    )
+
+
+def test__exhaustive__fill_with_func_only() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
+        agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110), Fill(func=FillFunc.LAST)],
+    )
+
+    assert query.codegen() == (
+        "avg:aws.ec2.cpuutilization{$az, role:cache} "
+        "by {az, role}.as_count().rollup(max, 110).fill(last, 300)"
+    )
+
+
+def test__exhaustive__fill_before_rollup() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
+        agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
+        funcs=[Fill(func=FillFunc.LAST, limit_s=112), Rollup(func=RollupFunc.MAX, period_s=110)],
+    )
+
+    assert query.codegen() == (
+        "avg:aws.ec2.cpuutilization{$az, role:cache} "
+        "by {az, role}.as_count().fill(last, 112).rollup(max, 110)"
     )
 
 
@@ -138,7 +182,7 @@ def test_rollup_default_func() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
-        rollup=Rollup(func=RollupFunc.DEFAULT),
+        funcs=[Rollup(func=RollupFunc.DEFAULT)],
     )
 
     assert query.codegen() == "avg:aws.ec2.cpuutilization"

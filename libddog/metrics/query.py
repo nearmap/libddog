@@ -169,7 +169,7 @@ class Query(QueryNode, Renderable):
         metric: Metric,
         filter: Optional[Filter] = None,
         agg: Aggregation,
-        rollup: Optional[Rollup] = None,
+        funcs: List[QueryFunc] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
         aggregator: str = "unused",  # TODO: remove
@@ -178,7 +178,7 @@ class Query(QueryNode, Renderable):
         self.metric = metric
         self.filter = filter
         self.agg = agg
-        self.rollup = rollup
+        self.funcs = funcs or []
         self.name = name or self.get_next_unique_name()
         self.data_source = data_source
         self.aggregator = aggregator
@@ -195,7 +195,8 @@ class Query(QueryNode, Renderable):
         agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
         metric = self.metric.codegen()
         filter = self.filter.codegen() if self.filter else ""
-        rollup = self.rollup.codegen() if self.rollup else ""
+
+        funcs = "".join([func.codegen() for func in self.funcs])
 
         query = "%s:%s%s%s%s%s" % (
             agg_func,
@@ -203,7 +204,7 @@ class Query(QueryNode, Renderable):
             filter,
             agg_by,
             agg_as,
-            rollup,
+            funcs,
         )
 
         return query
