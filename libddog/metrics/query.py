@@ -169,7 +169,7 @@ class Query(QueryNode, Renderable):
         metric: Metric,
         filter: Optional[Filter] = None,
         agg: Aggregation,
-        funcs: List[QueryFunc] = None,
+        funcs: Optional[List[QueryFunc]] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
         aggregator: str = "unused",  # TODO: remove
