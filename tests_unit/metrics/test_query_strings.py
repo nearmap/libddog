@@ -6,6 +6,7 @@ from libddog.metrics import (
     Fill,
     FillFunc,
     Filter,
+    FilterOperator,
     Metric,
     Query,
     Rollup,
@@ -31,7 +32,10 @@ def test__exhaustive() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        funcs=[Rollup(func=RollupFunc.MAX, period_s=110), Fill(func=FillFunc.LAST, limit_s=112)],
+        funcs=[
+            Rollup(func=RollupFunc.MAX, period_s=110),
+            Fill(func=FillFunc.LAST, limit_s=112),
+        ],
     )
 
     assert query.codegen() == (
@@ -166,7 +170,10 @@ def test__exhaustive__fill_before_rollup() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        funcs=[Fill(func=FillFunc.LAST, limit_s=112), Rollup(func=RollupFunc.MAX, period_s=110)],
+        funcs=[
+            Fill(func=FillFunc.LAST, limit_s=112),
+            Rollup(func=RollupFunc.MAX, period_s=110),
+        ],
     )
 
     assert query.codegen() == (
@@ -176,6 +183,21 @@ def test__exhaustive__fill_before_rollup() -> None:
 
 
 # selected corner cases
+
+
+def test_filter_negating() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        filter=Filter(
+            conds=[
+                TmplVar(tvar="az"),
+                Tag(tag="role", value="cache", operator=FilterOperator.NOT_EQUAL),
+            ]
+        ),
+        agg=Aggregation(func=AggFunc.AVG),
+    )
+
+    assert query.codegen() == "avg:aws.ec2.cpuutilization{$az, !role:cache}"
 
 
 def test_rollup_default_func() -> None:
