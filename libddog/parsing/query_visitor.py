@@ -20,10 +20,28 @@ def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
 
 
 class QueryVisitor(NodeVisitor):  # type: ignore
+
+    def visit_program(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[0]
+
+    # expr 
+
+    def visit_expr(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[0]
+
+    def visit_formula(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[0]
+
+    def visit_expr_ex_formula(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[0]
+
+    def visit_operand(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[0]
+
     # query
 
     def visit_query(self, node: Node, visited_children: List[Node]) -> Any:
-        agg_func = visited_children[0]
+        agg_func = visited_children[0][0]
         name = visited_children[1]
         return Query(metric=Metric(name=name), agg=Aggregation(func=agg_func))
 
