@@ -1,17 +1,22 @@
 from libddog.metrics import (
+    Add,
     AggFunc,
     Aggregation,
     As,
     By,
+    Div,
     Fill,
     FillFunc,
     Filter,
+    Int,
     Metric,
     Query,
     Rollup,
     RollupFunc,
     Tag,
     TmplVar,
+    abs,
+    timeshift,
 )
 from libddog.metrics.query import FilterOperator
 from libddog.parsing.query_parser import QueryParser
@@ -54,5 +59,24 @@ def test_ast_builder__exhaustive_query() -> None:
             Fill(func=FillFunc.LAST, limit_s=112),
         ],
     )
+
+    assert ast.codegen() == expected.codegen()
+
+
+def test_ast_builder__formula() -> None:
+    parser = QueryParser()
+
+    qs = "(abs(avg:aws.ec2.cpu) + 10) / timeshift(sum:aws.ec2.mem, -123)"
+
+    ast = parser.parse_ast(qs)
+    cpu = Query(
+        metric=Metric(name="aws.ec2.cpu"),
+        agg=Aggregation(func=AggFunc.AVG),
+    )
+    mem = Query(
+        metric=Metric(name="aws.ec2.mem"),
+        agg=Aggregation(func=AggFunc.SUM),
+    )
+    expected = Div(Add(abs(cpu), Int(10)), timeshift(mem, -123))
 
     assert ast.codegen() == expected.codegen()

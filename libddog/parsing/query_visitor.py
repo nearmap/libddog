@@ -3,6 +3,11 @@ from typing import Any, List, Type
 
 from parsimonious.nodes import Node, NodeVisitor
 
+import libddog.metrics.expressions
+import libddog.metrics.functions
+from libddog.metrics.expressions import BinaryFormula, Comma
+from libddog.metrics.functions import Function
+from libddog.metrics.literals import Int, Str
 from libddog.metrics.query import (
     AggFunc,
     Aggregation,
@@ -25,6 +30,16 @@ class ParseError(Exception):
     pass
 
 
+def resolve_binop(symbol: str) -> Type[BinaryFormula]:
+    mod = libddog.metrics.expressions
+    for attname in dir(mod):
+        cls = getattr(mod, attname)
+        if issubclass(cls, BinaryFormula) and cls.symbol == symbol:
+            return cls  # type: ignore
+
+    raise ParseError("Failed to resolve binary operator using input: %r" % symbol)
+
+
 def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
     alternatives: List[enum.Enum] = list(enum_cls)
     for alternative in alternatives:
@@ -32,6 +47,15 @@ def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
             return alternative
 
     raise ParseError("Failed to reverse enum %r using input: %r" % (enum_cls, literal))
+
+
+def resolve_func(func_name: str) -> Type[Function]:
+    mod = libddog.metrics.functions
+    for attname in dir(mod):
+        if func_name == attname:
+            return getattr(mod, attname)  # type: ignore
+
+    raise ParseError("Failed to resolve function name using input: %r" % func_name)
 
 
 class QueryVisitor(NodeVisitor):  # type: ignore
@@ -44,13 +68,64 @@ class QueryVisitor(NodeVisitor):  # type: ignore
         return visited_children[0]
 
     def visit_formula(self, node: Node, visited_children: List[Node]) -> Any:
-        return visited_children[0]
+        left = visited_children[0]
+        binop = left
+
+        operator, right = None, None
+        if isinstance(visited_children[1], list):
+            operator = visited_children[1][0][1]
+            right = visited_children[1][0][3]
+
+        if operator and right:
+            binop_cls = resolve_binop(operator)
+            if isinstance(right, int):
+                right = Int(right)
+            elif isinstance(right, str):
+                right = Str(right)
+            binop = binop_cls(left, right)
+
+        return binop
 
     def visit_expr_ex_formula(self, node: Node, visited_children: List[Node]) -> Any:
         return visited_children[0]
 
+    def visit_func_call(self, node: Node, visited_children: List[Node]) -> Any:
+        name = visited_children[0]
+
+        fst = visited_children[3]
+        args = [fst]
+
+        # we run into a problem here because the arguments to the function have
+        # already been parsed as a Comma binop and we have to actually undo that
+        # here
+        if isinstance(fst, Comma):
+            left: Any = fst.left
+            right: Any = fst.right
+
+            assert not isinstance(left, Comma)
+            assert not isinstance(right, Comma)
+
+            if isinstance(left, Int):
+                left = left.value
+            if isinstance(right, Int):
+                right = right.value
+
+            args = [left, right]
+
+        func = resolve_func(name)
+        return func(*args)
+
+    def visit_paren_expr(self, node: Node, visited_children: List[Node]) -> Any:
+        return visited_children[2]
+
     def visit_operand(self, node: Node, visited_children: List[Node]) -> Any:
         return visited_children[0]
+
+    def visit_binop(self, node: Node, visited_children: List[Node]) -> Any:
+        return node.text
+
+    def visit_func_name(self, node: Node, visited_children: List[Node]) -> Any:
+        return node.text
 
     # query
 
@@ -82,7 +157,6 @@ class QueryVisitor(NodeVisitor):  # type: ignore
         if agg_func:
             agg = Aggregation(func=agg_func, by=by, as_=as_)
 
-        # import pdb; pdb.set_trace()
         return Query(
             metric=Metric(name=name),
             agg=agg,
@@ -157,15 +231,7 @@ class QueryVisitor(NodeVisitor):  # type: ignore
 
     def visit_rollup(self, node: Node, visited_children: List[Node]) -> Any:
         func = visited_children[4]
-
-        minus = visited_children[5][0][3][0].text
-        period = visited_children[5][0][3][1].text
-
-        if period:
-            period = int(period)
-            if minus == "-":
-                period = -period
-
+        period = visited_children[5][0][3]
         return Rollup(func=func, period_s=period)
 
     def visit_rollup_func(self, node: Node, visited_children: List[Node]) -> Any:
@@ -173,15 +239,7 @@ class QueryVisitor(NodeVisitor):  # type: ignore
 
     def visit_fill(self, node: Node, visited_children: List[Node]) -> Any:
         func = visited_children[4]
-
-        minus = visited_children[5][0][3][0].text
-        limit = visited_children[5][0][3][1].text
-
-        if limit:
-            limit = int(limit)
-            if minus == "-":
-                limit = -limit
-
+        limit = visited_children[5][0][3]
         return Fill(func=func, limit_s=limit)
 
     def visit_fill_arg(self, node: Node, visited_children: List[Node]) -> Any:
@@ -203,6 +261,20 @@ class QueryVisitor(NodeVisitor):  # type: ignore
         dollar = node.children[0].text
         tvar = node.children[1].text
         return f"{dollar}{tvar}"
+
+    def visit_integer(self, node: Node, visited_children: List[Node]) -> Any:
+        if isinstance(visited_children[0], list):
+            minus = visited_children[0][0].text
+        else:
+            minus = visited_children[0].text
+
+        num = visited_children[1].text
+
+        num = int(num)
+        if minus == "-":
+            num = -num
+
+        return num
 
     # catch all
 

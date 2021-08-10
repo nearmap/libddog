@@ -222,7 +222,7 @@ class Query(QueryNode, Renderable):
 
     def as_dict(self) -> Dict[str, Any]:
         dct = {
-            "aggregator": self.agg.func.value if self.agg else 'avg',
+            "aggregator": self.agg.func.value if self.agg else "avg",
             "data_source": self.data_source,
             "name": self.name,
             "query": self.codegen(),

@@ -50,8 +50,7 @@ class integral(FunctionWithSingleQuery):
 
 
 class default_zero(FunctionWithSingleQuery):
-    def __init__(self, query: Query) -> None:
-        self.args = (query,)
+    pass
 
 
 # timeshift

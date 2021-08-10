@@ -1,5 +1,5 @@
 from libddog.metrics.expressions import Add, Comma, Div, Mul, Paren, Sub
-from libddog.metrics.functions import abs
+from libddog.metrics.functions import abs, default_zero, timeshift
 from libddog.metrics.literals import Int, Str
 from libddog.metrics.query import (
     AggFunc,
@@ -22,7 +22,9 @@ __all__ = (
     "abs",
     "Sub",
     "Mul",
+    "timeshift",
     "Div",
+    "default_zero",
     "Comma",
     "Str",
     "Int",
