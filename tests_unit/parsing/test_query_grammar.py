@@ -81,7 +81,7 @@ def test_grammar() -> None:
     failed = 0
     for desc, case in cases:
         try:
-            parser.parse(case)
+            parser.parse_st(case)
         except (IncompleteParseError, ParseError) as exc:
             failed += 1
             sys.stderr.write("Failed case: %r: %r:\n%s\n\n" % (desc, case, exc))

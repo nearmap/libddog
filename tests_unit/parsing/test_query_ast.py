@@ -9,11 +9,9 @@ def test_ast_builder() -> None:
     qs = "avg:aws.ec2.cpuutilization"
 
     ast = parser.parse_ast(qs)
-
-    assert (
-        ast.codegen()
-        == Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            agg=Aggregation(func=AggFunc.AVG),
-        ).codegen()
+    expected = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        agg=Aggregation(func=AggFunc.AVG),
     )
+
+    assert ast.codegen() == expected.codegen()
