@@ -2,11 +2,7 @@ import enum
 from typing import Any, Dict, List, Optional
 
 from libddog.common.bases import Renderable
-
-
-class QueryNode:
-    def codegen(self) -> str:
-        raise NotImplemented
+from libddog.metrics.bases import QueryNode
 
 
 class Metric(QueryNode):
@@ -105,6 +101,14 @@ class Aggregation(QueryNode):
         self.as_ = as_  # 'as' is a keyword in Python
 
 
+class QueryFunc(QueryNode):
+    """
+    A QueryFunc is attached directly to a Query. This makes it different from
+    other functions modeled as derived from Function because they can be applied
+    to whole expressions.
+    """
+
+
 class RollupFunc(enum.Enum):
     AVG = "avg"
     MIN = "min"
@@ -115,10 +119,6 @@ class RollupFunc(enum.Enum):
 
     def codegen(self) -> str:
         return self.value
-
-
-class QueryFunc(QueryNode):
-    pass
 
 
 class Rollup(QueryFunc):
