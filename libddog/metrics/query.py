@@ -24,7 +24,11 @@ class FilterCond(QueryNode):
 
 class Tag(FilterCond):
     def __init__(
-        self, *, tag: str, value: str, operator: FilterOperator = FilterOperator.EQUAL
+        self,
+        *,
+        tag: str,
+        value: Optional[str] = None,
+        operator: FilterOperator = FilterOperator.EQUAL,
     ) -> None:
         self.tag = tag
         self.value = value
@@ -32,11 +36,15 @@ class Tag(FilterCond):
 
     def codegen(self) -> str:
         key = self.tag
+        colon_value = ""
 
         if self.operator is FilterOperator.NOT_EQUAL:
             key = f"!{key}"
 
-        return f"{key}:{self.value}"
+        if self.value is not None:
+            colon_value = f":{self.value}"
+
+        return f"{key}{colon_value}"
 
 
 class TmplVar(FilterCond):
@@ -168,7 +176,7 @@ class Query(QueryNode, Renderable):
         *,
         metric: Metric,
         filter: Optional[Filter] = None,
-        agg: Aggregation,
+        agg: Optional[Aggregation] = None,
         funcs: Optional[List[QueryFunc]] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
@@ -190,9 +198,12 @@ class Query(QueryNode, Renderable):
         return "q%s" % counter
 
     def codegen(self) -> str:
-        agg_func = self.agg.func.codegen()
-        agg_by = self.agg.by.codegen() if self.agg.by else ""
-        agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
+        agg_func, agg_by, agg_as = "", "", ""
+        if self.agg:
+            agg_func = self.agg.func.codegen()
+            agg_by = self.agg.by.codegen() if self.agg.by else ""
+            agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
+
         metric = self.metric.codegen()
         filter = self.filter.codegen() if self.filter else ""
 
@@ -211,7 +222,7 @@ class Query(QueryNode, Renderable):
 
     def as_dict(self) -> Dict[str, Any]:
         dct = {
-            "aggregator": self.agg.func.value,
+            "aggregator": self.agg.func.value if self.agg else 'avg',
             "data_source": self.data_source,
             "name": self.name,
             "query": self.codegen(),
