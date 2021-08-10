@@ -20,11 +20,10 @@ def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
 
 
 class QueryVisitor(NodeVisitor):  # type: ignore
-
     def visit_program(self, node: Node, visited_children: List[Node]) -> Any:
         return visited_children[0]
 
-    # expr 
+    # expr
 
     def visit_expr(self, node: Node, visited_children: List[Node]) -> Any:
         return visited_children[0]
