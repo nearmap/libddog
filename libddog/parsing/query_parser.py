@@ -16,6 +16,6 @@ class QueryParser:
     def parse_ast(self, query_string: str) -> QueryNode:
         st = self.parse(query_string)
         visitor = QueryVisitor()
-        ast = visitor.visit(st)
+        ast: QueryNode = visitor.visit(st)
         # import pdb; pdb.set_trace()
         return ast

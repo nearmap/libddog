@@ -1,8 +1,7 @@
 import enum
 from typing import Any, List, Type
 
-from parsimonious.exceptions import VisitationError
-from parsimonious.nodes import NodeVisitor, Node
+from parsimonious.nodes import Node, NodeVisitor
 
 from libddog.metrics.query import AggFunc, Aggregation, Metric, Query
 
@@ -12,14 +11,15 @@ class ParseError(Exception):
 
 
 def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
-    for alternative in list(enum_cls):
+    alternatives: List[enum.Enum] = list(enum_cls)
+    for alternative in alternatives:
         if literal == alternative.value:
             return alternative
 
     raise ParseError("Failed to reverse enum %r using input: %r" % (enum_cls, literal))
 
 
-class QueryVisitor(NodeVisitor):
+class QueryVisitor(NodeVisitor):  # type: ignore
     # query
 
     def visit_query(self, node: Node, visited_children: List[Node]) -> Any:
