@@ -222,6 +222,8 @@ class Query(QueryNode, Renderable):
 
     def as_dict(self) -> Dict[str, Any]:
         dct = {
+            # self.agg would only be unset for legacy query strings, and 'avg'
+            # is the default aggregation anyway
             "aggregator": self.agg.func.value if self.agg else "avg",
             "data_source": self.data_source,
             "name": self.name,
