@@ -18,8 +18,8 @@ class Function(QueryNode):
 
 
 class FunctionWithSingleQuery(Function):
-    def __init__(self, expr: Query) -> None:
-        self.args = (expr,)
+    def __init__(self, query: Query) -> None:
+        self.args = (query,)
 
 
 # arithmetic
@@ -50,8 +50,8 @@ class integral(FunctionWithSingleQuery):
 
 
 class default_zero(FunctionWithSingleQuery):
-    def __init__(self, expr: Query) -> None:
-        self.args = (expr,)
+    def __init__(self, query: Query) -> None:
+        self.args = (query,)
 
 
 # timeshift
@@ -74,9 +74,9 @@ class month_before(FunctionWithSingleQuery):
 
 
 class timeshift(Function):
-    def __init__(self, expr: Query, time_s: int) -> None:
+    def __init__(self, query: Query, time_s: int) -> None:
         assert time_s < 0
-        self.args = (expr, Int(time_s))
+        self.args = (query, Int(time_s))
 
 
 # rate
@@ -165,8 +165,8 @@ class MovingRollupFunc(QueryNode, enum.Enum):
 
 
 class moving_rollup(Function):
-    def __init__(self, expr: Query, interval_s: int, func: MovingRollupFunc) -> None:
-        self.args = (expr, Int(interval_s), func)
+    def __init__(self, query: Query, interval_s: int, func: MovingRollupFunc) -> None:
+        self.args = (query, Int(interval_s), func)
 
 
 # rank
@@ -206,9 +206,9 @@ class TopDir(QueryNode, enum.Enum):
 
 class top(Function):
     def __init__(
-        self, expr: Query, limit_to: TopLimitTo, by: TopBy, dir: TopDir
+        self, query: Query, limit_to: TopLimitTo, by: TopBy, dir: TopDir
     ) -> None:
-        self.args = (expr, limit_to, by, dir)
+        self.args = (query, limit_to, by, dir)
 
 
 # TODO: variants of top / bottom
@@ -257,16 +257,16 @@ class OutliersAlgo(QueryNode, enum.Enum):
 class outliers(Function):
     def __init__(
         self,
-        expr: Query,
+        query: Query,
         algo: OutliersAlgo,
         tolerance: float,
         pct: Optional[int] = None,
     ) -> None:
-        args: Tuple[Any, ...] = (expr, algo, Float(tolerance))
+        args: Tuple[Any, ...] = (query, algo, Float(tolerance))
 
         if pct is not None:
             assert algo in (OutliersAlgo.MAD, OutliersAlgo.SCALED_MAD)
-            args = (expr, algo, Float(tolerance), Int(pct))
+            args = (query, algo, Float(tolerance), Int(pct))
 
         self.args = args
 
@@ -281,8 +281,8 @@ class AnomaliesAlgo(QueryNode, enum.Enum):
 
 
 class anomalies(Function):
-    def __init__(self, expr: Query, algo: AnomaliesAlgo, bounds: int = 2) -> None:
-        self.args = (expr, algo, Int(bounds))
+    def __init__(self, query: Query, algo: AnomaliesAlgo, bounds: int = 2) -> None:
+        self.args = (query, algo, Int(bounds))
 
 
 class ForecastAlgo(QueryNode, enum.Enum):
@@ -291,33 +291,33 @@ class ForecastAlgo(QueryNode, enum.Enum):
 
 
 class forecast(Function):
-    def __init__(self, expr: Query, algo: ForecastAlgo, deviations: int) -> None:
-        self.args = (expr, algo, Int(deviations))
+    def __init__(self, query: Query, algo: ForecastAlgo, deviations: int) -> None:
+        self.args = (query, algo, Int(deviations))
 
 
 # exclusion
 
 
 class exclude_null(Function):
-    def __init__(self, expr: Query, by: By) -> None:
-        self.args = (expr, by)
+    def __init__(self, query: Query, by: By) -> None:
+        self.args = (query, by)
 
 
 class cutoff_max(Function):
-    def __init__(self, expr: Query, threshold: int) -> None:
-        self.args = (expr, Int(threshold))
+    def __init__(self, query: Query, threshold: int) -> None:
+        self.args = (query, Int(threshold))
 
 
 class cutoff_min(Function):
-    def __init__(self, expr: Query, threshold: int) -> None:
-        self.args = (expr, Int(threshold))
+    def __init__(self, query: Query, threshold: int) -> None:
+        self.args = (query, Int(threshold))
 
 
 class clamp_max(Function):
-    def __init__(self, expr: Query, threshold: int) -> None:
-        self.args = (expr, Int(threshold))
+    def __init__(self, query: Query, threshold: int) -> None:
+        self.args = (query, Int(threshold))
 
 
 class clamp_min(Function):
-    def __init__(self, expr: Query, threshold: int) -> None:
-        self.args = (expr, Int(threshold))
+    def __init__(self, query: Query, threshold: int) -> None:
+        self.args = (query, Int(threshold))
