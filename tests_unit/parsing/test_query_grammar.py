@@ -2,10 +2,10 @@ import sys
 
 from parsimonious.exceptions import IncompleteParseError, ParseError
 
-from libddog.parsing.query import QueryParser
+from libddog.parsing.query_parser import QueryParser
 
 
-def test_parser() -> None:
+def test_grammar() -> None:
     single_query_cases = [
         ("minimal query", "avg:svcname"),
         ("suspect: no aggregation", "svcname"),
@@ -81,7 +81,7 @@ def test_parser() -> None:
     failed = 0
     for desc, case in cases:
         try:
-            parser.parse(case)
+            parser.parse_st(case)
         except (IncompleteParseError, ParseError) as exc:
             failed += 1
             sys.stderr.write("Failed case: %r: %r:\n%s\n\n" % (desc, case, exc))

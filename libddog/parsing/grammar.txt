@@ -10,10 +10,16 @@ operand             = query / string / integer
 
 
 binop               = "+" / "-" / "*" / "/" / ","
-func_name           = "abs" / "anomalies" / "count_nonzero" / "count_not_null"
-                      / "day_before" / "default_zero" / "diff" / "ewma_5" 
-                      / "exclude_null" / "forecast" / "hour_before" / "per_minute"
-                      / "per_second" / "timeshift" / "top10" / "top" / "week_before"
+func_name           = "abs" / "anomalies" / "autosmooth" / "clamp_max" / "clamp_min"
+                      / "count_nonzero" / "count_not_null" / "cumsum" / "cutoff_max"
+                      / "cutoff_min" / "day_before" / "default_zero" / "derivative"
+                      / "diff" / "dt" / "ewma_10" / "ewma_20" / "ewma_3" / "ewma_5"
+                      / "exclude_null" / "forecast" / "hour_before" / "integral"
+                      / "log10" / "log2" / "median_3" / "median_5" / "median_7"
+                      / "median_9" / "monotonic_diff" / "month_before"
+                      / "moving_rollup" / "outliers" / "per_hour" / "per_minute"
+                      / "per_second" / "piecewise_constant" / "robust_trend"
+                      / "timeshift" / "top10" / "top" / "trend_line" / "week_before"
 
 
 query               = agg? metric_name filter? by? as? query_func*

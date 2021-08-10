@@ -19,7 +19,7 @@ def test_exhaustive__with_name() -> None:
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        rollup=Rollup(func=RollupFunc.MAX, period_s=110),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
         name="cpu",
     )
 

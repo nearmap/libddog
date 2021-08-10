@@ -2,11 +2,7 @@ import enum
 from typing import Any, Dict, List, Optional
 
 from libddog.common.bases import Renderable
-
-
-class QueryNode:
-    def codegen(self) -> str:
-        raise NotImplemented
+from libddog.metrics.bases import QueryNode
 
 
 class Metric(QueryNode):
@@ -17,17 +13,38 @@ class Metric(QueryNode):
         return self.name
 
 
+class FilterOperator(enum.Enum):
+    EQUAL = 1
+    NOT_EQUAL = 2
+
+
 class FilterCond(QueryNode):
     pass
 
 
 class Tag(FilterCond):
-    def __init__(self, *, tag: str, value: str) -> None:
+    def __init__(
+        self,
+        *,
+        tag: str,
+        value: Optional[str] = None,
+        operator: FilterOperator = FilterOperator.EQUAL,
+    ) -> None:
         self.tag = tag
         self.value = value
+        self.operator = operator
 
     def codegen(self) -> str:
-        return "%s:%s" % (self.tag, self.value)
+        key = self.tag
+        colon_value = ""
+
+        if self.operator is FilterOperator.NOT_EQUAL:
+            key = f"!{key}"
+
+        if self.value is not None:
+            colon_value = f":{self.value}"
+
+        return f"{key}{colon_value}"
 
 
 class TmplVar(FilterCond):
@@ -92,6 +109,14 @@ class Aggregation(QueryNode):
         self.as_ = as_  # 'as' is a keyword in Python
 
 
+class QueryFunc(QueryNode):
+    """
+    A QueryFunc is attached directly to a Query. This makes it different from
+    other functions modeled as derived from Function because they can be applied
+    to whole expressions.
+    """
+
+
 class RollupFunc(enum.Enum):
     AVG = "avg"
     MIN = "min"
@@ -104,7 +129,7 @@ class RollupFunc(enum.Enum):
         return self.value
 
 
-class Rollup(QueryNode):
+class Rollup(QueryFunc):
     def __init__(self, *, func: RollupFunc, period_s: Optional[int] = None) -> None:
         self.func = func
         self.period_s = period_s
@@ -124,6 +149,25 @@ class Rollup(QueryNode):
         return ".rollup(%s)" % ", ".join(args)
 
 
+class FillFunc(enum.Enum):
+    LINEAR = "linear"
+    LAST = "last"
+    ZERO = "zero"
+    NULL = "null"
+
+
+class Fill(QueryFunc):
+    def __init__(self, *, func: FillFunc, limit_s: int = 300) -> None:
+        self.func = func
+        self.limit_s = limit_s
+
+    def codegen(self) -> str:
+        limit_s = "%s" % self.limit_s if self.limit_s else ""
+        args = [self.func.value, limit_s]
+        args = [arg for arg in args if arg]
+        return ".fill(%s)" % ", ".join(args)
+
+
 class Query(QueryNode, Renderable):
     _instance_counter = 1
 
@@ -132,8 +176,8 @@ class Query(QueryNode, Renderable):
         *,
         metric: Metric,
         filter: Optional[Filter] = None,
-        agg: Aggregation,
-        rollup: Optional[Rollup] = None,
+        agg: Optional[Aggregation] = None,
+        funcs: Optional[List[QueryFunc]] = None,
         name: Optional[str] = None,
         data_source: str = "metrics",
         aggregator: str = "unused",  # TODO: remove
@@ -142,7 +186,7 @@ class Query(QueryNode, Renderable):
         self.metric = metric
         self.filter = filter
         self.agg = agg
-        self.rollup = rollup
+        self.funcs = funcs or []
         self.name = name or self.get_next_unique_name()
         self.data_source = data_source
         self.aggregator = aggregator
@@ -154,12 +198,16 @@ class Query(QueryNode, Renderable):
         return "q%s" % counter
 
     def codegen(self) -> str:
-        agg_func = self.agg.func.codegen()
-        agg_by = self.agg.by.codegen() if self.agg.by else ""
-        agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
+        agg_func, agg_by, agg_as = "", "", ""
+        if self.agg:
+            agg_func = self.agg.func.codegen()
+            agg_by = self.agg.by.codegen() if self.agg.by else ""
+            agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
+
         metric = self.metric.codegen()
         filter = self.filter.codegen() if self.filter else ""
-        rollup = self.rollup.codegen() if self.rollup else ""
+
+        funcs = "".join([func.codegen() for func in self.funcs])
 
         query = "%s:%s%s%s%s%s" % (
             agg_func,
@@ -167,14 +215,14 @@ class Query(QueryNode, Renderable):
             filter,
             agg_by,
             agg_as,
-            rollup,
+            funcs,
         )
 
         return query
 
     def as_dict(self) -> Dict[str, Any]:
         dct = {
-            "aggregator": self.agg.func.value,
+            "aggregator": self.agg.func.value if self.agg else "avg",
             "data_source": self.data_source,
             "name": self.name,
             "query": self.codegen(),
