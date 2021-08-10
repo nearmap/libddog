@@ -1,5 +1,5 @@
 import enum
-from typing import Any, List
+from typing import Any, List, Type
 
 from parsimonious.exceptions import VisitationError
 from parsimonious.nodes import NodeVisitor, Node
@@ -11,7 +11,7 @@ class ParseError(Exception):
     pass
 
 
-def reverse_enum(enum_cls: enum.Enum, literal: str) -> enum.Enum:
+def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
     for alternative in list(enum_cls):
         if literal == alternative.value:
             return alternative
