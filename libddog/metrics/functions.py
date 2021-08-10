@@ -1,8 +1,9 @@
 import enum
+from typing import Any, Optional, Tuple
 
 from libddog.metrics.bases import QueryNode
-from libddog.metrics.literals import Int
-from libddog.metrics.query import Query
+from libddog.metrics.literals import Float, Int
+from libddog.metrics.query import By, Query
 
 
 class Function(QueryNode):
@@ -152,7 +153,7 @@ class median_9(FunctionWithSingleQuery):
 # remaining rollup use cases are handled as Rollup
 
 
-class MovingRollupFunc(enum.Enum, QueryNode):
+class MovingRollupFunc(QueryNode, enum.Enum):
     AVG = "avg"
     MIN = "min"
     MAX = "max"
@@ -171,7 +172,7 @@ class moving_rollup(Function):
 # rank
 
 
-class TopLimitTo(enum.Enum, QueryNode):
+class TopLimitTo(QueryNode, enum.Enum):
     FIVE = 5
     TEN = 10
     TWENTY_FIVE = 25
@@ -182,7 +183,7 @@ class TopLimitTo(enum.Enum, QueryNode):
         return f"{self.value}"
 
 
-class TopBy(enum.Enum, QueryNode):
+class TopBy(QueryNode, enum.Enum):
     MAX = "max"
     MEAN = "mean"
     MIN = "min"
@@ -195,7 +196,7 @@ class TopBy(enum.Enum, QueryNode):
         return f"'{self.value}'"
 
 
-class TopDir(enum.Enum, QueryNode):
+class TopDir(QueryNode, enum.Enum):
     ASC = "asc"
     DESC = "desc"
 
@@ -208,6 +209,9 @@ class top(Function):
         self, expr: Query, limit_to: TopLimitTo, by: TopBy, dir: TopDir
     ) -> None:
         self.args = (expr, limit_to, by, dir)
+
+
+# TODO: variants of top / bottom
 
 
 # count
@@ -237,8 +241,83 @@ class piecewise_constant(FunctionWithSingleQuery):
 
 
 # algorithms
-# TODO
+
+
+class OutliersAlgo(QueryNode, enum.Enum):
+    # TODO: values
+    DBSCAN = "dbscan"
+    MAD = "mad"
+    SCALED_DBSCAN = "dbscan"
+    SCALED_MAD = "dbscan"
+
+    def codegen(self) -> str:
+        return f"'{self.value}'"
+
+
+class outliers(Function):
+    def __init__(
+        self,
+        expr: Query,
+        algo: OutliersAlgo,
+        tolerance: float,
+        pct: Optional[int] = None,
+    ) -> None:
+        args: Tuple[Any, ...] = (expr, algo, Float(tolerance))
+
+        if pct is not None:
+            assert algo in (OutliersAlgo.MAD, OutliersAlgo.SCALED_MAD)
+            args = (expr, algo, Float(tolerance), Int(pct))
+
+        self.args = args
+
+
+class AnomaliesAlgo(QueryNode, enum.Enum):
+    BASIC = "basic"
+    AGILE = "agile"
+    ROBUST = "robust"
+
+    def codegen(self) -> str:
+        return f"'{self.value}'"
+
+
+class anomalies(Function):
+    def __init__(self, expr: Query, algo: AnomaliesAlgo, bounds: int = 2) -> None:
+        self.args = (expr, algo, Int(bounds))
+
+
+class ForecastAlgo(QueryNode, enum.Enum):
+    LINEAR = "linear"
+    SEASONAL = "seasonal"
+
+
+class forecast(Function):
+    def __init__(self, expr: Query, algo: ForecastAlgo, deviations: int) -> None:
+        self.args = (expr, algo, Int(deviations))
 
 
 # exclusion
-# TODO
+
+
+class exclude_null(Function):
+    def __init__(self, expr: Query, by: By) -> None:
+        self.args = (expr, by)
+
+
+class cutoff_max(Function):
+    def __init__(self, expr: Query, threshold: int) -> None:
+        self.args = (expr, Int(threshold))
+
+
+class cutoff_min(Function):
+    def __init__(self, expr: Query, threshold: int) -> None:
+        self.args = (expr, Int(threshold))
+
+
+class clamp_max(Function):
+    def __init__(self, expr: Query, threshold: int) -> None:
+        self.args = (expr, Int(threshold))
+
+
+class clamp_min(Function):
+    def __init__(self, expr: Query, threshold: int) -> None:
+        self.args = (expr, Int(threshold))
