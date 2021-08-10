@@ -52,8 +52,12 @@ def reverse_enum(enum_cls: Type[enum.Enum], literal: str) -> enum.Enum:
 def resolve_func(func_name: str) -> Type[Function]:
     mod = libddog.metrics.functions
     for attname in dir(mod):
-        if func_name == attname:
-            return getattr(mod, attname)  # type: ignore
+        cls = getattr(mod, attname)
+        try:
+            if issubclass(cls, Function) and func_name == attname:
+                return cls  # type: ignore
+        except TypeError:
+            pass  # issubclass raised
 
     raise ParseError("Failed to resolve function name using input: %r" % func_name)
 
