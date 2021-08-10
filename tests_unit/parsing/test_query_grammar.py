@@ -2,7 +2,7 @@ import sys
 
 from parsimonious.exceptions import IncompleteParseError, ParseError
 
-from libddog.parsing.query import QueryParser
+from libddog.parsing.query_parser import QueryParser
 
 
 def test_grammar() -> None:
