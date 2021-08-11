@@ -23,7 +23,7 @@ jobs:
       - run: echo "ve/bin" >> $GITHUB_PATH
       - run: pip install -r requirements.txt
       - run: pip install -r dev-requirements.txt
-      - run: ./check
+      - run: ./typecheck
 
   run-unit-tests:
     runs-on: ubuntu-latest
