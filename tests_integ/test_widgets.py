@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 from libddog.crud import DashboardManager
 from libddog.dashboards import Dashboard
@@ -22,6 +23,9 @@ class Helper:
         return ""
 
     def update(self, dashboard: Dashboard, id: str) -> None:
+        dt = datetime.now()
+        dashboard.desc += f'\n\nLast updated during test run on: *{dt.ctime()}*'
+
         self.mgr.update(dashboard, id)
 
 
