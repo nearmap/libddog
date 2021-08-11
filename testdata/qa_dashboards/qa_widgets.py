@@ -103,10 +103,10 @@ def get_dashboard() -> Dashboard:
         title="libddog QA: exercise widgets",
         desc=(
             "This dashboard is used exclusively for the purposes of integration "
-            "testing **libddog**, which a Datadog automation tool.\n\n"
+            "testing **libddog**, which is a Datadog automation tool.\n\n"
             "It is used during automated test runs as well as for manual (visual) "
             "inspection that everything looks correct.\n\n"
-            "[libddog on github](https://github.com/nearmap/libddog)"
+            "Get libddog on [Github](https://github.com/nearmap/libddog)."
         ),
         widgets=[wid_ec2_cpu],
         tmpl_var_presets=tmpl_presets_region,
