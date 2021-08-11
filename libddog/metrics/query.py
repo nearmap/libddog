@@ -205,7 +205,7 @@ class Query(QueryNode, Renderable):
             agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
 
         metric = self.metric.codegen()
-        filter = self.filter.codegen() if self.filter else ""
+        filter = self.filter.codegen() if self.filter else "{*}"
 
         funcs = "".join([func.codegen() for func in self.funcs])
 

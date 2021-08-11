@@ -13,6 +13,8 @@ from libddog.dashboards.components import (
 from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
+    LegendColumn,
+    LegendLayout,
     LiveSpan,
     ResponseFormat,
     TextAlign,
@@ -279,22 +281,26 @@ class Timeseries(Widget):
         title_size: int = 16,
         title_align: TitleAlign = TitleAlign.LEFT,
         show_legend: bool = True,
-        legend_layout: Optional[str] = None,  # TODO: make enum
-        legend_columns: Optional[Sequence[str]] = None,  # TODO: what is this?
+        legend_layout: LegendLayout = LegendLayout.AUTOMATIC,
+        legend_columns: Optional[Sequence[LegendColumn]] = None,
         requests: List[Request],
         yaxis: Optional[YAxis] = None,
         markers: Optional[Sequence[Marker]] = None,
         size: Optional[Size] = None,
         pos: Optional[Position] = None,
     ) -> None:
-        assert not legend_layout
-
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
         self.show_legend = show_legend
-        self.legend_layout = legend_layout or "auto"
-        self.legend_columns = legend_columns or ["avg", "min", "max", "value", "sum"]
+        self.legend_layout = legend_layout
+        self.legend_columns = legend_columns or [
+            LegendColumn.AVG,
+            LegendColumn.MIN,
+            LegendColumn.MAX,
+            LegendColumn.VALUE,
+            LegendColumn.SUM,
+        ]
         self.requests = requests
         self.yaxis = yaxis or YAxis()
         self.markers = markers or []
@@ -309,8 +315,8 @@ class Timeseries(Widget):
     def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
-                "legend_columns": self.legend_columns,
-                "legend_layout": self.legend_layout,
+                "legend_columns": [col.value for col in self.legend_columns],
+                "legend_layout": self.legend_layout.value,
                 "markers": [marker.as_dict() for marker in self.markers],
                 "requests": [self.request_as_dict(req) for req in self.requests],
                 "show_legend": self.show_legend,
