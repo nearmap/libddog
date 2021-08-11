@@ -103,7 +103,7 @@ def get_dashboard() -> Dashboard:
         title="libddog QA: exercise widgets",
         desc=(
             "This dashboard is used exclusively for the purposes of integration "
-            "testing **libddog**.\n\n"
+            "testing **libddog**, which a Datadog automation tool.\n\n"
             "It is used during automated test runs as well as for manual (visual) "
             "inspection that everything looks correct.\n\n"
             "[libddog on github](https://github.com/nearmap/libddog)"
