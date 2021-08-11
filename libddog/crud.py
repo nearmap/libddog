@@ -56,7 +56,7 @@ class DashboardManager:
             )
 
         client_kwargs = dashboard.as_dict()
-        client_kwargs.pop('id', None)  # we pass it separately
+        client_kwargs.pop("id", None)  # we pass it separately
 
         try:
             resp = datadog.api.Dashboard.update(id=id, **client_kwargs)  # type: ignore

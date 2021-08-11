@@ -1,6 +1,7 @@
 from libddog.dashboards import (
+    LegendColumn,
+    LegendLayout,
     LineMarker,
-    Marker,
     MarkerLineStyle,
     MarkerSeverity,
     Position,
@@ -38,7 +39,7 @@ def test_timeseries__minimal() -> None:
                         {
                             "data_source": "metrics",
                             "name": "q1",
-                            "query": "avg:aws.ec2.cpuutilization",
+                            "query": "avg:aws.ec2.cpuutilization{*}",
                         }
                     ],
                     "response_format": "timeseries",
@@ -78,7 +79,8 @@ def test_timeseries__exhaustive() -> None:
         title_size=17,
         title_align=TitleAlign.LEFT,
         show_legend=False,
-        legend_columns=["avg", "sum"],
+        legend_columns=[LegendColumn.MAX, LegendColumn.MIN],
+        legend_layout=LegendLayout.EXPANDED,
         requests=[Request(queries=[query])],
         yaxis=YAxis(
             include_zero=False,
@@ -108,8 +110,8 @@ def test_timeseries__exhaustive() -> None:
 
     assert ts.as_dict() == {
         "definition": {
-            "legend_columns": ["avg", "sum"],
-            "legend_layout": "auto",
+            "legend_columns": ["max", "min"],
+            "legend_layout": "vertical",
             "markers": [
                 {
                     "display_type": "ok bold",
@@ -131,7 +133,7 @@ def test_timeseries__exhaustive() -> None:
                         {
                             "data_source": "metrics",
                             "name": "q1",
-                            "query": "avg:aws.ec2.cpuutilization",
+                            "query": "avg:aws.ec2.cpuutilization{*}",
                         }
                     ],
                     "response_format": "timeseries",
