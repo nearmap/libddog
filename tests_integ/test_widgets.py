@@ -24,7 +24,7 @@ class Helper:
 
     def update(self, dashboard: Dashboard, id: str) -> None:
         dt = datetime.now()
-        dashboard.desc += f'\n\nLast updated during test run on: *{dt.ctime()}*'
+        dashboard.desc += f"\n\nLast updated during test run on: *{dt.ctime()}*"
 
         self.mgr.update(dashboard, id)
 
