@@ -47,6 +47,15 @@ def test__exhaustive() -> None:
 # start with the 'full' state and remove parts, covering most combinations
 
 
+def test__exhaustive__no_agg() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
+    )
+
+    assert query.codegen() == ("aws.ec2.cpuutilization{*}.rollup(max, 110)")
+
+
 def test__exhaustive__no_filter() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),

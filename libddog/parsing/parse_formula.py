@@ -27,5 +27,20 @@ def parse_formula_identifiers(text: str) -> Set[str]:
     """
     "100 * (q_4xx / q_all)" -> {"q_4xx", "q_all"}
     """
-    idents = set(rx_identifier.findall(text))
+
+    idents = set()
+    for match in rx_identifier.finditer(text):
+        start = match.start()
+        end = match.end()
+
+        if start > 0 and end < len(text) - 1:
+            pre = text[start-1:start]
+            post = text[end:end+1]
+
+            # we've matched a quoted ident - it's a string so don't include it
+            if pre == post and pre in ('"', "'"):
+                continue
+
+        idents.add(match.group())
+
     return idents - set(get_func_names())
