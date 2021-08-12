@@ -105,7 +105,7 @@ def test_timeseries__exhaustive() -> None:
             ),
         ],
         size=Size(width=1, height=4),
-        pos=Position(x=2, y=3),
+        position=Position(x=2, y=3),
     )
 
     assert ts.as_dict() == {

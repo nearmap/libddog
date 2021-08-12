@@ -44,7 +44,7 @@ def test_note__exhaustive() -> None:
         tick_edge=TickEdge.BOTTOM,
         has_padding=False,
         size=Size(width=4, height=5),
-        pos=Position(x=6, y=7),
+        position=Position(x=6, y=7),
     )
 
     assert note.as_dict() == {

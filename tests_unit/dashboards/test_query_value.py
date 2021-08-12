@@ -61,7 +61,7 @@ def test_query_value__exhaustive() -> None:
         precision=7,
         requests=[Request(queries=[query])],
         size=Size(width=4, height=1),
-        pos=Position(x=3, y=2),
+        position=Position(x=3, y=2),
     )
 
     assert qv.as_dict() == {

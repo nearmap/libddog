@@ -108,7 +108,7 @@ def get_timeseries() -> Widget:
         legend_layout=LegendLayout.EXPANDED,
         legend_columns=[LegendColumn.AVG, LegendColumn.MAX, LegendColumn.VALUE],
         size=Size(height=4, width=6),
-        pos=Position(x=0, y=0),
+        position=Position(x=0, y=0),
     )
 
     return widget
@@ -171,7 +171,7 @@ def get_query_values() -> List[Widget]:
                 ),
             ],
             size=Size(height=2, width=3),
-            pos=Position(x=x, y=0),
+            position=Position(x=x, y=0),
         )
         x += 3
         widgets.append(widget)
@@ -191,7 +191,7 @@ def get_notes() -> List[Widget]:
         background_color=BackgroundColor.YELLOW,
         text_align=TextAlign.LEFT,
         tick_edge=TickEdge.LEFT,
-        pos=Position(x=6, y=2),
+        position=Position(x=6, y=2),
         size=Size(width=3, height=2),
     )
 
@@ -205,7 +205,7 @@ def get_notes() -> List[Widget]:
         background_color=BackgroundColor.PURPLE,
         text_align=TextAlign.LEFT,
         tick_edge=TickEdge.TOP,
-        pos=Position(x=9, y=2),
+        position=Position(x=9, y=2),
         size=Size(width=3, height=2),
     )
 

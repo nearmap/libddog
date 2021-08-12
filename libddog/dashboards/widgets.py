@@ -36,7 +36,7 @@ class Widget:
     def as_dict(self) -> JsonDict:
         raise NotImplementedError
 
-    def add_layout(self, dct: JsonDict, size: Size, pos: Position) -> None:
+    def add_layout(self, dct: JsonDict, size: Size, position: Position) -> None:
         """
         Transforms:
 
@@ -52,7 +52,7 @@ class Widget:
             }
         """
 
-        layout = Layout(size=size, pos=pos)
+        layout = Layout(size=size, position=position)
         dct_layout = layout.as_dict()
         dct.update(dct_layout)
 
@@ -109,7 +109,7 @@ class Note(Widget):
         tick_edge: Optional[TickEdge] = None,
         has_padding: Optional[bool] = None,
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.preset = preset
         self.content = content
@@ -121,7 +121,7 @@ class Note(Widget):
         self.tick_edge = tick_edge
         self.has_padding = has_padding
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def apply_preset(self) -> "Note":
         """
@@ -187,7 +187,7 @@ class Note(Widget):
             },
         }
 
-        instance.add_layout(dct, size=instance.size, pos=instance.pos)
+        instance.add_layout(dct, size=instance.size, position=instance.position)
         return dct
 
 
@@ -218,7 +218,7 @@ class QueryValue(Widget):
         precision: int = 2,
         requests: List[Request],
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.title_size = title_size
@@ -229,7 +229,7 @@ class QueryValue(Widget):
         self.precision = precision
         self.requests = requests
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> Dict[str, Any]:
         dct = super().request_as_dict(request)
@@ -253,7 +253,7 @@ class QueryValue(Widget):
         if self.custom_unit:
             dct["definition"]["custom_unit"] = self.custom_unit
 
-        self.add_layout(dct, size=self.size, pos=self.pos)
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct
 
 
@@ -287,7 +287,7 @@ class Timeseries(Widget):
         yaxis: Optional[YAxis] = None,
         markers: Optional[Sequence[Marker]] = None,
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.title_size = title_size
@@ -305,7 +305,7 @@ class Timeseries(Widget):
         self.yaxis = yaxis or YAxis()
         self.markers = markers or []
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
@@ -328,7 +328,7 @@ class Timeseries(Widget):
             },
         }
 
-        self.add_layout(dct, size=self.size, pos=self.pos)
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct
 
 
@@ -343,14 +343,14 @@ class Group(Widget):
         background_color: Optional[BackgroundColor] = None,
         widgets: Optional[Sequence[Widget]] = None,
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.layout_type = layout_type
         self.background_color = background_color
         self.widgets = widgets or []
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def as_dict(self) -> JsonDict:
         dct = {
@@ -365,5 +365,5 @@ class Group(Widget):
         if self.background_color:
             dct["definition"]["background_color"] = self.background_color.value
 
-        self.add_layout(dct, size=self.size, pos=self.pos)
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct

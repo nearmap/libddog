@@ -63,15 +63,15 @@ class Position:
 
 
 class Layout(Renderable):
-    def __init__(self, *, size: Size, pos: Position) -> None:
+    def __init__(self, *, size: Size, position: Position) -> None:
         self.size = size
-        self.pos = pos
+        self.position = position
 
     def as_dict(self) -> JsonDict:
         return {
             "layout": {
-                "x": self.pos.x,
-                "y": self.pos.y,
+                "x": self.position.x,
+                "y": self.position.y,
                 "width": self.size.width,
                 "height": self.size.height,
             },
