@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -7,10 +8,13 @@ from libddog.dashboards import Dashboard
 
 
 class QADashboardManager:
+    # detect occurrences of:  %(variable)s
+    rx_string_template = re.compile("%\([a-zA-Z0-9_]+\)s")
+
     def __init__(self) -> None:
         proj_root = Path(__file__).parent.parent
         testdata_dir = proj_root.joinpath("testdata").absolute()
-        self.cli = DashboardManagerCli(proj_path=testdata_dir)
+        self.cli = DashboardManagerCli(proj_path=str(testdata_dir))
 
         self.mgr = DashboardManager()
         self.mgr.load_credentials_from_environment()
@@ -35,8 +39,14 @@ class QADashboardManager:
         # TODO: else create a new dash so we can use that id
         raise NotImplementedError
 
-    def update_live_dashboard(self, dashboard: Dashboard, id: str) -> None:
+    def timestamp_dashboard(self, dashboard: Dashboard) -> None:
         dt = datetime.now()
         dashboard.desc = dashboard.desc % {"test_run_time": dt.ctime()}
+
+    def update_live_dashboard(self, dashboard: Dashboard, id: str) -> None:
+        if self.rx_string_template.search(dashboard.desc):
+            raise RuntimeError(
+                "Dashboard desc contains unpopulated template: %s" % dashboard.desc
+            )
 
         self.mgr.update(dashboard, id)
