@@ -79,8 +79,8 @@ def test_timeseries__exhaustive() -> None:
         title_size=17,
         title_align=TitleAlign.LEFT,
         show_legend=False,
-        legend_columns=[LegendColumn.MAX, LegendColumn.MIN],
         legend_layout=LegendLayout.EXPANDED,
+        legend_columns=[LegendColumn.MAX, LegendColumn.MIN],
         requests=[Request(queries=[query])],
         yaxis=YAxis(
             include_zero=False,

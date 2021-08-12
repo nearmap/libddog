@@ -342,11 +342,15 @@ class Group(Widget):
         layout_type: LayoutType = LayoutType.ORDERED,
         background_color: Optional[BackgroundColor] = None,
         widgets: Optional[Sequence[Widget]] = None,
+        size: Optional[Size] = None,
+        pos: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.layout_type = layout_type
         self.background_color = background_color
         self.widgets = widgets or []
+        self.size = Size.backfill(self, size)
+        self.pos = pos or Position()
 
     def as_dict(self) -> JsonDict:
         dct = {
@@ -356,10 +360,10 @@ class Group(Widget):
                 "layout_type": self.layout_type.value,
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
-            # TODO: layout: {...}
         }
 
         if self.background_color:
             dct["definition"]["background_color"] = self.background_color.value
 
+        self.add_layout(dct, size=self.size, pos=self.pos)
         return dct

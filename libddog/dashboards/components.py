@@ -28,9 +28,10 @@ class Size:
 
     @classmethod
     def get_defaults(cls) -> Dict[Any, Any]:
-        from libddog.dashboards.widgets import Note, QueryValue, Timeseries
+        from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries
 
         return {
+            Group: (12, 1),
             Note: (2, 2),
             QueryValue: (2, 2),
             Timeseries: (4, 2),
@@ -236,8 +237,8 @@ class Request(Renderable):
         self,
         *,
         title: Optional[str] = None,
-        queries: List[Query],
         formulas: Optional[List[Formula]] = None,
+        queries: List[Query],
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
         style: Optional[Style] = None,

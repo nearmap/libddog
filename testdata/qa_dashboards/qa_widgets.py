@@ -141,6 +141,7 @@ def get_query_values() -> List[Widget]:
     x = 6
 
     for name, query in (("4xx", query_4xx), ("5xx", query_5xx)):
+        # Exercises most of the properties of a QueryValue
         widget = QueryValue(
             title=f"ELB {name.upper()}",
             time=Time(live_span=LiveSpan.LAST_1W),
@@ -179,6 +180,7 @@ def get_query_values() -> List[Widget]:
 
 
 def get_notes() -> List[Widget]:
+    # Exercises most of the properties of a Note
     note_timeseries = Note(
         preset=NotePreset.ANNOTATION,
         content=(
@@ -216,6 +218,7 @@ def get_group() -> Widget:
     wids_notes = get_notes()
     widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + wids_notes
 
+    # Exercises most of the properties of a Group
     group = Group(
         title="Exercise all supported widgets",
         background_color=BackgroundColor.VIVID_ORANGE,
