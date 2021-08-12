@@ -23,10 +23,12 @@ from libddog.metrics import (
     Fill,
     FillFunc,
     Filter,
+    FilterOperator,
     Metric,
     Query,
     Rollup,
     RollupFunc,
+    Tag,
     TmplVar,
 )
 
@@ -103,6 +105,29 @@ QUERY_CASES = [
         "no filter",
         Query(
             metric=Metric(name="aws.ec2.cpuutilization"),
+            agg=Aggregation(
+                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
+            ),
+            funcs=[
+                Rollup(func=RollupFunc.MAX, period_s=110),
+                Fill(func=FillFunc.LAST, limit_s=112),
+            ],
+        ),
+    ),
+    (
+        "negating filter",
+        Query(
+            metric=Metric(name="aws.ec2.cpuutilization"),
+            filter=Filter(
+                conds=[
+                    TmplVar(tvar="region"),
+                    Tag(
+                        tag="availability-zone",
+                        value="*a",
+                        operator=FilterOperator.NOT_EQUAL,
+                    ),
+                ]
+            ),
             agg=Aggregation(
                 func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
             ),
@@ -236,19 +261,16 @@ def get_desc_group() -> Widget:
         content=(
             "We use this dashboard to demonstrate as many possible variations "
             "of queries, formulas and functions as possible.\n\n"
-
             "The way we do this is a bit oversimplified because we are using "
             "the same timeseries widget for every use cases, with the same "
             "one or two metrics used in every graph. This is a good fit for "
             "some functions, but less good for others.\n\n"
-
             "As a result, we are not really concerned with the lines in the "
             "graps showing the right number, **just that the graph works and "
             "that the query string was accepted as valid by the Datadog API**. "
             "When we open the widget settings for each widget **we want the "
             "UI to correctly reflect the query in our model**, without "
             "components of it being discarded by Datadog as invalid.\n\n"
-
             "It's not strictly necessary that the graph have data in it, but "
             "it does make it much easier to QA, because we already know that "
             "the query was accepted and executed by the Datadog backend."
