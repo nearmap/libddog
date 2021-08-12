@@ -115,6 +115,28 @@ QUERY_CASES = [
         ),
     ),
     (
+        "inclusive filter",
+        Query(
+            metric=Metric(name="aws.ec2.cpuutilization"),
+            filter=Filter(
+                conds=[
+                    TmplVar(tvar="region"),
+                    Tag(
+                        tag="availability-zone",
+                        value="*a",
+                    ),
+                ]
+            ),
+            agg=Aggregation(
+                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
+            ),
+            funcs=[
+                Rollup(func=RollupFunc.MAX, period_s=110),
+                Fill(func=FillFunc.LAST, limit_s=112),
+            ],
+        ),
+    ),
+    (
         "negating filter",
         Query(
             metric=Metric(name="aws.ec2.cpuutilization"),
