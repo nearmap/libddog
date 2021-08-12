@@ -1,44 +1,17 @@
-import sys
-from datetime import datetime
-
-from libddog.crud import DashboardManager
-from libddog.dashboards import Dashboard
+from tests_integ.tools import QADashboardManager
 
 
-class Helper:
-    def __init__(self) -> None:
-        self.mgr = DashboardManager()
-        self.mgr.load_credentials_from_environment()
+def test_put_and_get_metrics() -> None:
+    mgr = QADashboardManager()
+    dashboard = mgr.load_definition_by_title("libddog QA: exercise metrics queries")
 
-    def assign_id(self, dashboard: Dashboard) -> str:
-        all_dashboards = self.mgr.list()
-
-        existing_id: str = ""
-        for dash in all_dashboards:
-            if dash["title"] == dashboard.title:
-                existing_id = dash["id"]
-                return existing_id
-
-        # TODO: else create a new dash so we can use that id
-        return ""
-
-    def update(self, dashboard: Dashboard, id: str) -> None:
-        dt = datetime.now()
-        dashboard.desc = dashboard.desc % {"test_run_time": dt.ctime()}
-
-        self.mgr.update(dashboard, id)
+    dash_id = mgr.assign_id_to_dashboard(dashboard)
+    mgr.update_live_dashboard(dashboard, dash_id)
 
 
-def test_update_all() -> None:
-    sys.path.append("testdata")
-    from qa_dashboards import qa_metrics, qa_widgets
+def test_put_and_get_widgets() -> None:
+    mgr = QADashboardManager()
+    dashboard = mgr.load_definition_by_title("libddog QA: exercise widgets")
 
-    for mod in (qa_widgets, qa_metrics):
-        dashboard: Dashboard = mod.get_dashboard()  # type: ignore
-
-        helper = Helper()
-
-        dash_id = helper.assign_id(dashboard)
-        print(f"Using id: {dash_id}")
-
-        helper.update(dashboard, dash_id)
+    dash_id = mgr.assign_id_to_dashboard(dashboard)
+    mgr.update_live_dashboard(dashboard, dash_id)
