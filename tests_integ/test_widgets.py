@@ -24,20 +24,21 @@ class Helper:
 
     def update(self, dashboard: Dashboard, id: str) -> None:
         dt = datetime.now()
-        dashboard.desc += f"\n\nLast updated during test run on: *{dt.ctime()}*"
+        dashboard.desc = dashboard.desc % {"test_run_time": dt.ctime()}
 
         self.mgr.update(dashboard, id)
 
 
 def test_update_all() -> None:
     sys.path.append("testdata")
-    from qa_dashboards import qa_widgets
+    from qa_dashboards import qa_metrics, qa_widgets
 
-    dashboard: Dashboard = qa_widgets.get_dashboard()
+    for mod in (qa_widgets, qa_metrics):
+        dashboard: Dashboard = mod.get_dashboard()  # type: ignore
 
-    helper = Helper()
+        helper = Helper()
 
-    dash_id = helper.assign_id(dashboard)
-    print(f"Using id: {dash_id}")
+        dash_id = helper.assign_id(dashboard)
+        print(f"Using id: {dash_id}")
 
-    helper.update(dashboard, dash_id)
+        helper.update(dashboard, dash_id)

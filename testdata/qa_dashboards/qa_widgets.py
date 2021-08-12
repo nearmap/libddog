@@ -1,5 +1,10 @@
 from typing import List
 
+from qa_dashboards.shared import (
+    get_dashboard_desc_template,
+    get_region_tmpl_var_presets,
+)
+
 from libddog.dashboards import (
     BackgroundColor,
     Comparator,
@@ -19,7 +24,6 @@ from libddog.dashboards import (
     Note,
     NotePreset,
     Palette,
-    PopulatedTemplateVariable,
     Position,
     QueryValue,
     RangeMarker,
@@ -27,8 +31,6 @@ from libddog.dashboards import (
     Scale,
     Size,
     Style,
-    TemplateVariableDefinition,
-    TemplateVariablesPreset,
     TextAlign,
     TickEdge,
     Time,
@@ -49,31 +51,6 @@ from libddog.metrics import (
     RollupFunc,
     TmplVar,
 )
-
-
-def get_region_tmpl_var_presets() -> List[TemplateVariablesPreset]:
-    presets = []
-    popular_regions = ["ap-southeast-2", "us-east-1", "us-west-1"]
-
-    defn = TemplateVariableDefinition(
-        name="region",
-        tag="region",
-        default_value="us-east-1",
-    )
-
-    for region in popular_regions:
-        preset = TemplateVariablesPreset(
-            name=region,
-            populated_vars=[
-                PopulatedTemplateVariable(
-                    tmpl_var=defn,
-                    value=region,
-                )
-            ],
-        )
-        presets.append(preset)
-
-    return presets
 
 
 def get_timeseries() -> Widget:
@@ -119,6 +96,7 @@ def get_query_values() -> List[Widget]:
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),
+        # NOTE: fill before rollup
         funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
         name="reqs_all",
     )
@@ -234,14 +212,7 @@ def get_dashboard() -> Dashboard:
     tmpl_presets_region = get_region_tmpl_var_presets()
     dashboard = Dashboard(
         title="libddog QA: exercise widgets",
-        desc=(
-            "This dashboard is used exclusively for the purposes of integration "
-            "testing **libddog**, which is an open source Datadog automation "
-            "tool created by Nearmap.\n\n"
-            "It is used during automated test runs as well as for manual (visual) "
-            "inspection that everything looks correct.\n\n"
-            "Get libddog on [Github](https://github.com/nearmap/libddog)."
-        ),
+        desc=get_dashboard_desc_template(),
         widgets=[group],
         tmpl_var_presets=tmpl_presets_region,
     )

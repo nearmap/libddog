@@ -3,9 +3,9 @@ from typing import Any, List, Type
 
 from parsimonious.nodes import Node, NodeVisitor
 
-import libddog.metrics.expressions
+import libddog.metrics.formulas
 import libddog.metrics.functions
-from libddog.metrics.expressions import BinaryFormula, Comma
+from libddog.metrics.formulas import BinaryFormula, Comma
 from libddog.metrics.functions import Function
 from libddog.metrics.literals import Int, Str
 from libddog.metrics.query import (
@@ -31,7 +31,7 @@ class ParseError(Exception):
 
 
 def resolve_binop(symbol: str) -> Type[BinaryFormula]:
-    mod = libddog.metrics.expressions
+    mod = libddog.metrics.formulas
     for attname in dir(mod):
         cls = getattr(mod, attname)
         if issubclass(cls, BinaryFormula) and cls.symbol == symbol:

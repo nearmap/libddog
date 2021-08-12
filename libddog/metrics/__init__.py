@@ -1,5 +1,5 @@
-from libddog.metrics.expressions import Add, Comma, Div, Mul, Paren, Sub
-from libddog.metrics.functions import abs, default_zero, timeshift
+from libddog.metrics.formulas import Add, Comma, Div, Mul, Paren, Sub
+from libddog.metrics.functions import abs, default_zero, log2, log10, timeshift
 from libddog.metrics.literals import Int, Str
 from libddog.metrics.query import (
     AggFunc,
@@ -19,29 +19,31 @@ from libddog.metrics.query import (
 )
 
 __all__ = (
-    "abs",
-    "Sub",
-    "Mul",
-    "timeshift",
-    "Div",
-    "default_zero",
-    "Comma",
-    "Str",
-    "Int",
     "Add",
+    "log10",
     "AggFunc",
     "Aggregation",
+    "log2",
     "As",
     "By",
+    "Comma",
+    "Div",
     "Fill",
     "FillFunc",
     "Filter",
     "FilterOperator",
+    "Int",
     "Metric",
-    "Query",
+    "Mul",
     "Paren",
+    "Query",
     "Rollup",
     "RollupFunc",
-    "TmplVar",
+    "Str",
+    "Sub",
     "Tag",
+    "TmplVar",
+    "abs",
+    "default_zero",
+    "timeshift",
 )
