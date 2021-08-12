@@ -7,12 +7,13 @@ from libddog.dashboards import (
     Dashboard,
     Formula,
     Group,
+    Note,
+    NotePreset,
     Position,
     Request,
     Size,
     Timeseries,
     Widget,
-    widgets,
 )
 from libddog.metrics import (
     AggFunc,
@@ -166,7 +167,10 @@ FORMULA_CASES = [
         "Nested function application",
         "log2(abs(cpu))",
     ),
-    # apply func to arith expr?
+    (
+        "Function applied to formula",
+        "log2(abs(cpu) / log10(reqs))",
+    ),
 ]
 
 FUNCTION_CASES = [
@@ -205,6 +209,7 @@ FUNCTION_CASES = [
     # rollup
     ("moving_rollup", "moving_rollup(reqs, 180, 'sum')"),
     # top
+    ("top", "top(reqs, 5, 'sum', 'asc')"),
     # count
     ("count_nonzero", "count_nonzero(reqs)"),
     ("count_not_null", "count_not_null(reqs)"),
@@ -213,8 +218,41 @@ FUNCTION_CASES = [
     ("trend_line", "trend_line(reqs)"),
     ("piecewise_constant", "piecewise_constant(reqs)"),
     # algorithms
+    ("outliers", "outliers(reqs, 'DBSCAN', 2.0)"),
+    ("anomalies", "anomalies(reqs, 'agile', 2)"),
+    ("forecast", "forecast(reqs, 'linear', 2)"),
     # exclusion
+    ("exclude_null", "exclude_null(reqs, 'availability-zone')"),
+    ("cutoff_max 2", "cutoff_max(reqs, 2)"),
+    ("cutoff_min 1", "cutoff_min(reqs, 1)"),
+    ("clamp_max 2", "clamp_max(reqs, 2)"),
+    ("clamp_min 1", "clamp_min(reqs, 1)"),
 ]
+
+
+def get_desc_group() -> Widget:
+    note = Note(
+        preset=NotePreset.ANNOTATION,
+        content=(
+            "We use this dashboard to demonstrate as many possible variations "
+            "of queries, formulas and functions as possible.\n\n"
+            "The line in the graph is not really meant to be meaningful "
+            "(although if the graph **is** showing data that is helpful "
+            "because we know the "
+            "query was executed successfully by the Datadog backend), "
+            "but the main thing is to validate that the Datadog API accepted the "
+            "query string as valid."
+        ),
+        show_tick=False,
+        size=Size(width=12, height=2),
+    )
+
+    group = Group(
+        title="How to use this dashboard to QA graphs",
+        widgets=[note],
+    )
+
+    return group
 
 
 def get_queries_group() -> Widget:
@@ -333,6 +371,7 @@ def get_functions_group() -> Widget:
 
 
 def get_dashboard() -> Dashboard:
+    desc = get_desc_group()
     queries = get_queries_group()
     formulas = get_formulas_group()
     functions = get_functions_group()
@@ -341,7 +380,7 @@ def get_dashboard() -> Dashboard:
     dashboard = Dashboard(
         title="libddog QA: exercise metrics queries",
         desc=get_dashboard_desc_template(),
-        widgets=[queries, formulas, functions],
+        widgets=[desc, queries, formulas, functions],
         tmpl_var_presets=tmpl_presets_region,
     )
 

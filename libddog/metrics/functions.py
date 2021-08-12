@@ -243,11 +243,10 @@ class piecewise_constant(FunctionWithSingleQuery):
 
 
 class OutliersAlgo(QueryNode, enum.Enum):
-    # TODO: values
-    DBSCAN = "dbscan"
-    MAD = "mad"
-    SCALED_DBSCAN = "dbscan"
-    SCALED_MAD = "dbscan"
+    DBSCAN = "DBSCAN"
+    MAD = "MAD"
+    SCALED_DBSCAN = "scaledDBSCAN"
+    SCALED_MAD = "scaledMAD"
 
     def codegen(self) -> str:
         return f"'{self.value}'"
