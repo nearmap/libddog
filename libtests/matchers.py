@@ -1,4 +1,5 @@
 import enum
+import re
 from typing import Any, Dict, List
 
 from libddog.common.types import JsonDict
@@ -24,97 +25,91 @@ class PatchInstructionDidNotMatchAnything(Exception):
     pass
 
 
-class PatchOp(enum.Enum):
-    NOOP = 0
-    SET = 1
-    DELETE = 2
-
-
 class PatchInstruction:
-    def __init__(self, path: str, value: str, op: PatchOp) -> None:
+    def __init__(self, path: str) -> None:
         self.path = path
+        self.times_applied = 0
+
+    def count_application(self) -> None:
+        self.times_applied += 1
+
+
+class assign(PatchInstruction):
+    def __init__(self, path: str, value: Any) -> None:
+        super().__init__(path)
         self.value = value
-        self.op = op
-
-    def maybe_apply(self, path: str) -> Any:
-        if self.path == path:
-            if self.op is PatchOp.SET:
-                return self.op, self.value
-            elif self.op is PatchOp.DELETE:
-                return self.op, None
-
-        return PatchOp.NOOP, None
 
 
-class ObjectPatcher:
-    def __init__(self, instructions: List[PatchInstruction]) -> None:
-        self.instructions = instructions
+rx_brackets_every = re.compile("\\[\\]")
+rx_brackets_key = re.compile('\\["([a-z-A-Z0-9_-]+)"\\]')
+rx_brackets_index = re.compile("\\[(-?[0-9]+)\\]")
 
-    @classmethod
-    def create(cls, patches: Dict[str, Any]) -> "ObjectPatcher":
-        instructions = []
 
-        for key, value in patches.items():
-            op_elem, _, path = key.partition(" ")
+def rewrite(obj: Any, path: str, instruction: PatchInstruction) -> Any:
+    if not path:
+        instruction.count_application()
+        if isinstance(instruction, assign):
+            return instruction.value
 
-            op = None
-            if op_elem == "-":
-                op = PatchOp.DELETE
-            elif op_elem == "=":
-                op = PatchOp.SET
-            else:
-                raise ValueError("Unsupported op: %s" % op_elem)
-
-            if not path.startswith("/"):
-                raise ValueError("Invalid patch path: %s" % path)
-
-            instruction = PatchInstruction(path=path, value=value, op=op)
-            instructions.append(instruction)
-            # print(instruction.__dict__)
-
-        return cls(instructions=instructions)
-
-    def apply_all_to_dict(self, path: str, dct: Dict[str, Any], key: str) -> None:
-        for instruction in self.instructions:
-            op, new_value = instruction.maybe_apply(path)
-            if op is PatchOp.SET:
-                dct[key] = new_value
-            elif op is PatchOp.DELETE:
-                del dct[key]
-
-    def apply_all_to_list(self, path: str, lst: List[Any], idx: int) -> None:
-        for instruction in self.instructions:
-            op, new_value = instruction.maybe_apply(path)
-            if op is PatchOp.SET:
-                lst[idx] = new_value
-            elif op is PatchOp.DELETE:
-                del lst[idx]
-
-    def rewrite(self, obj: object, path="/") -> Any:
+    # list index can be:
+    # * positive: 1, 2, ...
+    # * negative: -1, -2, ...
+    match = rx_brackets_index.match(path)
+    if match:
         # import pdb; pdb.set_trace()
-        if isinstance(obj, dict):
-            orig_dict = obj
-            cloned_dict = dict(obj)
+        substr = match.group(0)
+        idx = int(match.group(1))
 
-            # can't modify the dict while iterating over it, so iterate over the
-            # original and modify the clone
-            for key in orig_dict.keys():
-                nested_path = f"{path}{key}"
-                self.apply_all_to_dict(nested_path, cloned_dict, key)
+        if not isinstance(obj, list):
+            raise RuntimeError("Matched brackets index but obj is not a list: %r", obj)
 
-            return cloned_dict
+        path_rest = path[len(substr) :]
+        obj[idx] = rewrite(obj[idx], path_rest, instruction)
+        return obj
 
-        elif isinstance(obj, list):
-            orig_list = obj
-            cloned_list = list(obj)
+    # dict index can only be a concrete key
+    match = rx_brackets_key.match(path)
+    if match:
+        substr = match.group(0)
+        key = match.group(1)
 
-            for i, _ in enumerate(orig_list):
-                nested_path = f"{path}[{i}]"
-                self.apply_all_to_list(nested_path, cloned_list, i)
+        if not isinstance(obj, dict):
+            raise RuntimeError("Matched brackets index but obj is not a dict: %r", obj)
 
-            return cloned_list
+        path_rest = path[len(substr) :]
+        obj[key] = rewrite(obj[key], path_rest, instruction)
+        return obj
+
+    # list or dict empty brackets means:
+    # * apply to every item in list
+    # * apply to every item in dict
+    match = rx_brackets_every.match(path)
+    if match:
+        substr = match.group(0)
+        path_rest = path[len(substr) :]
+
+        if isinstance(obj, list):
+            for idx, _ in enumerate(obj):
+                obj[idx] = rewrite(obj[idx], path_rest, instruction)
+
+        elif isinstance(obj, dict):
+            for key in obj.keys():
+                obj[key] = rewrite(obj[key], path_rest, instruction)
+
+        return obj
+
+    return obj
 
 
-def obj_matcher(dct: JsonDict, patches: Dict[Any, Any]) -> JsonDict:
-    patcher = ObjectPatcher.create(patches)
-    return patcher.rewrite(dct)
+def obj_matcher(obj: Any, instructions: List[PatchInstruction]) -> Any:
+    for instruction in instructions:
+        path = instruction.path
+        if path.startswith("."):
+            path = path[1:]
+
+        obj = rewrite(obj, path, instruction)
+
+        if not instruction.times_applied:
+            raise PatchInstructionDidNotMatchAnything(instruction.path)
+
+    return obj
