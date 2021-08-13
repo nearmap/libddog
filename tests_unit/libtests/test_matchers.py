@@ -24,6 +24,13 @@ def test__two_level_dict__assign_one_key() -> None:
     assert fst == obj_matcher(snd, [assign('.["user"]["first-name"]', "James")])
 
 
+def test__single_level_dict__set_new_key() -> None:
+    fst = {"id": 123, "first-name": "James", "last-name": "Joy"}
+    snd = {"id": 123, "last-name": "Joy"}
+
+    assert fst == obj_matcher(snd, [assign('.["first-name"]', "James")])
+
+
 # list only
 
 

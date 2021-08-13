@@ -1,4 +1,3 @@
-import enum
 import re
 from typing import Any, Dict, List
 
@@ -67,7 +66,7 @@ def rewrite(obj: Any, path: str, instruction: PatchInstruction) -> Any:
         obj[idx] = rewrite(obj[idx], path_rest, instruction)
         return obj
 
-    # dict index can only be a concrete key
+    # dict key can only be a concrete key
     match = rx_brackets_key.match(path)
     if match:
         substr = match.group(0)
@@ -77,7 +76,7 @@ def rewrite(obj: Any, path: str, instruction: PatchInstruction) -> Any:
             raise RuntimeError("Matched brackets index but obj is not a dict: %r", obj)
 
         path_rest = path[len(substr) :]
-        obj[key] = rewrite(obj[key], path_rest, instruction)
+        obj[key] = rewrite(obj.get(key), path_rest, instruction)
         return obj
 
     # list or dict empty brackets means:
