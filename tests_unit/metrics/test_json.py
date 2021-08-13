@@ -11,7 +11,7 @@ from libddog.metrics import (
     Tag,
     TmplVar,
 )
-from tests_unit.tools import dict_matcher
+from libtests.matchers import dict_matcher
 
 
 def test_exhaustive__with_name() -> None:

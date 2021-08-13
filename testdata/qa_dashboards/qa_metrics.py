@@ -284,7 +284,7 @@ def get_desc_group() -> Widget:
             "We use this dashboard to demonstrate as many possible variations "
             "of queries, formulas and functions as possible.\n\n"
             "The way we do this is a bit oversimplified because we are using "
-            "the same timeseries widget for every use cases, with the same "
+            "the same timeseries widget for every use case, with the same "
             "one or two metrics used in every graph. This is a good fit for "
             "some functions, but less good for others.\n\n"
             "As a result, we are not really concerned with the lines in the "

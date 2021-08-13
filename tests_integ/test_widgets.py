@@ -1,4 +1,4 @@
-from tests_integ.tools import QADashboardManager
+from libtests.managers import QADashboardManager
 
 
 def test_put_and_get_metrics() -> None:
@@ -19,3 +19,10 @@ def test_put_and_get_widgets() -> None:
     mgr.timestamp_dashboard(dashboard)
 
     mgr.update_live_dashboard(dashboard, dash_id)
+
+    model = dashboard.as_dict()
+    dct = mgr.mgr.get(dash_id)
+
+    import pdb
+
+    pdb.set_trace()
