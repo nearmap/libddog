@@ -39,7 +39,7 @@ def test_formula__exhaustive() -> None:
 # corner cases
 
 
-def test_formula__unresolved_var() -> None:
+def _test_formula__unresolved_var() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),

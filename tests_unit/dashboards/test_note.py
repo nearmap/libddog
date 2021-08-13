@@ -34,8 +34,8 @@ def test_note__minimal() -> None:
 def test_note__exhaustive() -> None:
     # override all the values such that they differ from the preset
     note = Note(
-        content="this is a note",
         preset=NotePreset.ANNOTATION,
+        content="this is a note",
         background_color=BackgroundColor.VIVID_YELLOW,
         font_size=17,
         text_align=TextAlign.RIGHT,
@@ -44,7 +44,7 @@ def test_note__exhaustive() -> None:
         tick_edge=TickEdge.BOTTOM,
         has_padding=False,
         size=Size(width=4, height=5),
-        pos=Position(x=6, y=7),
+        position=Position(x=6, y=7),
     )
 
     assert note.as_dict() == {
@@ -69,8 +69,8 @@ def test_note__no_preset_equals_default_preset() -> None:
     )
 
     note_default = Note(
-        content="this is a note",
         preset=NotePreset.DEFAULT,
+        content="this is a note",
     )
 
     assert note_no_preset.as_dict() == note_default.as_dict()
@@ -78,8 +78,8 @@ def test_note__no_preset_equals_default_preset() -> None:
 
 def test_note_caption__minimal() -> None:
     note = Note(
-        content="this is a note",
         preset=NotePreset.CAPTION,
+        content="this is a note",
     )
 
     assert note.as_dict() == {
@@ -100,8 +100,8 @@ def test_note_caption__minimal() -> None:
 
 def test_note_header__minimal() -> None:
     note = Note(
-        content="this is a note",
         preset=NotePreset.HEADER,
+        content="this is a note",
     )
 
     assert note.as_dict() == {
@@ -122,8 +122,8 @@ def test_note_header__minimal() -> None:
 
 def test_note_annotation__minimal() -> None:
     note = Note(
-        content="this is a note",
         preset=NotePreset.ANNOTATION,
+        content="this is a note",
     )
 
     assert note.as_dict() == {

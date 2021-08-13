@@ -11,7 +11,7 @@ from libddog.metrics import (
     Tag,
     TmplVar,
 )
-from tests_unit.tools import dict_matcher
+from libtests.matchers import dict_matcher
 
 
 def test_exhaustive__with_name() -> None:
@@ -51,14 +51,14 @@ def test_minimal__without_name() -> None:
         "aggregator": "avg",
         "data_source": "metrics",
         "name": "q1",
-        "query": "avg:aws.ec2.cpuutilization",
+        "query": "avg:aws.ec2.cpuutilization{*}",
     }
 
     assert dict_matcher(dct2, name="q2") == {
         "aggregator": "max",
         "data_source": "metrics",
         "name": "q2",
-        "query": "max:aws.ec2.memory",
+        "query": "max:aws.ec2.memory{*}",
     }
 
     # generated names are unique for each query

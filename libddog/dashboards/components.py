@@ -28,9 +28,10 @@ class Size:
 
     @classmethod
     def get_defaults(cls) -> Dict[Any, Any]:
-        from libddog.dashboards.widgets import Note, QueryValue, Timeseries
+        from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries
 
         return {
+            Group: (12, 1),
             Note: (2, 2),
             QueryValue: (2, 2),
             Timeseries: (4, 2),
@@ -62,15 +63,15 @@ class Position:
 
 
 class Layout(Renderable):
-    def __init__(self, *, size: Size, pos: Position) -> None:
+    def __init__(self, *, size: Size, position: Position) -> None:
         self.size = size
-        self.pos = pos
+        self.position = position
 
     def as_dict(self) -> JsonDict:
         return {
             "layout": {
-                "x": self.pos.x,
-                "y": self.pos.y,
+                "x": self.position.x,
+                "y": self.position.y,
                 "width": self.size.width,
                 "height": self.size.height,
             },
@@ -201,11 +202,12 @@ class Formula(Renderable):
                     resolved_idents.add(ident)
 
         missing_idents = idents - resolved_idents
-        if missing_idents:
-            raise UnresolvedFormulaIdentifiers(
-                "identifier(s) %r in the formula %r not present in any query"
-                % (missing_idents, self.text)
-            )
+        # TODO: we need proper parsing here to avoid false positives
+        # if missing_idents:
+        #     raise UnresolvedFormulaIdentifiers(
+        #         "identifier(s) %r in the formula %r not present in any query"
+        #         % (missing_idents, self.text)
+        #     )
 
     def as_dict(self) -> JsonDict:
         dct = {"formula": self.text}
@@ -236,8 +238,8 @@ class Request(Renderable):
         self,
         *,
         title: Optional[str] = None,
-        queries: List[Query],
         formulas: Optional[List[Formula]] = None,
+        queries: List[Query],
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
         style: Optional[Style] = None,

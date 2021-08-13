@@ -103,9 +103,8 @@ class DashboardManagerCli:
 
     def load_definitions_module(self) -> ModuleType:
         # add '.' to sys.path to make 'config' importable
-        cwd = os.path.abspath(os.getcwd())
-        if cwd not in sys.path:
-            sys.path.append(cwd)
+        if self.proj_path not in sys.path:
+            sys.path.append(self.proj_path)
 
         # import the module
         try:

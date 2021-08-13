@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# always run with -s to echo dashboard id's used by tests
+py.test tests_integ/ -s $@

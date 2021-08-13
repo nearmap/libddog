@@ -28,7 +28,7 @@ def test_abs() -> None:
         )
     )
 
-    assert query.codegen() == "abs(avg:aws.ec2.cpuutilization)"
+    assert query.codegen() == "abs(avg:aws.ec2.cpuutilization{*})"
 
 
 def test_add() -> None:
@@ -46,7 +46,7 @@ def test_add() -> None:
     )
     query = Add(left, right)
 
-    assert query.codegen() == "abs(avg:aws.ec2.cpu) + abs(avg:aws.ec2.memory)"
+    assert query.codegen() == "abs(avg:aws.ec2.cpu{*}) + abs(avg:aws.ec2.memory{*})"
 
 
 def test_paren() -> None:
@@ -65,4 +65,6 @@ def test_paren() -> None:
     paren = Paren(Add(left, right))
     query = Add(paren, Int(1))
 
-    assert query.codegen() == "(abs(avg:aws.ec2.cpu) + abs(avg:aws.ec2.memory)) + 1"
+    assert query.codegen() == (
+        "(abs(avg:aws.ec2.cpu{*}) + abs(avg:aws.ec2.memory{*})) + 1"
+    )

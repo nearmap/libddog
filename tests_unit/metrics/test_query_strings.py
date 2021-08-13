@@ -24,7 +24,7 @@ def test__minimal() -> None:
         agg=Aggregation(func=AggFunc.AVG),
     )
 
-    assert query.codegen() == "avg:aws.ec2.cpuutilization"
+    assert query.codegen() == "avg:aws.ec2.cpuutilization{*}"
 
 
 def test__exhaustive() -> None:
@@ -47,6 +47,15 @@ def test__exhaustive() -> None:
 # start with the 'full' state and remove parts, covering most combinations
 
 
+def test__exhaustive__no_agg() -> None:
+    query = Query(
+        metric=Metric(name="aws.ec2.cpuutilization"),
+        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
+    )
+
+    assert query.codegen() == ("aws.ec2.cpuutilization{*}.rollup(max, 110)")
+
+
 def test__exhaustive__no_filter() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
@@ -55,7 +64,7 @@ def test__exhaustive__no_filter() -> None:
     )
 
     assert query.codegen() == (
-        "avg:aws.ec2.cpuutilization by {az, role}.as_count().rollup(max, 110)"
+        "avg:aws.ec2.cpuutilization{*} by {az, role}.as_count().rollup(max, 110)"
     )
 
 
@@ -207,4 +216,4 @@ def test_rollup_default_func() -> None:
         funcs=[Rollup(func=RollupFunc.DEFAULT)],
     )
 
-    assert query.codegen() == "avg:aws.ec2.cpuutilization"
+    assert query.codegen() == "avg:aws.ec2.cpuutilization{*}"

@@ -47,27 +47,28 @@ class DashboardManager:
         result = datadog.api.Dashboard.get_all()  # type: ignore
         return result["dashboards"]
 
-    def update(self, dashboard: Dashboard) -> None:
-        if not dashboard.id:
+    def update(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
+        id = id or dashboard.id
+
+        if not id:
             raise RuntimeError(
-                "Cannot update dashboard without an .id attribute: %r" % dashboard.title
+                "Cannot update dashboard without an id: %r" % dashboard.title
             )
 
         client_kwargs = dashboard.as_dict()
+        client_kwargs.pop("id", None)  # we pass it separately
 
         try:
-            resp = datadog.api.Dashboard.update(**client_kwargs)  # type: ignore
+            resp = datadog.api.Dashboard.update(id=id, **client_kwargs)  # type: ignore
             error_strs = self.parse_response(resp)
             if error_strs:
                 print(
                     "Failed to update dashboard %r entitled %r:\n%s"
-                    % (dashboard.id, dashboard.title, error_strs)
+                    % (id, dashboard.title, error_strs)
                 )
                 pprint.pprint(client_kwargs)
 
             else:
-                print(
-                    "Updated dashboard %r entitled %r" % (dashboard.id, dashboard.title)
-                )
+                print("Updated dashboard %r entitled %r" % (id, dashboard.title))
         except Exception as exc:
             raise

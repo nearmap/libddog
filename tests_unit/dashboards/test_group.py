@@ -14,6 +14,7 @@ def test_group__minimal() -> None:
             "type": "group",
             "widgets": [],
         },
+        "layout": {"height": 1, "width": 12, "x": 0, "y": 0},
     }
 
 
@@ -40,4 +41,5 @@ def test_group__exhaustive() -> None:
             "type": "group",
             "widgets": [note1.as_dict(), note2.as_dict()],
         },
+        "layout": {"height": 1, "width": 12, "x": 0, "y": 0},
     }

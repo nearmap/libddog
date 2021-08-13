@@ -44,6 +44,20 @@ class LayoutType(enum.Enum):
     # have not validated the other alternatives yet
 
 
+class LegendColumn(enum.Enum):
+    AVG = "avg"
+    MIN = "min"
+    MAX = "max"
+    VALUE = "value"
+    SUM = "sum"
+
+
+class LegendLayout(enum.Enum):
+    AUTOMATIC = "auto"
+    COMPACT = "horizontal"
+    EXPANDED = "vertical"
+
+
 class LineType(enum.Enum):
     SOLID = "solid"
     DASHED = "dashed"
@@ -123,6 +137,7 @@ class TickEdge(enum.Enum):
 
 class TitleAlign(enum.Enum):
     LEFT = "left"
+    # 'center' and 'right' seem to have no effect
     # have not validated the other alternatives yet
 
 

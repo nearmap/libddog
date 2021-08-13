@@ -200,16 +200,16 @@ class Query(QueryNode, Renderable):
     def codegen(self) -> str:
         agg_func, agg_by, agg_as = "", "", ""
         if self.agg:
-            agg_func = self.agg.func.codegen()
+            agg_func = "%s:" % self.agg.func.codegen()
             agg_by = self.agg.by.codegen() if self.agg.by else ""
             agg_as = self.agg.as_.codegen() if self.agg.as_ else ""
 
         metric = self.metric.codegen()
-        filter = self.filter.codegen() if self.filter else ""
+        filter = self.filter.codegen() if self.filter else "{*}"
 
         funcs = "".join([func.codegen() for func in self.funcs])
 
-        query = "%s:%s%s%s%s%s" % (
+        query = "%s%s%s%s%s%s" % (
             agg_func,
             metric,
             filter,

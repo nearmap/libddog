@@ -13,6 +13,8 @@ from libddog.dashboards.components import (
 from libddog.dashboards.enums import (
     BackgroundColor,
     LayoutType,
+    LegendColumn,
+    LegendLayout,
     LiveSpan,
     ResponseFormat,
     TextAlign,
@@ -34,7 +36,7 @@ class Widget:
     def as_dict(self) -> JsonDict:
         raise NotImplementedError
 
-    def add_layout(self, dct: JsonDict, size: Size, pos: Position) -> None:
+    def add_layout(self, dct: JsonDict, size: Size, position: Position) -> None:
         """
         Transforms:
 
@@ -50,7 +52,7 @@ class Widget:
             }
         """
 
-        layout = Layout(size=size, pos=pos)
+        layout = Layout(size=size, position=position)
         dct_layout = layout.as_dict()
         dct.update(dct_layout)
 
@@ -107,7 +109,7 @@ class Note(Widget):
         tick_edge: Optional[TickEdge] = None,
         has_padding: Optional[bool] = None,
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.preset = preset
         self.content = content
@@ -119,7 +121,7 @@ class Note(Widget):
         self.tick_edge = tick_edge
         self.has_padding = has_padding
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def apply_preset(self) -> "Note":
         """
@@ -185,7 +187,7 @@ class Note(Widget):
             },
         }
 
-        instance.add_layout(dct, size=instance.size, pos=instance.pos)
+        instance.add_layout(dct, size=instance.size, position=instance.position)
         return dct
 
 
@@ -216,7 +218,7 @@ class QueryValue(Widget):
         precision: int = 2,
         requests: List[Request],
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.title_size = title_size
@@ -227,7 +229,7 @@ class QueryValue(Widget):
         self.precision = precision
         self.requests = requests
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> Dict[str, Any]:
         dct = super().request_as_dict(request)
@@ -251,7 +253,7 @@ class QueryValue(Widget):
         if self.custom_unit:
             dct["definition"]["custom_unit"] = self.custom_unit
 
-        self.add_layout(dct, size=self.size, pos=self.pos)
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct
 
 
@@ -279,27 +281,31 @@ class Timeseries(Widget):
         title_size: int = 16,
         title_align: TitleAlign = TitleAlign.LEFT,
         show_legend: bool = True,
-        legend_layout: Optional[str] = None,  # TODO: make enum
-        legend_columns: Optional[Sequence[str]] = None,  # TODO: what is this?
+        legend_layout: LegendLayout = LegendLayout.AUTOMATIC,
+        legend_columns: Optional[Sequence[LegendColumn]] = None,
         requests: List[Request],
         yaxis: Optional[YAxis] = None,
         markers: Optional[Sequence[Marker]] = None,
         size: Optional[Size] = None,
-        pos: Optional[Position] = None,
+        position: Optional[Position] = None,
     ) -> None:
-        assert not legend_layout
-
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
         self.show_legend = show_legend
-        self.legend_layout = legend_layout or "auto"
-        self.legend_columns = legend_columns or ["avg", "min", "max", "value", "sum"]
+        self.legend_layout = legend_layout
+        self.legend_columns = legend_columns or [
+            LegendColumn.AVG,
+            LegendColumn.MIN,
+            LegendColumn.MAX,
+            LegendColumn.VALUE,
+            LegendColumn.SUM,
+        ]
         self.requests = requests
         self.yaxis = yaxis or YAxis()
         self.markers = markers or []
         self.size = Size.backfill(self, size)
-        self.pos = pos or Position()
+        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
@@ -309,8 +315,8 @@ class Timeseries(Widget):
     def as_dict(self) -> JsonDict:
         dct = {
             "definition": {
-                "legend_columns": self.legend_columns,
-                "legend_layout": self.legend_layout,
+                "legend_columns": [col.value for col in self.legend_columns],
+                "legend_layout": self.legend_layout.value,
                 "markers": [marker.as_dict() for marker in self.markers],
                 "requests": [self.request_as_dict(req) for req in self.requests],
                 "show_legend": self.show_legend,
@@ -322,7 +328,7 @@ class Timeseries(Widget):
             },
         }
 
-        self.add_layout(dct, size=self.size, pos=self.pos)
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct
 
 
@@ -336,11 +342,15 @@ class Group(Widget):
         layout_type: LayoutType = LayoutType.ORDERED,
         background_color: Optional[BackgroundColor] = None,
         widgets: Optional[Sequence[Widget]] = None,
+        size: Optional[Size] = None,
+        position: Optional[Position] = None,
     ) -> None:
         self.title = title
         self.layout_type = layout_type
         self.background_color = background_color
         self.widgets = widgets or []
+        self.size = Size.backfill(self, size)
+        self.position = position or Position()
 
     def as_dict(self) -> JsonDict:
         dct = {
@@ -350,10 +360,10 @@ class Group(Widget):
                 "layout_type": self.layout_type.value,
                 "widgets": [wid.as_dict() for wid in self.widgets],
             },
-            # TODO: layout: {...}
         }
 
         if self.background_color:
             dct["definition"]["background_color"] = self.background_color.value
 
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct

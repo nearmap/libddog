@@ -83,7 +83,7 @@ def test_request__exhaustive() -> None:
                 "aggregator": "avg",
                 "data_source": "metrics",
                 "name": "cpu",
-                "query": "avg:aws.ec2.cpuutilization",
+                "query": "avg:aws.ec2.cpuutilization{*}",
             }
         ],
         "style": {"line_type": "dashed", "line_width": "thick", "palette": "orange"},
@@ -119,13 +119,13 @@ def test_request__synthesize_formulas_from_queries() -> None:
                 "aggregator": "avg",
                 "data_source": "metrics",
                 "name": "reqs",
-                "query": "avg:aws.elb.http_requests",
+                "query": "avg:aws.elb.http_requests{*}",
             },
             {
                 "aggregator": "avg",
                 "data_source": "metrics",
                 "name": "cpu",
-                "query": "avg:aws.ec2.cpuutilization",
+                "query": "avg:aws.ec2.cpuutilization{*}",
             },
         ],
         "style": {
