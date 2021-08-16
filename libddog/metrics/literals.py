@@ -17,14 +17,6 @@ class Int(FormulaNode):
         return f"{self.value}"
 
 
-class Str(FormulaNode):
-    def __init__(self, value: str) -> None:
-        self.value = value
-
-    def codegen(self) -> str:
-        return self.value
-
-
 class Identifier(FormulaNode):
     def __init__(self, name: str) -> None:
         self.name = name

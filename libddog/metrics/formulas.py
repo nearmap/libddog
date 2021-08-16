@@ -38,3 +38,6 @@ class Div(BinaryFormula):
 
 class Comma(BinaryFormula):
     symbol = ","
+
+    def codegen(self) -> str:
+        return f"{self.left.codegen()}{self.symbol} {self.right.codegen()}"

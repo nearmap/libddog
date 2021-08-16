@@ -43,7 +43,7 @@ from libddog.metrics.functions import (
     trend_line,
     week_before,
 )
-from libddog.metrics.literals import Identifier, Int, Str
+from libddog.metrics.literals import Float, Identifier, Int
 from libddog.metrics.query import (
     AggFunc,
     Aggregation,
@@ -73,6 +73,7 @@ __all__ = (
     "FillFunc",
     "Filter",
     "FilterOperator",
+    "Float",
     "Identifier",
     "Int",
     "Metric",
@@ -81,7 +82,6 @@ __all__ = (
     "Query",
     "Rollup",
     "RollupFunc",
-    "Str",
     "Sub",
     "Tag",
     "TmplVar",

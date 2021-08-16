@@ -7,7 +7,7 @@ import libddog.metrics.formulas
 import libddog.metrics.functions
 from libddog.metrics.formulas import BinaryFormula, Comma
 from libddog.metrics.functions import Function
-from libddog.metrics.literals import Int, Str
+from libddog.metrics.literals import Int
 from libddog.metrics.query import (
     AggFunc,
     Aggregation,
@@ -84,8 +84,8 @@ class QueryVisitor(NodeVisitor):  # type: ignore
             binop_cls = resolve_binop(operator)
             if isinstance(right, int):
                 right = Int(right)
-            elif isinstance(right, str):
-                right = Str(right)
+            # elif isinstance(right, str):
+            #     right = Str(right)
             binop = binop_cls(left, right)
 
         return binop
