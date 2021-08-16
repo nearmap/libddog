@@ -45,6 +45,7 @@ from libddog.metrics import (
     Fill,
     FillFunc,
     Filter,
+    Int,
     Metric,
     Query,
     Rollup,
@@ -115,10 +116,14 @@ def get_query_values() -> List[Widget]:
         name="reqs_5xx",
     )
 
+    reqs_all = query_all_reqs.identifier()
+
     widgets: List[Widget] = []
     x = 6
 
     for name, query in (("4xx", query_4xx), ("5xx", query_5xx)):
+        reqs_this = query.identifier()
+
         # Exercises most of the properties of a QueryValue
         widget = QueryValue(
             title=f"ELB {name.upper()}",
@@ -127,7 +132,7 @@ def get_query_values() -> List[Widget]:
             precision=1,
             requests=[
                 Request(
-                    formulas=[Formula(text=f"100 * (reqs_{name} / reqs_all)")],
+                    formulas=[Formula(formula=Int(100) * (reqs_this / reqs_all))],
                     queries=[query_all_reqs, query],
                     conditional_formats=[
                         ConditionalFormat(

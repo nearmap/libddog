@@ -1,9 +1,9 @@
-from libddog.metrics.literals import Identifier
 import pytest
 
 from libddog.common.errors import UnresolvedFormulaIdentifiers
 from libddog.dashboards import Formula, Request
 from libddog.metrics import AggFunc, Aggregation, Metric, Query
+from libddog.metrics.literals import Identifier
 
 
 def test_formula__exhaustive() -> None:
@@ -51,7 +51,7 @@ def test_formula__unresolved_identifier() -> None:
     )
 
     q1 = query.identifier()
-    q2 = Identifier('q2')  # we just made it up
+    q2 = Identifier("q2")  # we just made it up
 
     request = Request(
         formulas=[

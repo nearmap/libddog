@@ -1,5 +1,6 @@
-from libddog.metrics.bases import FormulaNode
 from typing import List
+
+from libddog.metrics.bases import FormulaNode
 from libddog.metrics.literals import Identifier
 
 

@@ -1,4 +1,3 @@
-from libddog.metrics.support import find_identifiers
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.bases import Renderable
@@ -18,6 +17,7 @@ from libddog.dashboards.enums import (
 )
 from libddog.metrics.bases import FormulaNode
 from libddog.metrics.query import Query
+from libddog.metrics.support import find_identifiers
 
 
 class Size:
@@ -202,7 +202,7 @@ class Formula(Renderable):
         unresolved = used - defined
 
         if unresolved:
-            fmt = ', '.join(sorted([f"'{id}'" for id in unresolved]))
+            fmt = ", ".join(sorted([f"'{id}'" for id in unresolved]))
             raise UnresolvedFormulaIdentifiers(
                 "identifier(s) %s in the formula %r not present in any query"
                 % (fmt, self.formula.codegen())

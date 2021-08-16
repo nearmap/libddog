@@ -20,17 +20,62 @@ from libddog.metrics import (
     Aggregation,
     As,
     By,
+    Comma,
     Fill,
     FillFunc,
     Filter,
     FilterOperator,
+    Int,
     Metric,
     Query,
     Rollup,
     RollupFunc,
     Tag,
     TmplVar,
+    abs,
+    anomalies,
+    autosmooth,
+    clamp_max,
+    clamp_min,
+    count_nonzero,
+    count_not_null,
+    cumsum,
+    cutoff_max,
+    cutoff_min,
+    day_before,
+    default_zero,
+    derivative,
+    diff,
+    dt,
+    ewma_3,
+    ewma_5,
+    ewma_10,
+    ewma_20,
+    exclude_null,
+    forecast,
+    hour_before,
+    integral,
+    log2,
+    log10,
+    median_3,
+    median_5,
+    median_7,
+    median_9,
+    monotonic_diff,
+    month_before,
+    moving_rollup,
+    outliers,
+    per_hour,
+    per_minute,
+    per_second,
+    piecewise_constant,
+    robust_trend,
+    timeshift,
+    top,
+    trend_line,
+    week_before,
 )
+from libddog.metrics.functions import forecast
 
 QUERY_CASES = [
     (
@@ -201,81 +246,6 @@ QUERY_CASES = [
     ),
 ]
 
-FORMULA_CASES = [
-    (
-        "All arithmetic operators",
-        "((abs(cpu) * 2) - reqs) + (log2(cpu) / timeshift(reqs, -3600))",
-    ),
-    (
-        "Comma as binary operator",
-        "cpu, reqs",
-    ),
-    (
-        "Nested function application",
-        "log2(abs(cpu))",
-    ),
-    (
-        "Function applied to formula",
-        "log2(abs(cpu) / log10(reqs))",
-    ),
-]
-
-FUNCTION_CASES = [
-    # arithmetic
-    ("abs", "abs(reqs)"),
-    ("log2", "log2(reqs)"),
-    ("log10", "log10(reqs)"),
-    ("cumsum", "cumsum(reqs)"),
-    ("integral", "integral(reqs)"),
-    # interpolation
-    ("default_zero", "default_zero(reqs)"),
-    # timeshift
-    ("hour_before", "hour_before(reqs)"),
-    ("day_before", "day_before(reqs)"),
-    ("week_before", "week_before(reqs)"),
-    ("month_before", "month_before(reqs)"),
-    ("timeshift -1h", "timeshift(reqs, -3600)"),
-    # rate
-    ("per_second", "per_second(reqs)"),
-    ("per_minute", "per_minute(reqs)"),
-    ("per_hour", "per_hour(reqs)"),
-    ("dt", "dt(reqs)"),
-    ("diff", "diff(reqs)"),
-    ("monotonic_diff", "monotonic_diff(reqs)"),
-    ("derivative", "derivative(reqs)"),
-    # smoothing
-    ("autosmooth", "autosmooth(reqs)"),
-    ("ewma_3", "ewma_3(reqs)"),
-    ("ewma_5", "ewma_5(reqs)"),
-    ("ewma_10", "ewma_10(reqs)"),
-    ("ewma_20", "ewma_20(reqs)"),
-    ("median_3", "median_3(reqs)"),
-    ("median_5", "median_5(reqs)"),
-    ("median_7", "median_7(reqs)"),
-    ("median_9", "median_9(reqs)"),
-    # rollup
-    ("moving_rollup", "moving_rollup(reqs, 180, 'sum')"),
-    # top
-    ("top", "top(reqs, 5, 'sum', 'asc')"),
-    # count
-    ("count_nonzero", "count_nonzero(reqs)"),
-    ("count_not_null", "count_not_null(reqs)"),
-    # regression
-    ("robust_trend", "robust_trend(reqs)"),
-    ("trend_line", "trend_line(reqs)"),
-    ("piecewise_constant", "piecewise_constant(reqs)"),
-    # algorithms
-    ("outliers", "outliers(reqs, 'DBSCAN', 2.0)"),
-    ("anomalies", "anomalies(reqs, 'agile', 2)"),
-    ("forecast", "forecast(reqs, 'linear', 2)"),
-    # exclusion
-    ("exclude_null", "exclude_null(reqs, 'availability-zone')"),
-    ("cutoff_max 2", "cutoff_max(reqs, 2)"),
-    ("cutoff_min 1", "cutoff_min(reqs, 1)"),
-    ("clamp_max 2", "clamp_max(reqs, 2)"),
-    ("clamp_min 1", "clamp_min(reqs, 1)"),
-]
-
 
 def get_desc_group() -> Widget:
     note = Note(
@@ -340,29 +310,51 @@ def get_queries_group() -> Widget:
 
 
 def get_formulas_group() -> Widget:
-    cpu = Query(
+    query_cpu = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),
         name="cpu",
     )
-    reqs = Query(
+    query_reqs = Query(
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),
         name="reqs",
     )
 
+    cpu = query_cpu.identifier()
+    reqs = query_reqs.identifier()
+
+    cases = [
+        (
+            "All arithmetic operators",
+            ((abs(cpu) * Int(2)) - reqs) + (log2(cpu) / timeshift(reqs, -3600)),
+        ),
+        (
+            "Comma as binary operator",
+            Comma(cpu, reqs),
+        ),
+        (
+            "Nested function application",
+            log2(abs(cpu)),
+        ),
+        (
+            "Function applied to formula",
+            log2(abs(cpu) / log10(reqs)),
+        ),
+    ]
+
     widgets = []
     x, y = 0, 0
 
-    for title, text in FORMULA_CASES:
+    for title, formula in cases:
         widget = Timeseries(
             title=title,
             requests=[
                 Request(
-                    formulas=[Formula(text=text)],
-                    queries=[cpu, reqs],
+                    formulas=[Formula(formula=formula)],
+                    queries=[query_cpu, query_reqs],
                 ),
             ],
             position=Position(x=x, y=y),
@@ -384,26 +376,84 @@ def get_formulas_group() -> Widget:
 
 
 def get_functions_group() -> Widget:
-    reqs = Query(
+    query_reqs = Query(
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),
         name="reqs",
     )
 
+    reqs = query_reqs.identifier()
+
+    cases = [
+        # arithmetic
+        ("abs", abs(reqs)),
+        ("log2", log2(reqs)),
+        ("log10", log10(reqs)),
+        ("cumsum", cumsum(reqs)),
+        ("integral", integral(reqs)),
+        # interpolation
+        ("default_zero", default_zero(reqs)),
+        # timeshift
+        ("hour_before", hour_before(reqs)),
+        ("day_before", day_before(reqs)),
+        ("week_before", week_before(reqs)),
+        ("month_before", month_before(reqs)),
+        ("timeshift -1h", timeshift(reqs, -3600)),
+        # rate
+        ("per_second", per_second(reqs)),
+        ("per_minute", per_minute(reqs)),
+        ("per_hour", per_hour(reqs)),
+        ("dt", dt(reqs)),
+        ("diff", diff(reqs)),
+        ("monotonic_diff", monotonic_diff(reqs)),
+        ("derivative", derivative(reqs)),
+        # smoothing
+        ("autosmooth", autosmooth(reqs)),
+        ("ewma_3", ewma_3(reqs)),
+        ("ewma_5", ewma_5(reqs)),
+        ("ewma_10", ewma_10(reqs)),
+        ("ewma_20", ewma_20(reqs)),
+        ("median_3", median_3(reqs)),
+        ("median_5", median_5(reqs)),
+        ("median_7", median_7(reqs)),
+        ("median_9", median_9(reqs)),
+        # rollup
+        ("moving_rollup", moving_rollup(reqs, 180, "sum")),
+        # top
+        ("top", top(reqs, 5, "sum", "asc")),
+        # count
+        ("count_nonzero", count_nonzero(reqs)),
+        ("count_not_null", count_not_null(reqs)),
+        # regression
+        ("robust_trend", robust_trend(reqs)),
+        ("trend_line", trend_line(reqs)),
+        ("piecewise_constant", piecewise_constant(reqs)),
+        # algorithms
+        ("outliers", outliers(reqs, "DBSCAN", 2.0)),
+        ("anomalies", anomalies(reqs, "agile", 2)),
+        ("forecast", forecast(reqs, "linear", 2)),
+        # exclusion
+        ("exclude_null", exclude_null(reqs, "availability-zone")),
+        ("cutoff_max 2", cutoff_max(reqs, 2)),
+        ("cutoff_min 1", cutoff_min(reqs, 1)),
+        ("clamp_max 2", clamp_max(reqs, 2)),
+        ("clamp_min 1", clamp_min(reqs, 1)),
+    ]
+
     widgets = []
     x, y = 0, 0
 
-    for title, text in FUNCTION_CASES:
+    for title, formula in cases:
         widget = Timeseries(
             title=title,
             requests=[
                 Request(
                     formulas=[
-                        Formula(text="reqs", alias="source"),
-                        Formula(text=text, alias=title),
+                        Formula(formula=reqs, alias="source"),
+                        Formula(formula=formula, alias=title),
                     ],
-                    queries=[reqs],
+                    queries=[query_reqs],
                 ),
             ],
             position=Position(x=x, y=y),
