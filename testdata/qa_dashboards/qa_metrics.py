@@ -75,7 +75,6 @@ from libddog.metrics import (
     trend_line,
     week_before,
 )
-from libddog.metrics.functions import forecast
 
 QUERY_CASES = [
     (
