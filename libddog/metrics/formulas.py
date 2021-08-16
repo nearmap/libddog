@@ -17,7 +17,7 @@ class BinaryFormula(FormulaNode):
         self.right = right
 
     def codegen(self) -> str:
-        return f"{self.left.codegen()} {self.symbol} {self.right.codegen()}"
+        return f"({self.left.codegen()} {self.symbol} {self.right.codegen()})"
 
 
 class Add(BinaryFormula):
