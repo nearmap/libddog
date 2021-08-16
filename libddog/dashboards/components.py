@@ -1,6 +1,5 @@
 from libddog.metrics.support import find_identifiers
-from libddog.metrics import formulas
-from typing import Any, Dict, List, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.bases import Renderable
 from libddog.common.errors import UnresolvedFormulaIdentifiers
@@ -19,7 +18,6 @@ from libddog.dashboards.enums import (
 )
 from libddog.metrics.bases import FormulaNode
 from libddog.metrics.query import Query
-from libddog.parsing.parse_formula import parse_formula_identifiers
 
 
 class Size:
