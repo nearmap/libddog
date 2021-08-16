@@ -1,14 +1,6 @@
 from libddog.metrics.bases import FormulaNode
 
 
-class Paren(FormulaNode):
-    def __init__(self, node: FormulaNode) -> None:
-        self.node = node
-
-    def codegen(self) -> str:
-        return f"({self.node.codegen()})"
-
-
 class BinaryFormula(FormulaNode):
     symbol: str = ""
 

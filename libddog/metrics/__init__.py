@@ -1,4 +1,4 @@
-from libddog.metrics.formulas import Add, Comma, Div, Mul, Paren, Sub
+from libddog.metrics.formulas import Add, Comma, Div, Mul, Sub
 from libddog.metrics.functions import (
     abs,
     anomalies,
@@ -78,7 +78,6 @@ __all__ = (
     "Int",
     "Metric",
     "Mul",
-    "Paren",
     "Query",
     "Rollup",
     "RollupFunc",

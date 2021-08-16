@@ -6,7 +6,6 @@ from libddog.metrics import (
     Identifier,
     Int,
     Mul,
-    Paren,
     Sub,
     abs,
     log2,
@@ -15,12 +14,6 @@ from libddog.metrics import (
 )
 
 # trivial cases
-
-
-def test_paren__minimal() -> None:
-    formula = Paren(Identifier("q1"))
-
-    assert formula.codegen() == "(q1)"
 
 
 def test_add__minimal() -> None:
