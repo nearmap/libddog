@@ -1,3 +1,4 @@
+from libddog.metrics.literals import Identifier
 import pytest
 
 from libddog.common.errors import UnresolvedFormulaIdentifiers
@@ -6,28 +7,31 @@ from libddog.metrics import AggFunc, Aggregation, Metric, Query
 
 
 def test_formula__exhaustive() -> None:
-    reqs = Query(
+    query_reqs = Query(
         metric=Metric(name="aws.elb.http_requests"),
         agg=Aggregation(func=AggFunc.AVG),
         name="reqs",
     )
-    cpu = Query(
+    query_cpu = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="cpu",
     )
 
+    reqs = query_reqs.identifier()
+    cpu = query_cpu.identifier()
+
     request = Request(
-        formulas=[Formula(text="reqs / cpu", alias="requests per cpu")],
-        queries=[reqs, cpu],
+        formulas=[Formula(formula=reqs / cpu, alias="requests per cpu")],
+        queries=[query_reqs, query_cpu],
     )
 
     assert request.as_dict() == {
         "conditional_formats": [],
         "display_type": "line",
-        "formulas": [{"alias": "requests per cpu", "formula": "reqs / cpu"}],
+        "formulas": [{"alias": "requests per cpu", "formula": "(reqs / cpu)"}],
         "on_right_yaxis": False,
-        "queries": [reqs.as_dict(), cpu.as_dict()],
+        "queries": [query_reqs.as_dict(), query_cpu.as_dict()],
         "style": {
             "line_type": "solid",
             "line_width": "normal",
@@ -39,17 +43,20 @@ def test_formula__exhaustive() -> None:
 # corner cases
 
 
-def _test_formula__unresolved_var() -> None:
+def test_formula__unresolved_identifier() -> None:
     query = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="q1",
     )
 
+    q1 = query.identifier()
+    q2 = Identifier('q2')  # we just made it up
+
     request = Request(
         formulas=[
             Formula(
-                text="q1 * q2",
+                formula=q1 * q2,
             )
         ],
         queries=[query],
@@ -59,5 +66,5 @@ def _test_formula__unresolved_var() -> None:
         request.as_dict()
 
     assert ctx.value.args[0] == (
-        "identifier(s) {'q2'} in the formula 'q1 * q2' not present in any query"
+        "identifier(s) 'q2' in the formula '(q1 * q2)' not present in any query"
     )

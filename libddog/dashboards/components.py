@@ -1,3 +1,5 @@
+from libddog.metrics.support import find_identifiers
+from libddog.metrics import formulas
 from typing import Any, Dict, List, Optional, Sequence, Set
 
 from libddog.common.bases import Renderable
@@ -15,6 +17,7 @@ from libddog.dashboards.enums import (
     Palette,
     Scale,
 )
+from libddog.metrics.bases import FormulaNode
 from libddog.metrics.query import Query
 from libddog.parsing.parse_formula import parse_formula_identifiers
 
@@ -188,29 +191,27 @@ class YAxis(Renderable):
 
 
 class Formula(Renderable):
-    def __init__(self, text: str, alias: Optional[str] = None) -> None:
-        self.text = text
+    def __init__(self, formula: FormulaNode, alias: Optional[str] = None) -> None:
+        self.formula = formula
         self.alias = alias
 
     def validate(self, queries: List[Query]) -> None:
-        idents = parse_formula_identifiers(self.text)
+        identifiers = find_identifiers(self.formula)
+        used = {ident.name for ident in identifiers}
 
-        resolved_idents: Set[str] = set()
-        for ident in idents:
-            for query in queries:
-                if query.name == ident:
-                    resolved_idents.add(ident)
+        defined = {query.name for query in queries}
 
-        missing_idents = idents - resolved_idents
-        # TODO: we need proper parsing here to avoid false positives
-        # if missing_idents:
-        #     raise UnresolvedFormulaIdentifiers(
-        #         "identifier(s) %r in the formula %r not present in any query"
-        #         % (missing_idents, self.text)
-        #     )
+        unresolved = used - defined
+
+        if unresolved:
+            fmt = ', '.join(sorted([f"'{id}'" for id in unresolved]))
+            raise UnresolvedFormulaIdentifiers(
+                "identifier(s) %s in the formula %r not present in any query"
+                % (fmt, self.formula.codegen())
+            )
 
     def as_dict(self) -> JsonDict:
-        dct = {"formula": self.text}
+        dct = {"formula": self.formula.codegen()}
         if self.alias:
             dct["alias"] = self.alias
 
