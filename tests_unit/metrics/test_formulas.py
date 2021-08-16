@@ -1,4 +1,18 @@
-from libddog.metrics import Add, Comma, Div, Identifier, Mul, Paren, Sub
+from libddog.metrics import (
+    Add,
+    Comma,
+    Div,
+    Float,
+    Identifier,
+    Int,
+    Mul,
+    Paren,
+    Sub,
+    abs,
+    log2,
+    log10,
+    timeshift,
+)
 
 # trivial cases
 
@@ -64,3 +78,40 @@ def test_div__infix() -> None:
     formula = Identifier("q1") / Identifier("q2")
 
     assert formula.codegen() == "(q1 / q2)"
+
+
+# compound expressions
+
+
+def test_operator_precedence() -> None:
+    formula = (Float(2.1) + Int(4)) / Int(6)
+
+    assert formula.codegen() == ("((2.1 + 4) / 6)")
+
+
+def test_all_arithmetic_operators() -> None:
+    cpu = Identifier("cpu")
+    reqs = Identifier("reqs")
+
+    formula = ((abs(cpu) * Int(2)) - reqs) + (log2(cpu) / timeshift(reqs, -3600))
+
+    assert formula.codegen() == (
+        "(((abs(cpu) * 2) - reqs) + (log2(cpu) / timeshift(reqs, -3600)))"
+    )
+
+
+def test_nested_function_application() -> None:
+    cpu = Identifier("cpu")
+
+    formula = log2(abs(cpu))
+
+    assert formula.codegen() == "log2(abs(cpu))"
+
+
+def test_function_applied_to_formula() -> None:
+    cpu = Identifier("cpu")
+    reqs = Identifier("reqs")
+
+    formula = log2(abs(cpu) / log10(reqs))
+
+    assert formula.codegen() == "log2((abs(cpu) / log10(reqs)))"

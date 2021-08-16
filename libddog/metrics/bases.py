@@ -2,14 +2,14 @@ class QueryNode:
     "The base class for all metrics AST classes."
 
     def codegen(self) -> str:
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
 
 class FormulaNode:
     "The base class for all formula AST classes."
 
     def codegen(self) -> str:
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     def __add__(self, other: "FormulaNode") -> "FormulaNode":
         from libddog.metrics.formulas import Add
