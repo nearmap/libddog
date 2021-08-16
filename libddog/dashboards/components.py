@@ -259,7 +259,7 @@ class Request(Renderable):
         formulas = self.formulas
         if not formulas:
             for query in self.queries:
-                formula = Formula(text="%s" % query.name, alias=self.title)
+                formula = Formula(formula=query.identifier(), alias=self.title)
                 formulas.append(formula)
 
         # validate that variables used in formula correspond to query names
