@@ -2,6 +2,7 @@ import enum
 from typing import Any, Optional, Tuple
 
 from libddog.metrics.bases import FormulaNode
+from libddog.metrics.exceptions import FormulaValidationError
 from libddog.metrics.literals import Float, Int
 from libddog.metrics.query import By
 
@@ -17,31 +18,35 @@ class Function(FormulaNode):
         return "%s(%s)" % (name, args_str)
 
 
-class FunctionWithSingleFormulaNode(Function):
+class FunctionWithSingleNode(Function):
     def __init__(self, node: FormulaNode) -> None:
-        self.args = (node,)
+        self.node = node
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()})"
 
 
 # arithmetic
 
 
-class abs(FunctionWithSingleFormulaNode):
+class abs(FunctionWithSingleNode):
     pass
 
 
-class log2(FunctionWithSingleFormulaNode):
+class log2(FunctionWithSingleNode):
     pass
 
 
-class log10(FunctionWithSingleFormulaNode):
+class log10(FunctionWithSingleNode):
     pass
 
 
-class cumsum(FunctionWithSingleFormulaNode):
+class cumsum(FunctionWithSingleNode):
     pass
 
 
-class integral(FunctionWithSingleFormulaNode):
+class integral(FunctionWithSingleNode):
     pass
 
 
@@ -49,102 +54,111 @@ class integral(FunctionWithSingleFormulaNode):
 # fill() is a FormulaNodeFunc so not mentioned here
 
 
-class default_zero(FunctionWithSingleFormulaNode):
+class default_zero(FunctionWithSingleNode):
     pass
 
 
 # timeshift
 
 
-class hour_before(FunctionWithSingleFormulaNode):
+class hour_before(FunctionWithSingleNode):
     pass
 
 
-class day_before(FunctionWithSingleFormulaNode):
+class day_before(FunctionWithSingleNode):
     pass
 
 
-class week_before(FunctionWithSingleFormulaNode):
+class week_before(FunctionWithSingleNode):
     pass
 
 
-class month_before(FunctionWithSingleFormulaNode):
+class month_before(FunctionWithSingleNode):
     pass
 
 
 class timeshift(Function):
     def __init__(self, node: FormulaNode, time_s: int) -> None:
-        assert time_s < 0
-        self.args = (node, Int(time_s))
+        if time_s >= 0:
+            raise FormulaValidationError(
+                "timeshift interval must be below zero: %r" % time_s
+            )
+
+        self.node = node
+        self.time_s = time_s
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.time_s})"
 
 
 # rate
 
 
-class per_second(FunctionWithSingleFormulaNode):
+class per_second(FunctionWithSingleNode):
     pass
 
 
-class per_minute(FunctionWithSingleFormulaNode):
+class per_minute(FunctionWithSingleNode):
     pass
 
 
-class per_hour(FunctionWithSingleFormulaNode):
+class per_hour(FunctionWithSingleNode):
     pass
 
 
-class dt(FunctionWithSingleFormulaNode):
+class dt(FunctionWithSingleNode):
     pass
 
 
-class diff(FunctionWithSingleFormulaNode):
+class diff(FunctionWithSingleNode):
     pass
 
 
-class monotonic_diff(FunctionWithSingleFormulaNode):
+class monotonic_diff(FunctionWithSingleNode):
     pass
 
 
-class derivative(FunctionWithSingleFormulaNode):
+class derivative(FunctionWithSingleNode):
     pass
 
 
 # smoothing
 
 
-class autosmooth(FunctionWithSingleFormulaNode):
+class autosmooth(FunctionWithSingleNode):
     pass
 
 
-class ewma_3(FunctionWithSingleFormulaNode):
+class ewma_3(FunctionWithSingleNode):
     pass
 
 
-class ewma_5(FunctionWithSingleFormulaNode):
+class ewma_5(FunctionWithSingleNode):
     pass
 
 
-class ewma_10(FunctionWithSingleFormulaNode):
+class ewma_10(FunctionWithSingleNode):
     pass
 
 
-class ewma_20(FunctionWithSingleFormulaNode):
+class ewma_20(FunctionWithSingleNode):
     pass
 
 
-class median_3(FunctionWithSingleFormulaNode):
+class median_3(FunctionWithSingleNode):
     pass
 
 
-class median_5(FunctionWithSingleFormulaNode):
+class median_5(FunctionWithSingleNode):
     pass
 
 
-class median_7(FunctionWithSingleFormulaNode):
+class median_7(FunctionWithSingleNode):
     pass
 
 
-class median_9(FunctionWithSingleFormulaNode):
+class median_9(FunctionWithSingleNode):
     pass
 
 
@@ -218,26 +232,26 @@ class top(Function):
 # count
 
 
-class count_nonzero(FunctionWithSingleFormulaNode):
+class count_nonzero(FunctionWithSingleNode):
     pass
 
 
-class count_not_null(FunctionWithSingleFormulaNode):
+class count_not_null(FunctionWithSingleNode):
     pass
 
 
 # regression
 
 
-class robust_trend(FunctionWithSingleFormulaNode):
+class robust_trend(FunctionWithSingleNode):
     pass
 
 
-class trend_line(FunctionWithSingleFormulaNode):
+class trend_line(FunctionWithSingleNode):
     pass
 
 
-class piecewise_constant(FunctionWithSingleFormulaNode):
+class piecewise_constant(FunctionWithSingleNode):
     pass
 
 
