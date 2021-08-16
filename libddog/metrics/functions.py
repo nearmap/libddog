@@ -178,10 +178,32 @@ class MovingRollupFunc(FormulaNode, enum.Enum):
 
 
 class moving_rollup(Function):
-    def __init__(
-        self, node: FormulaNode, interval_s: int, func: MovingRollupFunc
-    ) -> None:
-        self.args = (node, Int(interval_s), func)
+    _valid_methods = frozenset(
+        {
+            "avg",
+            "min",
+            "max",
+            "sum",
+            "count",
+        }
+    )
+
+    def __init__(self, node: FormulaNode, period_s: int, method: str) -> None:
+        if method not in self._valid_methods:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._valid_methods)]
+            )
+            raise FormulaValidationError(
+                "moving_rollup method %r must be one of: %s" % (method, alternatives)
+            )
+
+        self.node = node
+        self.period_s = period_s
+        self.method = method
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.period_s}, '{self.method}')"
 
 
 # rank
@@ -258,80 +280,153 @@ class piecewise_constant(FunctionWithSingleNode):
 # algorithms
 
 
-class OutliersAlgo(FormulaNode, enum.Enum):
-    DBSCAN = "DBSCAN"
-    MAD = "MAD"
-    SCALED_DBSCAN = "scaledDBSCAN"
-    SCALED_MAD = "scaledMAD"
-
-    def codegen(self) -> str:
-        return f"'{self.value}'"
-
-
 class outliers(Function):
+    _valid_algorithms = frozenset(
+        {
+            "DBSCAN",
+            "MAD",
+            "scaledDBSCAN",
+            "scaledMAD",
+        }
+    )
+    _allow_pct_arg = frozenset(
+        {
+            "MAD",
+            "scaledMAD",
+        }
+    )
+
     def __init__(
         self,
         node: FormulaNode,
-        algo: OutliersAlgo,
+        algorithm: str,
         tolerance: float,
         pct: Optional[int] = None,
     ) -> None:
-        args: Tuple[Any, ...] = (node, algo, Float(tolerance))
+        if algorithm not in self._valid_algorithms:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._valid_algorithms)]
+            )
+            raise FormulaValidationError(
+                "outliers algorithm %r must be one of: %s" % (algorithm, alternatives)
+            )
 
-        if pct is not None:
-            assert algo in (OutliersAlgo.MAD, OutliersAlgo.SCALED_MAD)
-            args = (node, algo, Float(tolerance), Int(pct))
+        if pct is not None and algorithm not in self._allow_pct_arg:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._allow_pct_arg)]
+            )
+            raise FormulaValidationError(
+                "outliers pct only valid for algorithms: %s" % alternatives
+            )
 
-        self.args = args
-
-
-class AnomaliesAlgo(FormulaNode, enum.Enum):
-    BASIC = "basic"
-    AGILE = "agile"
-    ROBUST = "robust"
+        self.node = node
+        self.algorithm = algorithm
+        self.tolerance = tolerance
+        self.pct = pct
 
     def codegen(self) -> str:
-        return f"'{self.value}'"
+        func_name = self.__class__.__name__
+
+        args = [self.node.codegen(), f"'{self.algorithm}'", f"{self.tolerance}"]
+        if self.pct is not None:
+            args.append(f"{self.pct}")
+
+        args_fmt = ", ".join(args)
+        return f"{func_name}({args_fmt})"
 
 
 class anomalies(Function):
-    def __init__(self, node: FormulaNode, algo: AnomaliesAlgo, bounds: int = 2) -> None:
-        self.args = (node, algo, Int(bounds))
+    _valid_algorithms = frozenset({"basic", "agile", "robust"})
 
+    def __init__(self, node: FormulaNode, algorithm: str, bounds: int = 2) -> None:
+        if algorithm not in self._valid_algorithms:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._valid_algorithms)]
+            )
+            raise FormulaValidationError(
+                "anomalies algorithm %r must be one of: %s" % (algorithm, alternatives)
+            )
 
-class ForecastAlgo(FormulaNode, enum.Enum):
-    LINEAR = "linear"
-    SEASONAL = "seasonal"
+        self.node = node
+        self.algorithm = algorithm
+        self.bounds = bounds
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, '{self.algorithm}', {self.bounds})"
 
 
 class forecast(Function):
-    def __init__(self, node: FormulaNode, algo: ForecastAlgo, deviations: int) -> None:
-        self.args = (node, algo, Int(deviations))
+    _valid_algorithms = frozenset({"linear", "seasonal"})
+
+    def __init__(self, node: FormulaNode, algorithm: str, deviations: int) -> None:
+        if algorithm not in self._valid_algorithms:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._valid_algorithms)]
+            )
+            raise FormulaValidationError(
+                "forecast algorithm %r must be one of: %s" % (algorithm, alternatives)
+            )
+
+        self.node = node
+        self.algorithm = algorithm
+        self.deviations = deviations
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return (
+            f"{func_name}({self.node.codegen()}, '{self.algorithm}', {self.deviations})"
+        )
 
 
 # exclusion
 
 
 class exclude_null(Function):
-    def __init__(self, node: FormulaNode, by: By) -> None:
-        self.args = (node, by)
+    def __init__(self, node: FormulaNode, by: str) -> None:
+        self.node = node
+        self.by = by
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, '{self.by}')"
 
 
 class cutoff_max(Function):
     def __init__(self, node: FormulaNode, threshold: int) -> None:
-        self.args = (node, Int(threshold))
+        self.node = node
+        self.threshold = threshold
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.threshold})"
 
 
 class cutoff_min(Function):
     def __init__(self, node: FormulaNode, threshold: int) -> None:
-        self.args = (node, Int(threshold))
+        self.node = node
+        self.threshold = threshold
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.threshold})"
 
 
 class clamp_max(Function):
     def __init__(self, node: FormulaNode, threshold: int) -> None:
-        self.args = (node, Int(threshold))
+        self.node = node
+        self.threshold = threshold
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.threshold})"
 
 
 class clamp_min(Function):
     def __init__(self, node: FormulaNode, threshold: int) -> None:
-        self.args = (node, Int(threshold))
+        self.node = node
+        self.threshold = threshold
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.threshold})"

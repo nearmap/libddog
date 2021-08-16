@@ -20,8 +20,15 @@ from libddog.metrics import (
     Tag,
     TmplVar,
     abs,
+    anomalies,
     autosmooth,
+    clamp_max,
+    clamp_min,
+    count_nonzero,
+    count_not_null,
     cumsum,
+    cutoff_max,
+    cutoff_min,
     day_before,
     default_zero,
     derivative,
@@ -31,6 +38,8 @@ from libddog.metrics import (
     ewma_5,
     ewma_10,
     ewma_20,
+    exclude_null,
+    forecast,
     hour_before,
     integral,
     log2,
@@ -41,13 +50,19 @@ from libddog.metrics import (
     median_9,
     monotonic_diff,
     month_before,
+    moving_rollup,
+    outliers,
     per_hour,
     per_minute,
     per_second,
+    piecewise_constant,
+    robust_trend,
     timeshift,
+    trend_line,
     week_before,
 )
 from libddog.metrics.exceptions import FormulaValidationError
+from libddog.metrics.functions import forecast
 
 # def test_abs() -> None:
 #     query = abs(
@@ -310,3 +325,184 @@ def test_median_9__minimal() -> None:
     formula = median_9(cpu)
 
     assert formula.codegen() == "median_9(cpu)"
+
+
+# rollup
+
+
+def test_moving_rollup__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = moving_rollup(cpu, 60, "avg")
+
+    assert formula.codegen() == "moving_rollup(cpu, 60, 'avg')"
+
+
+def test_moving_rollup__invalid_method() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        moving_rollup(cpu, 60, "using-elephants")
+
+    assert ctx.value.args[0] == (
+        "moving_rollup method 'using-elephants' must be one of: "
+        "'avg', 'count', 'max', 'min', 'sum'"
+    )
+
+
+# rank
+
+# TODO top
+
+# count
+
+
+def test_count_nonzero__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = count_nonzero(cpu)
+
+    assert formula.codegen() == "count_nonzero(cpu)"
+
+
+def test_count_not_null__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = count_not_null(cpu)
+
+    assert formula.codegen() == "count_not_null(cpu)"
+
+
+# regression
+
+
+def test_robust_trend__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = robust_trend(cpu)
+
+    assert formula.codegen() == "robust_trend(cpu)"
+
+
+def test_trend_line__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = trend_line(cpu)
+
+    assert formula.codegen() == "trend_line(cpu)"
+
+
+def test_piecewise_constant__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = piecewise_constant(cpu)
+
+    assert formula.codegen() == "piecewise_constant(cpu)"
+
+
+# algorithms
+
+
+def test_outliers__dbscan() -> None:
+    cpu = Identifier("cpu")
+    formula = outliers(cpu, "DBSCAN", 2.0)
+
+    assert formula.codegen() == "outliers(cpu, 'DBSCAN', 2.0)"
+
+
+def test_outliers__mad() -> None:
+    cpu = Identifier("cpu")
+    formula = outliers(cpu, "MAD", 3.0, 90)
+
+    assert formula.codegen() == "outliers(cpu, 'MAD', 3.0, 90)"
+
+
+def test_outliers__invalid_algorithm() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        outliers(cpu, "veryMAD", 2.0)
+
+    assert ctx.value.args[0] == (
+        "outliers algorithm 'veryMAD' must be one of: "
+        "'DBSCAN', 'MAD', 'scaledDBSCAN', 'scaledMAD'"
+    )
+
+
+def test_outliers__invalid_pct() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        outliers(cpu, "DBSCAN", 2.0, 90)
+
+    assert ctx.value.args[0] == (
+        "outliers pct only valid for algorithms: 'MAD', 'scaledMAD'"
+    )
+
+
+def test_anomalies__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = anomalies(cpu, "agile", 2)
+
+    assert formula.codegen() == "anomalies(cpu, 'agile', 2)"
+
+
+def test_anomalies__invalid_algorithm() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        anomalies(cpu, "black-cat", 2)
+
+    assert ctx.value.args[0] == (
+        "anomalies algorithm 'black-cat' must be one of: 'agile', 'basic', 'robust'"
+    )
+
+
+def test_forecast__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = forecast(cpu, "linear", 2)
+
+    assert formula.codegen() == "forecast(cpu, 'linear', 2)"
+
+
+def test_forecast__invalid_algorithm() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        forecast(cpu, "modernist", 2)
+
+    assert ctx.value.args[0] == (
+        "forecast algorithm 'modernist' must be one of: 'linear', 'seasonal'"
+    )
+
+
+# exclusion
+
+
+def test_exclude_null__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = exclude_null(cpu, "region")
+
+    assert formula.codegen() == "exclude_null(cpu, 'region')"
+
+
+def test_cutoff_max__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = cutoff_max(cpu, 80)
+
+    assert formula.codegen() == "cutoff_max(cpu, 80)"
+
+
+def test_cutoff_min__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = cutoff_min(cpu, 10)
+
+    assert formula.codegen() == "cutoff_min(cpu, 10)"
+
+
+def test_clamp_max__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = clamp_max(cpu, 70)
+
+    assert formula.codegen() == "clamp_max(cpu, 70)"
+
+
+def test_clamp_min__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = clamp_min(cpu, 15)
+
+    assert formula.codegen() == "clamp_min(cpu, 15)"
