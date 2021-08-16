@@ -1,21 +1,12 @@
 import enum
-from typing import Any, Optional, Tuple
+from typing import Optional
 
 from libddog.metrics.bases import FormulaNode
 from libddog.metrics.exceptions import FormulaValidationError
-from libddog.metrics.literals import Float, Int
-from libddog.metrics.query import By
 
 
 class Function(FormulaNode):
-    def __init__(self, *args: FormulaNode) -> None:
-        self.args = args
-
-    def codegen(self) -> str:
-        name = self.__class__.__name__
-        args = [arg.codegen() for arg in self.args]
-        args_str = ", ".join(args)
-        return "%s(%s)" % (name, args_str)
+    pass
 
 
 class FunctionWithSingleNode(Function):
@@ -51,7 +42,6 @@ class integral(FunctionWithSingleNode):
 
 
 # interpolation
-# fill() is a FormulaNodeFunc so not mentioned here
 
 
 class default_zero(FunctionWithSingleNode):
@@ -163,18 +153,6 @@ class median_9(FunctionWithSingleNode):
 
 
 # rollup
-# remaining rollup use cases are handled as Rollup
-
-
-class MovingRollupFunc(FormulaNode, enum.Enum):
-    AVG = "avg"
-    MIN = "min"
-    MAX = "max"
-    SUM = "sum"
-    COUNT = "count"
-
-    def codegen(self) -> str:
-        return self.value
 
 
 class moving_rollup(Function):
@@ -209,43 +187,50 @@ class moving_rollup(Function):
 # rank
 
 
-class TopLimitTo(FormulaNode, enum.Enum):
-    FIVE = 5
-    TEN = 10
-    TWENTY_FIVE = 25
-    FIFTY = 50
-    HUNDRED = 100
-
-    def codegen(self) -> str:
-        return f"{self.value}"
-
-
-class TopBy(FormulaNode, enum.Enum):
-    MAX = "max"
-    MEAN = "mean"
-    MIN = "min"
-    SUM = "sum"
-    LAST = "last"
-    L2NORM = "l2norm"
-    AREA = "area"
-
-    def codegen(self) -> str:
-        return f"'{self.value}'"
-
-
-class TopDir(FormulaNode, enum.Enum):
-    ASC = "asc"
-    DESC = "desc"
-
-    def codegen(self) -> str:
-        return f"'{self.value}'"
-
-
 class top(Function):
-    def __init__(
-        self, node: FormulaNode, limit_to: TopLimitTo, by: TopBy, dir: TopDir
-    ) -> None:
-        self.args = (node, limit_to, by, dir)
+    _valid_limit_to = frozenset({5, 10, 25, 50, 100})
+    _valid_by = frozenset(
+        {
+            "max",
+            "mean",
+            "min",
+            "sum",
+            "last",
+            "l2norm",
+            "area",
+        }
+    )
+    _valid_dir = frozenset({"asc", "desc"})
+
+    def __init__(self, node: FormulaNode, limit_to: int, by: str, dir: str) -> None:
+        if limit_to not in self._valid_limit_to:
+            alternatives = ", ".join(
+                [f"{alt!r}" for alt in sorted(self._valid_limit_to)]
+            )
+            raise FormulaValidationError(
+                "top limit_to %r must be one of: %s" % (limit_to, alternatives)
+            )
+
+        if by not in self._valid_by:
+            alternatives = ", ".join([f"{alt!r}" for alt in sorted(self._valid_by)])
+            raise FormulaValidationError(
+                "top by %r must be one of: %s" % (by, alternatives)
+            )
+
+        if dir not in self._valid_dir:
+            alternatives = ", ".join([f"{alt!r}" for alt in sorted(self._valid_dir)])
+            raise FormulaValidationError(
+                "top dir %r must be one of: %s" % (dir, alternatives)
+            )
+
+        self.node = node
+        self.limit_to = limit_to
+        self.by = by
+        self.dir = dir
+
+    def codegen(self) -> str:
+        func_name = self.__class__.__name__
+        return f"{func_name}({self.node.codegen()}, {self.limit_to}, '{self.by}', '{self.dir}')"
 
 
 # TODO: variants of top / bottom

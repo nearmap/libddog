@@ -1,24 +1,7 @@
 import pytest
 
 from libddog.metrics import (
-    Add,
-    AggFunc,
-    Aggregation,
-    As,
-    By,
-    Fill,
-    FillFunc,
-    Filter,
-    FilterOperator,
     Identifier,
-    Int,
-    Metric,
-    Paren,
-    Query,
-    Rollup,
-    RollupFunc,
-    Tag,
-    TmplVar,
     abs,
     anomalies,
     autosmooth,
@@ -58,61 +41,12 @@ from libddog.metrics import (
     piecewise_constant,
     robust_trend,
     timeshift,
+    top,
     trend_line,
     week_before,
 )
 from libddog.metrics.exceptions import FormulaValidationError
 from libddog.metrics.functions import forecast
-
-# def test_abs() -> None:
-#     query = abs(
-#         Query(
-#             metric=Metric(name="aws.ec2.cpuutilization"),
-#             agg=Aggregation(func=AggFunc.AVG),
-#         )
-#     )
-
-#     assert query.codegen() == "abs(avg:aws.ec2.cpuutilization{*})"
-
-
-# def test_add() -> None:
-#     left = abs(
-#         Query(
-#             metric=Metric(name="aws.ec2.cpu"),
-#             agg=Aggregation(func=AggFunc.AVG),
-#         )
-#     )
-#     right = abs(
-#         Query(
-#             metric=Metric(name="aws.ec2.memory"),
-#             agg=Aggregation(func=AggFunc.AVG),
-#         )
-#     )
-#     query = Add(left, right)
-
-#     assert query.codegen() == "abs(avg:aws.ec2.cpu{*}) + abs(avg:aws.ec2.memory{*})"
-
-
-# def test_paren() -> None:
-#     left = abs(
-#         Query(
-#             metric=Metric(name="aws.ec2.cpu"),
-#             agg=Aggregation(func=AggFunc.AVG),
-#         )
-#     )
-#     right = abs(
-#         Query(
-#             metric=Metric(name="aws.ec2.memory"),
-#             agg=Aggregation(func=AggFunc.AVG),
-#         )
-#     )
-#     paren = Paren(Add(left, right))
-#     query = Add(paren, Int(1))
-
-#     assert query.codegen() == (
-#         "(abs(avg:aws.ec2.cpu{*}) + abs(avg:aws.ec2.memory{*})) + 1"
-#     )
-
 
 # arithmetic
 
@@ -351,7 +285,43 @@ def test_moving_rollup__invalid_method() -> None:
 
 # rank
 
-# TODO top
+
+def test_top__minimal() -> None:
+    cpu = Identifier("cpu")
+    formula = top(cpu, 5, "sum", "asc")
+
+    assert formula.codegen() == "top(cpu, 5, 'sum', 'asc')"
+
+
+def test_top__out_of_range() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        top(cpu, 6, "sum", "asc")
+
+    assert ctx.value.args[0] == "top limit_to 6 must be one of: 5, 10, 25, 50, 100"
+
+
+def test_top__invalid_by() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        top(cpu, 5, "unicycle", "asc")
+
+    assert ctx.value.args[0] == (
+        "top by 'unicycle' must be one of: "
+        "'area', 'l2norm', 'last', 'max', 'mean', 'min', 'sum'"
+    )
+
+
+def test_top__invalid_dir() -> None:
+    cpu = Identifier("cpu")
+
+    with pytest.raises(FormulaValidationError) as ctx:
+        top(cpu, 5, "sum", "sideways")
+
+    assert ctx.value.args[0] == "top dir 'sideways' must be one of: 'asc', 'desc'"
+
 
 # count
 
