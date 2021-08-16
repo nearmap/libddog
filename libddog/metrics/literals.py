@@ -1,7 +1,7 @@
-from libddog.metrics.bases import QueryNode
+from libddog.metrics.bases import FormulaNode
 
 
-class Float(QueryNode):
+class Float(FormulaNode):
     def __init__(self, value: float) -> None:
         self.value = value
 
@@ -9,7 +9,7 @@ class Float(QueryNode):
         return f"{self.value}"
 
 
-class Int(QueryNode):
+class Int(FormulaNode):
     def __init__(self, value: int) -> None:
         self.value = value
 
@@ -17,9 +17,17 @@ class Int(QueryNode):
         return f"{self.value}"
 
 
-class Str(QueryNode):
+class Str(FormulaNode):
     def __init__(self, value: str) -> None:
         self.value = value
 
     def codegen(self) -> str:
         return self.value
+
+
+class Identifier(FormulaNode):
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def codegen(self) -> str:
+        return f"{self.name}"

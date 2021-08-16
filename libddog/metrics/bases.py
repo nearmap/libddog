@@ -3,3 +3,10 @@ class QueryNode:
 
     def codegen(self) -> str:
         raise NotImplemented
+
+
+class FormulaNode:
+    "The base class for all formula AST classes."
+
+    def codegen(self) -> str:
+        raise NotImplemented

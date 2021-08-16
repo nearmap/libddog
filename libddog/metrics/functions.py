@@ -1,13 +1,13 @@
 import enum
 from typing import Any, Optional, Tuple
 
-from libddog.metrics.bases import QueryNode
+from libddog.metrics.bases import FormulaNode
 from libddog.metrics.literals import Float, Int
-from libddog.metrics.query import By, Query
+from libddog.metrics.query import By
 
 
-class Function(QueryNode):
-    def __init__(self, *args: QueryNode) -> None:
+class Function(FormulaNode):
+    def __init__(self, *args: FormulaNode) -> None:
         self.args = args
 
     def codegen(self) -> str:
@@ -17,134 +17,134 @@ class Function(QueryNode):
         return "%s(%s)" % (name, args_str)
 
 
-class FunctionWithSingleQuery(Function):
-    def __init__(self, query: Query) -> None:
-        self.args = (query,)
+class FunctionWithSingleFormulaNode(Function):
+    def __init__(self, node: FormulaNode) -> None:
+        self.args = (node,)
 
 
 # arithmetic
 
 
-class abs(FunctionWithSingleQuery):
+class abs(FunctionWithSingleFormulaNode):
     pass
 
 
-class log2(FunctionWithSingleQuery):
+class log2(FunctionWithSingleFormulaNode):
     pass
 
 
-class log10(FunctionWithSingleQuery):
+class log10(FunctionWithSingleFormulaNode):
     pass
 
 
-class cumsum(FunctionWithSingleQuery):
+class cumsum(FunctionWithSingleFormulaNode):
     pass
 
 
-class integral(FunctionWithSingleQuery):
+class integral(FunctionWithSingleFormulaNode):
     pass
 
 
 # interpolation
-# fill() is a QueryFunc so not mentioned here
+# fill() is a FormulaNodeFunc so not mentioned here
 
 
-class default_zero(FunctionWithSingleQuery):
+class default_zero(FunctionWithSingleFormulaNode):
     pass
 
 
 # timeshift
 
 
-class hour_before(FunctionWithSingleQuery):
+class hour_before(FunctionWithSingleFormulaNode):
     pass
 
 
-class day_before(FunctionWithSingleQuery):
+class day_before(FunctionWithSingleFormulaNode):
     pass
 
 
-class week_before(FunctionWithSingleQuery):
+class week_before(FunctionWithSingleFormulaNode):
     pass
 
 
-class month_before(FunctionWithSingleQuery):
+class month_before(FunctionWithSingleFormulaNode):
     pass
 
 
 class timeshift(Function):
-    def __init__(self, query: Query, time_s: int) -> None:
+    def __init__(self, node: FormulaNode, time_s: int) -> None:
         assert time_s < 0
-        self.args = (query, Int(time_s))
+        self.args = (node, Int(time_s))
 
 
 # rate
 
 
-class per_second(FunctionWithSingleQuery):
+class per_second(FunctionWithSingleFormulaNode):
     pass
 
 
-class per_minute(FunctionWithSingleQuery):
+class per_minute(FunctionWithSingleFormulaNode):
     pass
 
 
-class per_hour(FunctionWithSingleQuery):
+class per_hour(FunctionWithSingleFormulaNode):
     pass
 
 
-class dt(FunctionWithSingleQuery):
+class dt(FunctionWithSingleFormulaNode):
     pass
 
 
-class diff(FunctionWithSingleQuery):
+class diff(FunctionWithSingleFormulaNode):
     pass
 
 
-class monotonic_diff(FunctionWithSingleQuery):
+class monotonic_diff(FunctionWithSingleFormulaNode):
     pass
 
 
-class derivative(FunctionWithSingleQuery):
+class derivative(FunctionWithSingleFormulaNode):
     pass
 
 
 # smoothing
 
 
-class autosmooth(FunctionWithSingleQuery):
+class autosmooth(FunctionWithSingleFormulaNode):
     pass
 
 
-class ewma_3(FunctionWithSingleQuery):
+class ewma_3(FunctionWithSingleFormulaNode):
     pass
 
 
-class ewma_5(FunctionWithSingleQuery):
+class ewma_5(FunctionWithSingleFormulaNode):
     pass
 
 
-class ewma_10(FunctionWithSingleQuery):
+class ewma_10(FunctionWithSingleFormulaNode):
     pass
 
 
-class ewma_20(FunctionWithSingleQuery):
+class ewma_20(FunctionWithSingleFormulaNode):
     pass
 
 
-class median_3(FunctionWithSingleQuery):
+class median_3(FunctionWithSingleFormulaNode):
     pass
 
 
-class median_5(FunctionWithSingleQuery):
+class median_5(FunctionWithSingleFormulaNode):
     pass
 
 
-class median_7(FunctionWithSingleQuery):
+class median_7(FunctionWithSingleFormulaNode):
     pass
 
 
-class median_9(FunctionWithSingleQuery):
+class median_9(FunctionWithSingleFormulaNode):
     pass
 
 
@@ -152,7 +152,7 @@ class median_9(FunctionWithSingleQuery):
 # remaining rollup use cases are handled as Rollup
 
 
-class MovingRollupFunc(QueryNode, enum.Enum):
+class MovingRollupFunc(FormulaNode, enum.Enum):
     AVG = "avg"
     MIN = "min"
     MAX = "max"
@@ -164,14 +164,16 @@ class MovingRollupFunc(QueryNode, enum.Enum):
 
 
 class moving_rollup(Function):
-    def __init__(self, query: Query, interval_s: int, func: MovingRollupFunc) -> None:
-        self.args = (query, Int(interval_s), func)
+    def __init__(
+        self, node: FormulaNode, interval_s: int, func: MovingRollupFunc
+    ) -> None:
+        self.args = (node, Int(interval_s), func)
 
 
 # rank
 
 
-class TopLimitTo(QueryNode, enum.Enum):
+class TopLimitTo(FormulaNode, enum.Enum):
     FIVE = 5
     TEN = 10
     TWENTY_FIVE = 25
@@ -182,7 +184,7 @@ class TopLimitTo(QueryNode, enum.Enum):
         return f"{self.value}"
 
 
-class TopBy(QueryNode, enum.Enum):
+class TopBy(FormulaNode, enum.Enum):
     MAX = "max"
     MEAN = "mean"
     MIN = "min"
@@ -195,7 +197,7 @@ class TopBy(QueryNode, enum.Enum):
         return f"'{self.value}'"
 
 
-class TopDir(QueryNode, enum.Enum):
+class TopDir(FormulaNode, enum.Enum):
     ASC = "asc"
     DESC = "desc"
 
@@ -205,9 +207,9 @@ class TopDir(QueryNode, enum.Enum):
 
 class top(Function):
     def __init__(
-        self, query: Query, limit_to: TopLimitTo, by: TopBy, dir: TopDir
+        self, node: FormulaNode, limit_to: TopLimitTo, by: TopBy, dir: TopDir
     ) -> None:
-        self.args = (query, limit_to, by, dir)
+        self.args = (node, limit_to, by, dir)
 
 
 # TODO: variants of top / bottom
@@ -216,33 +218,33 @@ class top(Function):
 # count
 
 
-class count_nonzero(FunctionWithSingleQuery):
+class count_nonzero(FunctionWithSingleFormulaNode):
     pass
 
 
-class count_not_null(FunctionWithSingleQuery):
+class count_not_null(FunctionWithSingleFormulaNode):
     pass
 
 
 # regression
 
 
-class robust_trend(FunctionWithSingleQuery):
+class robust_trend(FunctionWithSingleFormulaNode):
     pass
 
 
-class trend_line(FunctionWithSingleQuery):
+class trend_line(FunctionWithSingleFormulaNode):
     pass
 
 
-class piecewise_constant(FunctionWithSingleQuery):
+class piecewise_constant(FunctionWithSingleFormulaNode):
     pass
 
 
 # algorithms
 
 
-class OutliersAlgo(QueryNode, enum.Enum):
+class OutliersAlgo(FormulaNode, enum.Enum):
     DBSCAN = "DBSCAN"
     MAD = "MAD"
     SCALED_DBSCAN = "scaledDBSCAN"
@@ -255,21 +257,21 @@ class OutliersAlgo(QueryNode, enum.Enum):
 class outliers(Function):
     def __init__(
         self,
-        query: Query,
+        node: FormulaNode,
         algo: OutliersAlgo,
         tolerance: float,
         pct: Optional[int] = None,
     ) -> None:
-        args: Tuple[Any, ...] = (query, algo, Float(tolerance))
+        args: Tuple[Any, ...] = (node, algo, Float(tolerance))
 
         if pct is not None:
             assert algo in (OutliersAlgo.MAD, OutliersAlgo.SCALED_MAD)
-            args = (query, algo, Float(tolerance), Int(pct))
+            args = (node, algo, Float(tolerance), Int(pct))
 
         self.args = args
 
 
-class AnomaliesAlgo(QueryNode, enum.Enum):
+class AnomaliesAlgo(FormulaNode, enum.Enum):
     BASIC = "basic"
     AGILE = "agile"
     ROBUST = "robust"
@@ -279,43 +281,43 @@ class AnomaliesAlgo(QueryNode, enum.Enum):
 
 
 class anomalies(Function):
-    def __init__(self, query: Query, algo: AnomaliesAlgo, bounds: int = 2) -> None:
-        self.args = (query, algo, Int(bounds))
+    def __init__(self, node: FormulaNode, algo: AnomaliesAlgo, bounds: int = 2) -> None:
+        self.args = (node, algo, Int(bounds))
 
 
-class ForecastAlgo(QueryNode, enum.Enum):
+class ForecastAlgo(FormulaNode, enum.Enum):
     LINEAR = "linear"
     SEASONAL = "seasonal"
 
 
 class forecast(Function):
-    def __init__(self, query: Query, algo: ForecastAlgo, deviations: int) -> None:
-        self.args = (query, algo, Int(deviations))
+    def __init__(self, node: FormulaNode, algo: ForecastAlgo, deviations: int) -> None:
+        self.args = (node, algo, Int(deviations))
 
 
 # exclusion
 
 
 class exclude_null(Function):
-    def __init__(self, query: Query, by: By) -> None:
-        self.args = (query, by)
+    def __init__(self, node: FormulaNode, by: By) -> None:
+        self.args = (node, by)
 
 
 class cutoff_max(Function):
-    def __init__(self, query: Query, threshold: int) -> None:
-        self.args = (query, Int(threshold))
+    def __init__(self, node: FormulaNode, threshold: int) -> None:
+        self.args = (node, Int(threshold))
 
 
 class cutoff_min(Function):
-    def __init__(self, query: Query, threshold: int) -> None:
-        self.args = (query, Int(threshold))
+    def __init__(self, node: FormulaNode, threshold: int) -> None:
+        self.args = (node, Int(threshold))
 
 
 class clamp_max(Function):
-    def __init__(self, query: Query, threshold: int) -> None:
-        self.args = (query, Int(threshold))
+    def __init__(self, node: FormulaNode, threshold: int) -> None:
+        self.args = (node, Int(threshold))
 
 
 class clamp_min(Function):
-    def __init__(self, query: Query, threshold: int) -> None:
-        self.args = (query, Int(threshold))
+    def __init__(self, node: FormulaNode, threshold: int) -> None:
+        self.args = (node, Int(threshold))
