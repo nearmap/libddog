@@ -97,7 +97,6 @@ def get_query_values() -> List[Widget]:
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),
-        # NOTE: fill before rollup
         funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
         name="reqs_all",
     )
