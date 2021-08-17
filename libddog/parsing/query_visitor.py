@@ -18,7 +18,7 @@ from libddog.metrics.query import (
     Filter,
     FilterOperator,
     Metric,
-    Query,
+    QueryState,
     Rollup,
     RollupFunc,
     Tag,
@@ -161,7 +161,7 @@ class QueryVisitor(NodeVisitor):  # type: ignore
         if agg_func:
             agg = Aggregation(func=agg_func, by=by, as_=as_)
 
-        return Query(
+        return QueryState(
             metric=Metric(name=name),
             agg=agg,
             filter=filter,

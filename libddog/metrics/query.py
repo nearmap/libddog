@@ -169,7 +169,7 @@ class Fill(QueryFunc):
         return ".fill(%s)" % ", ".join(args)
 
 
-class Query(QueryNode, Renderable):
+class QueryState(QueryNode, Renderable):
     _instance_counter = 1
 
     def __init__(

@@ -2,17 +2,17 @@ import pytest
 
 from libddog.common.errors import UnresolvedFormulaIdentifiers
 from libddog.dashboards import Formula, Request
-from libddog.metrics import AggFunc, Aggregation, Metric, Query
+from libddog.metrics import AggFunc, Aggregation, Metric, QueryState
 from libddog.metrics.literals import Identifier
 
 
 def test_formula__exhaustive() -> None:
-    query_reqs = Query(
+    query_reqs = QueryState(
         metric=Metric(name="aws.elb.http_requests"),
         agg=Aggregation(func=AggFunc.AVG),
         name="reqs",
     )
-    query_cpu = Query(
+    query_cpu = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="cpu",
@@ -44,7 +44,7 @@ def test_formula__exhaustive() -> None:
 
 
 def test_formula__unresolved_identifier() -> None:
-    query = Query(
+    query = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="q1",

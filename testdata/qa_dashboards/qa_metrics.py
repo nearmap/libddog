@@ -28,7 +28,7 @@ from libddog.metrics import (
     Float,
     Int,
     Metric,
-    Query,
+    QueryState,
     Rollup,
     RollupFunc,
     Tag,
@@ -80,14 +80,14 @@ from libddog.metrics import (
 QUERY_CASES = [
     (
         "minimal query",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             agg=Aggregation(func=AggFunc.AVG),
         ),
     ),
     (
         "exhaustive query",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(
@@ -101,7 +101,7 @@ QUERY_CASES = [
     ),
     (
         "no aggregation",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             funcs=[
@@ -112,7 +112,7 @@ QUERY_CASES = [
     ),
     (
         "aggregation without as",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(func=AggFunc.AVG, by=By(tags=["availability-zone"])),
@@ -124,7 +124,7 @@ QUERY_CASES = [
     ),
     (
         "aggregation without by",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(func=AggFunc.AVG, as_=As.RATE),
@@ -136,7 +136,7 @@ QUERY_CASES = [
     ),
     (
         "aggregation without by/as",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(func=AggFunc.AVG),
@@ -148,7 +148,7 @@ QUERY_CASES = [
     ),
     (
         "no filter",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             agg=Aggregation(
                 func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
@@ -161,7 +161,7 @@ QUERY_CASES = [
     ),
     (
         "inclusive filter",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(
                 conds=[
@@ -183,7 +183,7 @@ QUERY_CASES = [
     ),
     (
         "negating filter",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(
                 conds=[
@@ -206,7 +206,7 @@ QUERY_CASES = [
     ),
     (
         "no rollup",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(
@@ -219,7 +219,7 @@ QUERY_CASES = [
     ),
     (
         "no fill",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(
@@ -232,7 +232,7 @@ QUERY_CASES = [
     ),
     (
         "fill before rollup",
-        Query(
+        QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(conds=[TmplVar(tvar="region")]),
             agg=Aggregation(
@@ -310,13 +310,13 @@ def get_queries_group() -> Widget:
 
 
 def get_formulas_group() -> Widget:
-    query_cpu = Query(
+    query_cpu = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),
         name="cpu",
     )
-    query_reqs = Query(
+    query_reqs = QueryState(
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),
@@ -377,7 +377,7 @@ def get_formulas_group() -> Widget:
 
 
 def get_functions_group() -> Widget:
-    query_reqs = Query(
+    query_reqs = QueryState(
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG),

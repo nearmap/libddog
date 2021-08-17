@@ -16,7 +16,7 @@ from libddog.dashboards.enums import (
     Scale,
 )
 from libddog.metrics.bases import FormulaNode
-from libddog.metrics.query import Query
+from libddog.metrics.query import QueryState
 from libddog.metrics.support import find_identifiers
 
 
@@ -193,7 +193,7 @@ class Formula(Renderable):
         self.formula = formula
         self.alias = alias
 
-    def validate(self, queries: List[Query]) -> None:
+    def validate(self, queries: List[QueryState]) -> None:
         identifiers = find_identifiers(self.formula)
         used = {ident.name for ident in identifiers}
 
@@ -238,7 +238,7 @@ class Request(Renderable):
         *,
         title: Optional[str] = None,
         formulas: Optional[List[Formula]] = None,
-        queries: List[Query],
+        queries: List[QueryState],
         conditional_formats: Optional[Sequence[ConditionalFormat]] = None,
         display_type: DisplayType = DisplayType.LINES,
         style: Optional[Style] = None,

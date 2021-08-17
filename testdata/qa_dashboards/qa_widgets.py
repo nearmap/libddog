@@ -47,7 +47,7 @@ from libddog.metrics import (
     Filter,
     Int,
     Metric,
-    Query,
+    QueryState,
     Rollup,
     RollupFunc,
     TmplVar,
@@ -55,7 +55,7 @@ from libddog.metrics import (
 
 
 def get_timeseries() -> Widget:
-    query = Query(
+    query = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["availability-zone"])),
@@ -93,21 +93,21 @@ def get_timeseries() -> Widget:
 
 
 def get_query_values() -> List[Widget]:
-    query_all_reqs = Query(
+    query_all_reqs = QueryState(
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),
         funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
         name="reqs_all",
     )
-    query_4xx = Query(
+    query_4xx = QueryState(
         metric=Metric(name="aws.elb.httpcode_elb_4xx"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),
         funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
         name="reqs_4xx",
     )
-    query_5xx = Query(
+    query_5xx = QueryState(
         metric=Metric(name="aws.elb.httpcode_elb_5xx"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),

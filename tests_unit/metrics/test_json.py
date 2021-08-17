@@ -5,7 +5,7 @@ from libddog.metrics import (
     By,
     Filter,
     Metric,
-    Query,
+    QueryState,
     Rollup,
     RollupFunc,
     Tag,
@@ -15,7 +15,7 @@ from libtests.matchers import dict_matcher
 
 
 def test_exhaustive__with_name() -> None:
-    query = Query(
+    query = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
         agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
@@ -35,11 +35,11 @@ def test_exhaustive__with_name() -> None:
 
 
 def test_minimal__without_name() -> None:
-    query1 = Query(
+    query1 = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
     )
-    query2 = Query(
+    query2 = QueryState(
         metric=Metric(name="aws.ec2.memory"),
         agg=Aggregation(func=AggFunc.MAX),
     )

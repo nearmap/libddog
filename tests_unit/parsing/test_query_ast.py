@@ -10,7 +10,7 @@ from libddog.metrics import (
     Filter,
     Int,
     Metric,
-    Query,
+    QueryState,
     Rollup,
     RollupFunc,
     Tag,
@@ -28,7 +28,7 @@ def test_ast_builder__minimal_query() -> None:
     qs = "avg:aws.ec2.cpuutilization"
 
     ast = parser.parse_ast(qs)
-    expected = Query(
+    expected = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
     )
@@ -45,7 +45,7 @@ def test_ast_builder__exhaustive_query() -> None:
     )
 
     ast = parser.parse_ast(qs)
-    expected = Query(
+    expected = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         filter=Filter(
             conds=[

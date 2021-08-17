@@ -13,11 +13,11 @@ from libddog.dashboards import (
     TitleAlign,
     YAxis,
 )
-from libddog.metrics import AggFunc, Aggregation, Metric, Query
+from libddog.metrics import AggFunc, Aggregation, Metric, QueryState
 
 
 def test_timeseries__minimal() -> None:
-    query = Query(
+    query = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="q1",
@@ -68,7 +68,7 @@ def test_timeseries__minimal() -> None:
 
 
 def test_timeseries__exhaustive() -> None:
-    query = Query(
+    query = QueryState(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="q1",
