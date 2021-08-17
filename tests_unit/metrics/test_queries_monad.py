@@ -29,29 +29,19 @@ def test__minimal() -> None:
 
 
 def test__exhaustive() -> None:
-    # query = QueryState(
-    #     metric=Metric(name="aws.ec2.cpuutilization"),
-    #     filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
-    #     agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-    #     funcs=[
-    #         Rollup(func=RollupFunc.MAX, period_s=110),
-    #         Fill(func=FillFunc.LAST, limit_s=112),
-    #     ],
-    # )
     query = (
         Query("aws.ec2.cpuutilization")
         .filter("$az", role="cache")
         .agg("avg")
         .by("az", "role")
         .as_count()
+        .rollup("max", 110)
+        .fill("last", 112)
     )
 
-    # assert query.codegen() == (
-    #     "avg:aws.ec2.cpuutilization{$az, role:cache} "
-    #     "by {az, role}.as_count().rollup(max, 110).fill(last, 112)"
-    # )
     assert query._state.codegen() == (
-        "avg:aws.ec2.cpuutilization{$az, role:cache} by {az, role}.as_count()"
+        "avg:aws.ec2.cpuutilization{$az, role:cache} "
+        "by {az, role}.as_count().rollup(max, 110).fill(last, 112)"
     )
 
 
@@ -293,3 +283,47 @@ def test__selecting_and_negating_same_tag_is_allowed() -> None:
     )
 
     assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a, !az:*a}"
+
+
+# rollup
+
+
+def test__invalid_rollup_func() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("avg").rollup("tires")
+
+    assert ctx.value.args[0] == (
+        "Rollup function 'tires' must be one of 'avg', 'count', 'max', 'min', 'sum'"
+    )
+
+
+def test__duplicate_rollup_func() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").rollup("min").rollup("count")
+
+    assert ctx.value.args[0] == (
+        "Cannot set rollup function 'count' because "
+        "query already contains rollup function 'min'"
+    )
+
+
+# fill
+
+
+def test__invalid_fill_func() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("avg").fill("bottle")
+
+    assert ctx.value.args[0] == (
+        "Fill function 'bottle' must be one of 'last', 'linear', 'null', 'zero'"
+    )
+
+
+def test__duplicate_fill_func() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").fill("last").fill("zero")
+
+    assert ctx.value.args[0] == (
+        "Cannot set fill function 'zero' because "
+        "query already contains fill function 'last'"
+    )

@@ -171,7 +171,7 @@ def test__exhaustive__fill_with_func_only() -> None:
 
     assert query.codegen() == (
         "avg:aws.ec2.cpuutilization{$az, role:cache} "
-        "by {az, role}.as_count().rollup(max, 110).fill(last, 300)"
+        "by {az, role}.as_count().rollup(max, 110).fill(last)"
     )
 
 

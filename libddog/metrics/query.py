@@ -17,7 +17,7 @@ def reverse_enum(enum_cls: Type[enum.Enum], literal: str, label: str) -> enum.En
         if literal == alternative.value:
             return alternative
 
-    values = [alt.value for alt in alternatives]
+    values = [alt.value for alt in alternatives if alt.value]
     values_fmt = ", ".join([f"{alt!r}" for alt in sorted(values)])
     raise QueryValidationError("%s %r must be one of %s" % (label, literal, values_fmt))
 
@@ -199,7 +199,7 @@ class FillFunc(enum.Enum):
 
 
 class Fill(QueryFunc):
-    def __init__(self, *, func: FillFunc, limit_s: int = 300) -> None:
+    def __init__(self, *, func: FillFunc, limit_s: Optional[int] = None) -> None:
         self.func = func
         self.limit_s = limit_s
 
@@ -418,6 +418,52 @@ class QueryMonad:
             )
 
         state.agg.as_ = As.RATE
+        return self.__class__(state)
+
+    def rollup(self, func: str, period: Optional[int] = None) -> "QueryMonad":
+        state = self._state.clone()
+
+        existing_rollup = None
+        for existing_func in state.funcs:
+            if isinstance(existing_func, Rollup):
+                existing_rollup = existing_func
+
+        if existing_rollup is not None:
+            raise QueryValidationError(
+                "Cannot set rollup function %r because "
+                "query already contains rollup function %r"
+                % (func, existing_rollup.func.value)
+            )
+
+        rollup_func = reverse_enum(RollupFunc, func, label="Rollup function")
+        assert isinstance(rollup_func, RollupFunc)  # help mypy
+        rollup = Rollup(func=rollup_func, period_s=period)
+
+        state.funcs.append(rollup)
+
+        return self.__class__(state)
+
+    def fill(self, func: str, limit: Optional[int] = None) -> "QueryMonad":
+        state = self._state.clone()
+
+        existing_fill = None
+        for existing_func in state.funcs:
+            if isinstance(existing_func, Fill):
+                existing_fill = existing_func
+
+        if existing_fill is not None:
+            raise QueryValidationError(
+                "Cannot set fill function %r because "
+                "query already contains fill function %r"
+                % (func, existing_fill.func.value)
+            )
+
+        fill_func = reverse_enum(FillFunc, func, label="Fill function")
+        assert isinstance(fill_func, FillFunc)  # help mypy
+        fill = Fill(func=fill_func, limit_s=limit)
+
+        state.funcs.append(fill)
+
         return self.__class__(state)
 
 
