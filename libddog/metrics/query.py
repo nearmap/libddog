@@ -51,6 +51,15 @@ class Tag(FilterCond):
         self.value = value
         self.operator = operator
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, self.__class__) and all(
+            (
+                self.tag == other.tag,
+                self.value == other.value,
+                self.operator == other.operator,
+            )
+        )
+
     def codegen(self) -> str:
         key = self.tag
         colon_value = ""
@@ -71,6 +80,9 @@ class TmplVar(FilterCond):
         assert not tvar.startswith("$")
 
         self.tvar = tvar
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, self.__class__) and self.tvar == other.tvar
 
     def codegen(self) -> str:
         return "$%s" % self.tvar
@@ -260,6 +272,25 @@ class QueryMonad:
     def __init__(self, state: QueryState) -> None:
         self._state = state
 
+    def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
+        state = self._state.clone()
+
+        # TODO: validate that tags are well formed
+
+        state.filter = state.filter or Filter(conds=[])
+
+        for tmplvar in tmplvars:
+            tmpl_cond = TmplVar(tvar=tmplvar[1:])
+            if tmpl_cond not in state.filter.conds:
+                state.filter.conds.append(tmpl_cond)
+
+        for tag, value in tags.items():
+            tag_cond = Tag(tag=tag, value=value)
+            if tag_cond not in state.filter.conds:
+                state.filter.conds.append(tag_cond)
+
+        return self.__class__(state)
+
     def agg(self, func: str) -> "QueryMonad":
         state = self._state.clone()
 
@@ -280,7 +311,7 @@ class QueryMonad:
     def by(self, *tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        # TODO: validate that tags are well formed
+        # TODO: validate that tags are well formed (cannot be $tmplvar)
 
         # 'func' has to be set before 'by' - otherwise it would be possible to
         # construct queries with 'by' only and that wouldn't be valid syntax

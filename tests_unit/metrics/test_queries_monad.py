@@ -38,14 +38,20 @@ def test__exhaustive() -> None:
     #         Fill(func=FillFunc.LAST, limit_s=112),
     #     ],
     # )
-    query = Query("aws.ec2.cpuutilization").agg("avg").by("az", "role").as_count()
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .filter("$az", role="cache")
+        .agg("avg")
+        .by("az", "role")
+        .as_count()
+    )
 
     # assert query.codegen() == (
     #     "avg:aws.ec2.cpuutilization{$az, role:cache} "
     #     "by {az, role}.as_count().rollup(max, 110).fill(last, 112)"
     # )
     assert query._state.codegen() == (
-        "avg:aws.ec2.cpuutilization{*} " "by {az, role}.as_count()"
+        "avg:aws.ec2.cpuutilization{$az, role:cache} by {az, role}.as_count()"
     )
 
 
@@ -120,3 +126,49 @@ def test__agg_as_rate_without_func() -> None:
     assert ctx.value.args[0] == (
         "Cannot set as_rate() because aggregation function is not set yet"
     )
+
+
+# filter
+
+
+def test__filter__multiple_calls_using_tmpl_vars() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg").filter("$region").filter("$az")
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{$region, $az}"
+
+
+def test__filter__multiple_calls_using_tags() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization").agg("avg").filter(role="cache").filter(az="*a")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{role:cache, az:*a}"
+
+
+def test__filter__multiple_calls_intermixed() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .agg("avg")
+        .filter("$region")
+        .filter(role="cache")
+        .filter("$az")
+        .filter(host="i-123")
+    )
+
+    assert query._state.codegen() == (
+        "avg:aws.ec2.cpuutilization{$region, role:cache, $az, host:i-123}"
+    )
+
+
+def test__duplicate_filter_is_noop__using_tmpl_var() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg").filter("$az").filter("$az")
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{$az}"
+
+
+def test__duplicate_filter_is_noop__using_tag() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg").filter(az="*a").filter(az="*a")
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a}"
+
+# TODO filter_ne
