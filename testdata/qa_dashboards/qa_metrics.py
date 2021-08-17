@@ -25,6 +25,7 @@ from libddog.metrics import (
     FillFunc,
     Filter,
     FilterOperator,
+    Float,
     Int,
     Metric,
     Query,
@@ -328,7 +329,8 @@ def get_formulas_group() -> Widget:
     cases = [
         (
             "All arithmetic operators",
-            ((abs(cpu) * Int(2)) - reqs) + (log2(cpu) / timeshift(reqs, -3600)),
+            ((abs(cpu) * Int(2)) - reqs)
+            + (Float(3.14) * log2(cpu) / timeshift(reqs, -3600)),
         ),
         (
             "Comma as binary operator",
