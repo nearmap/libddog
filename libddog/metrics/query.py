@@ -76,16 +76,25 @@ class Tag(FilterCond):
 class TmplVar(FilterCond):
     """A filter using a template variable."""
 
-    def __init__(self, *, tvar: str) -> None:
+    def __init__(self, *, tvar: str, operator: FilterOperator = FilterOperator.EQUAL) -> None:
         assert not tvar.startswith("$")
 
         self.tvar = tvar
+        self.operator = operator
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, self.__class__) and self.tvar == other.tvar
+        return isinstance(other, self.__class__) and all((
+            self.tvar == other.tvar,
+            self.operator == other.operator,
+        ))
 
     def codegen(self) -> str:
-        return "$%s" % self.tvar
+        key = f"${self.tvar}"
+
+        if self.operator is FilterOperator.NOT_EQUAL:
+            key = f"!{key}"
+
+        return key
 
 
 class Filter(QueryNode):
@@ -269,6 +278,13 @@ class QueryState(QueryNode, Renderable):
 
 
 class QueryMonad:
+    """
+    QueryMonad provides a more succinct and convenient syntax to build up a
+    query string. Internally, it just stores a QueryState and each time a method
+    is called the internal QueryState is cloned and then mutated, before
+    re-wrapping it into a QueryMonad. This allows chaining method calls.
+    """
+
     def __init__(self, state: QueryState) -> None:
         self._state = state
 
@@ -280,11 +296,23 @@ class QueryMonad:
         state.filter = state.filter or Filter(conds=[])
 
         for tmplvar in tmplvars:
+            if not tmplvar.startswith("$"):
+                raise QueryValidationError(
+                    "Filter key %r without value must be a template variable, not a tag"
+                    % tmplvar
+                )
+
             tmpl_cond = TmplVar(tvar=tmplvar[1:])
             if tmpl_cond not in state.filter.conds:
                 state.filter.conds.append(tmpl_cond)
 
         for tag, value in tags.items():
+            if tag.startswith("$"):
+                raise QueryValidationError(
+                    "Filter '%s:%s' must be a tag, not a template variable"
+                    % (tag, value)
+                )
+
             tag_cond = Tag(tag=tag, value=value)
             if tag_cond not in state.filter.conds:
                 state.filter.conds.append(tag_cond)
@@ -311,7 +339,7 @@ class QueryMonad:
     def by(self, *tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        # TODO: validate that tags are well formed (cannot be $tmplvar)
+        # TODO: validate that tags are well formed (and cannot be $tmplvar)
 
         # 'func' has to be set before 'by' - otherwise it would be possible to
         # construct queries with 'by' only and that wouldn't be valid syntax

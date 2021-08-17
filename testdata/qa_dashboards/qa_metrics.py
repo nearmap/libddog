@@ -182,7 +182,7 @@ QUERY_CASES = [
         ),
     ),
     (
-        "negating filter",
+        "negating tag filter",
         QueryState(
             metric=Metric(name="aws.ec2.cpuutilization"),
             filter=Filter(
@@ -193,6 +193,24 @@ QUERY_CASES = [
                         value="*a",
                         operator=FilterOperator.NOT_EQUAL,
                     ),
+                ]
+            ),
+            agg=Aggregation(
+                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
+            ),
+            funcs=[
+                Rollup(func=RollupFunc.MAX, period_s=110),
+                Fill(func=FillFunc.LAST, limit_s=112),
+            ],
+        ),
+    ),
+    (
+        "negating tmpl var filter",
+        QueryState(
+            metric=Metric(name="aws.ec2.cpuutilization"),
+            filter=Filter(
+                conds=[
+                    TmplVar(tvar="region", operator=FilterOperator.NOT_EQUAL),
                 ]
             ),
             agg=Aggregation(

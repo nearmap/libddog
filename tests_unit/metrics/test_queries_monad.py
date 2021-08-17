@@ -131,6 +131,24 @@ def test__agg_as_rate_without_func() -> None:
 # filter
 
 
+def test__filter__pass_tag_as_tmpl_var() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").filter("role")
+
+    assert ctx.value.args[0] == (
+        "Filter key 'role' without value must be a template variable, not a tag"
+    )
+
+
+def test__filter__tmpl_var_as_tag() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").filter(**{"$role": "cache"})
+
+    assert ctx.value.args[0] == (
+        "Filter '$role:cache' must be a tag, not a template variable"
+    )
+
+
 def test__filter__multiple_calls_using_tmpl_vars() -> None:
     query = Query("aws.ec2.cpuutilization").agg("avg").filter("$region").filter("$az")
 
@@ -171,4 +189,5 @@ def test__duplicate_filter_is_noop__using_tag() -> None:
 
     assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a}"
 
-# TODO filter_ne
+
+# filter_ne
