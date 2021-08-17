@@ -190,4 +190,106 @@ def test__duplicate_filter_is_noop__using_tag() -> None:
     assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a}"
 
 
+def test__conflicting_values_for_same_tag_is_allowed() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg").filter(az="*a").filter(az="*b")
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a, az:*b}"
+
+
 # filter_ne
+
+
+def test__negating_filter__representative() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .agg("avg")
+        .filter_ne("$az")
+        .filter_ne(role="cache")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!$az, !role:cache}"
+
+
+def test__negating_filter__pass_tag_as_tmpl_var() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").filter_ne("role")
+
+    assert ctx.value.args[0] == (
+        "Filter key 'role' without value must be a template variable, not a tag"
+    )
+
+
+def test__negating_filter__pass_tmpl_var_as_tag() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").filter(**{"$role": "cache"})
+
+    assert ctx.value.args[0] == (
+        "Filter '$role:cache' must be a tag, not a template variable"
+    )
+
+
+def test__negating_filter__multiple_calls_using_tmpl_vars() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization").agg("avg").filter_ne("$region").filter_ne("$az")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!$region, !$az}"
+
+
+def test__negating_filter__multiple_calls_using_tags() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .agg("avg")
+        .filter_ne(role="cache")
+        .filter_ne(az="*a")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!role:cache, !az:*a}"
+
+
+def test__negating_filter__multiple_calls_intermixed() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .agg("avg")
+        .filter_ne("$region")
+        .filter_ne(role="cache")
+        .filter_ne("$az")
+        .filter_ne(host="i-123")
+    )
+
+    assert query._state.codegen() == (
+        "avg:aws.ec2.cpuutilization{!$region, !role:cache, !$az, !host:i-123}"
+    )
+
+
+def test__duplicate_negating_filter_is_noop__using_tmpl_var() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg").filter_ne("$az").filter_ne("$az")
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!$az}"
+
+
+def test__duplicate_negating_filter_is_noop__using_tag() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization").agg("avg").filter_ne(az="*a").filter_ne(az="*a")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!az:*a}"
+
+
+def test__conflicting_negating_values_for_same_tag_is_allowed() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization").agg("avg").filter_ne(az="*a").filter_ne(az="*b")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{!az:*a, !az:*b}"
+
+
+# filter and filter_ne
+
+
+def test__selecting_and_negating_same_tag_is_allowed() -> None:
+    query = (
+        Query("aws.ec2.cpuutilization").agg("avg").filter(az="*a").filter_ne(az="*a")
+    )
+
+    assert query._state.codegen() == "avg:aws.ec2.cpuutilization{az:*a, !az:*a}"
