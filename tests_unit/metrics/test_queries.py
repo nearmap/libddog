@@ -601,3 +601,76 @@ def test_charset__tag_value() -> None:
         with pytest.raises(QueryValidationError) as ctx:
             query.filter_ne(region=tag_value)
         assert ctx.value.args[0] == f"Invalid tag value: '{tag_value}'"
+
+
+# internal state
+
+
+def test_state_is_cloned__agg_func() -> None:
+    query = Query("aws.ec2.cpuutilization")
+
+    fst = query.agg("avg")
+    snd = query.agg("sum")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{*}"
+    assert snd._state.codegen() == "sum:aws.ec2.cpuutilization{*}"
+
+
+def test_state_is_cloned__agg_by() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.by("az")
+    snd = query.by("region")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{*} by {az}"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{*} by {region}"
+
+
+def test_state_is_cloned__agg_as() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.as_count()
+    snd = query.as_rate()
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{*}.as_count()"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{*}.as_rate()"
+
+
+def test_state_is_cloned__filter() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.filter(region="us-east-1")
+    snd = query.filter(region="us-west-1")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{region:us-east-1}"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{region:us-west-1}"
+
+
+def test_state_is_cloned__filter_ne() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.filter_ne(region="us-east-1")
+    snd = query.filter_ne(region="us-west-1")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{!region:us-east-1}"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{!region:us-west-1}"
+
+
+def test_state_is_cloned__rollup() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.rollup("min")
+    snd = query.rollup("max")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{*}.rollup(min)"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{*}.rollup(max)"
+
+
+def test_state_is_cloned__fill() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    fst = query.fill("zero")
+    snd = query.fill("last")
+
+    assert fst._state.codegen() == "avg:aws.ec2.cpuutilization{*}.fill(zero)"
+    assert snd._state.codegen() == "avg:aws.ec2.cpuutilization{*}.fill(last)"
