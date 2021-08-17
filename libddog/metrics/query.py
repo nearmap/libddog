@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Type
 from libddog.common.bases import Renderable
 from libddog.metrics.bases import QueryNode
 from libddog.metrics.literals import Identifier
+from libddog.parsing.query_parser import QueryParser
 
 
 class QueryValidationError(Exception):
@@ -296,8 +297,6 @@ class QueryMonad:
     def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        from libddog.parsing.query_parser import QueryParser  # TODO fixme
-
         parser = QueryParser.get_instance()
 
         state.filter = state.filter or Filter(conds=[])
@@ -333,8 +332,6 @@ class QueryMonad:
 
     def filter_ne(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
-
-        from libddog.parsing.query_parser import QueryParser  # TODO fixme
 
         parser = QueryParser.get_instance()
 
@@ -389,7 +386,6 @@ class QueryMonad:
     def by(self, *tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        from libddog.parsing.query_parser import QueryParser  # TODO fixme
         parser = QueryParser.get_instance()
 
         # 'func' has to be set before 'by' - otherwise it would be possible to

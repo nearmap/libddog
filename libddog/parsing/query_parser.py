@@ -5,7 +5,6 @@ from parsimonious.exceptions import IncompleteParseError, ParseError
 from parsimonious.nodes import Node
 
 from libddog.metrics.bases import QueryNode
-from libddog.parsing.query_visitor import QueryVisitor
 
 
 class QueryParser:
@@ -28,6 +27,8 @@ class QueryParser:
         return self.grammar.parse(query_string)
 
     def parse_ast(self, query_string: str) -> QueryNode:
+        from libddog.parsing.query_visitor import QueryVisitor
+
         st = self.parse_st(query_string)
         visitor = QueryVisitor()
         ast: QueryNode = visitor.visit(st)
