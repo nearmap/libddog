@@ -14,7 +14,6 @@ from libddog.metrics import (
     Tag,
     TmplVar,
 )
-from libddog.metrics.query import Query
 
 # 'empty' and 'full' states
 

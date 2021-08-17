@@ -327,3 +327,80 @@ def test__duplicate_fill_func() -> None:
         "Cannot set fill function 'zero' because "
         "query already contains fill function 'last'"
     )
+
+
+# character set
+
+VALID_TAG_NAMES = [
+    ("upper case", "TAG_NAME"),
+    ("mixed case", "tagValue"),
+]
+
+INVALID_TAG_NAMES = [
+    ("space", "availability zone"),
+    ("wildcard", "regio*"),
+    ("starts with digit", "3d"),
+    ("wildcard suffix", "us-east-*"),
+    ("wildcard prefix", "*-east-1"),
+    ("filesystem path", "/dev/null"),
+    ("dotted name", "looks.like.a.metric.name"),
+    # ("dash terminator", "-secret-"),
+    # ("key value", "key:value"),
+]
+
+VALID_TAG_VALUES = [
+    ("upper case", "TAG_VALUE"),
+    ("mixed case", "tagValue"),
+    ("starts with digit", "3d"),
+    ("wildcard suffix", "us-east-*"),
+    ("wildcard prefix", "*-east-1"),
+    ("filesystem path", "/dev/null"),
+    ("dotted name", "looks.like.a.metric.name"),
+    ("dash terminator", "-secret-"),
+    # yes, it's valid even though it looks like a tag:tag:value situation
+    ("key value", "key:value"),
+]
+
+INVALID_TAG_VALUES = [
+    ("space", "us east"),
+    ("infix wildcard", "us-*-1"),
+    ("multiple wildcards", "us-east-**"),
+]
+
+def test_charset__tag_name() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    for _, tag_name in VALID_TAG_NAMES:
+        query.by(tag_name)  # does not raise
+        query.filter(**{tag_name: 'value'})  # does not raise
+        query.filter_ne(**{tag_name: 'value'})  # does not raise
+
+    for _, tag_name in INVALID_TAG_NAMES:
+        with pytest.raises(QueryValidationError) as ctx:
+            query.by(tag_name)
+        assert ctx.value.args[0] == f"Invalid tag name: '{tag_name}'"
+
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter(**{tag_name: 'value'})
+        assert ctx.value.args[0] == f"Invalid tag name: '{tag_name}'"
+
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter_ne(**{tag_name: 'value'})
+        assert ctx.value.args[0] == f"Invalid tag name: '{tag_name}'"
+
+
+def test_charset__tag_value() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    for _, tag_value in VALID_TAG_VALUES:
+        query.filter(region=tag_value)  # does not raise
+        query.filter_ne(region=tag_value)  # does not raise
+
+    for _, tag_value in INVALID_TAG_VALUES:
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter(region=tag_value)
+        assert ctx.value.args[0] == f"Invalid tag value: '{tag_value}'"
+
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter_ne(region=tag_value)
+        assert ctx.value.args[0] == f"Invalid tag value: '{tag_value}'"

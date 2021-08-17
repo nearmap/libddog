@@ -296,7 +296,9 @@ class QueryMonad:
     def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        # TODO: validate that tags are well formed
+        from libddog.parsing.query_parser import QueryParser  # TODO fixme
+
+        parser = QueryParser.get_instance()
 
         state.filter = state.filter or Filter(conds=[])
 
@@ -318,6 +320,11 @@ class QueryMonad:
                     % (tag, value)
                 )
 
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+            if not parser.is_valid_tag_value(value):
+                raise QueryValidationError("Invalid tag value: %r" % value)
+
             tag_cond = Tag(tag=tag, value=value)
             if tag_cond not in state.filter.conds:
                 state.filter.conds.append(tag_cond)
@@ -327,7 +334,9 @@ class QueryMonad:
     def filter_ne(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        # TODO: validate that tags are well formed
+        from libddog.parsing.query_parser import QueryParser  # TODO fixme
+
+        parser = QueryParser.get_instance()
 
         state.filter = state.filter or Filter(conds=[])
 
@@ -348,6 +357,11 @@ class QueryMonad:
                     "Filter '%s:%s' must be a tag, not a template variable"
                     % (tag, value)
                 )
+
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+            if not parser.is_valid_tag_value(value):
+                raise QueryValidationError("Invalid tag value: %r" % value)
 
             tag_cond = Tag(tag=tag, value=value, operator=FilterOperator.NOT_EQUAL)
             if tag_cond not in state.filter.conds:
@@ -375,7 +389,8 @@ class QueryMonad:
     def by(self, *tags: str) -> "QueryMonad":
         state = self._state.clone()
 
-        # TODO: validate that tags are well formed (and cannot be $tmplvar)
+        from libddog.parsing.query_parser import QueryParser  # TODO fixme
+        parser = QueryParser.get_instance()
 
         # 'func' has to be set before 'by' - otherwise it would be possible to
         # construct queries with 'by' only and that wouldn't be valid syntax
@@ -388,6 +403,9 @@ class QueryMonad:
 
         by = state.agg.by or By(tags=list(tags))
         for tag in tags:
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+
             if tag not in by.tags:
                 by.tags.append(tag)
 
