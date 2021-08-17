@@ -277,7 +277,7 @@ class QueryMonad:
 
         return self.__class__(state)
 
-    def by(self, *tags: str) -> 'QueryMonad':
+    def by(self, *tags: str) -> "QueryMonad":
         state = self._state.clone()
 
         # TODO: validate that tags are well formed
@@ -285,11 +285,10 @@ class QueryMonad:
         # 'func' has to be set before 'by' - otherwise it would be possible to
         # construct queries with 'by' only and that wouldn't be valid syntax
         if not state.agg:
-            tags_fmt = ', '.join([f"{tag!r}" for tag in tags])
+            tags_fmt = ", ".join([f"{tag!r}" for tag in tags])
             raise QueryValidationError(
                 "Cannot set aggregation by %s because "
-                "aggregation function is not set yet"
-                % tags_fmt
+                "aggregation function is not set yet" % tags_fmt
             )
 
         by = state.agg.by or By(tags=list(tags))
@@ -298,6 +297,32 @@ class QueryMonad:
                 by.tags.append(tag)
 
         state.agg.by = by
+        return self.__class__(state)
+
+    def as_count(self) -> "QueryMonad":
+        state = self._state.clone()
+
+        # 'func' has to be set before 'as' - otherwise it would be possible to
+        # construct queries with 'as' only and that wouldn't be valid syntax
+        if not state.agg:
+            raise QueryValidationError(
+                "Cannot set as_count() because aggregation function is not set yet"
+            )
+
+        state.agg.as_ = As.COUNT
+        return self.__class__(state)
+
+    def as_rate(self) -> "QueryMonad":
+        state = self._state.clone()
+
+        # 'func' has to be set before 'as' - otherwise it would be possible to
+        # construct queries with 'as' only and that wouldn't be valid syntax
+        if not state.agg:
+            raise QueryValidationError(
+                "Cannot set as_rate() because aggregation function is not set yet"
+            )
+
+        state.agg.as_ = As.RATE
         return self.__class__(state)
 
 
