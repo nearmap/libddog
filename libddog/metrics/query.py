@@ -1,9 +1,25 @@
+import copy
 import enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from libddog.common.bases import Renderable
 from libddog.metrics.bases import QueryNode
 from libddog.metrics.literals import Identifier
+
+
+class QueryValidationError(Exception):
+    pass
+
+
+def reverse_enum(enum_cls: Type[enum.Enum], literal: str, label: str) -> enum.Enum:
+    alternatives: List[enum.Enum] = list(enum_cls)
+    for alternative in alternatives:
+        if literal == alternative.value:
+            return alternative
+
+    values = [alt.value for alt in alternatives]
+    values_fmt = ", ".join([f"{alt!r}" for alt in sorted(values)])
+    raise QueryValidationError("%s %r must be one of %s" % (label, literal, values_fmt))
 
 
 class Metric(QueryNode):
@@ -193,6 +209,9 @@ class QueryState(QueryNode, Renderable):
         self.aggregator = aggregator
         self.query = query
 
+    def clone(self) -> "QueryState":
+        return copy.deepcopy(self)
+
     def get_next_unique_name(self) -> str:
         counter = self.__class__._instance_counter
         self.__class__._instance_counter += 1
@@ -235,3 +254,53 @@ class QueryState(QueryNode, Renderable):
         }
 
         return dct
+
+
+class QueryMonad:
+    def __init__(self, state: QueryState) -> None:
+        self._state = state
+
+    def agg(self, func: str) -> "QueryMonad":
+        state = self._state.clone()
+
+        agg_func_existing = state.agg.func if state.agg else None
+        if agg_func_existing is not None:
+            raise QueryValidationError(
+                "Cannot set aggregation function %r because "
+                "query already contains aggregation function %r"
+                % (func, agg_func_existing.value)
+            )
+
+        agg_func = reverse_enum(AggFunc, func, label="Aggregation function")
+        assert isinstance(agg_func, AggFunc)  # help mypy
+        state.agg = Aggregation(func=agg_func)
+
+        return self.__class__(state)
+
+    def by(self, *tags: str) -> 'QueryMonad':
+        state = self._state.clone()
+
+        # TODO: validate that tags are well formed
+
+        # 'func' has to be set before 'by' - otherwise it would be possible to
+        # construct queries with 'by' only and that wouldn't be valid syntax
+        if not state.agg:
+            tags_fmt = ', '.join([f"{tag!r}" for tag in tags])
+            raise QueryValidationError(
+                "Cannot set aggregation by %s because "
+                "aggregation function is not set yet"
+                % tags_fmt
+            )
+
+        by = state.agg.by or By(tags=list(tags))
+        for tag in tags:
+            if tag not in by.tags:
+                by.tags.append(tag)
+
+        state.agg.by = by
+        return self.__class__(state)
+
+
+def Query(metric: str, name: Optional[str] = None) -> QueryMonad:
+    state = QueryState(metric=Metric(name=metric), name=name)
+    return QueryMonad(state)
