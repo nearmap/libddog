@@ -63,20 +63,20 @@ def test_ast_builder__exhaustive_query() -> None:
     assert ast.codegen() == expected.codegen()
 
 
-def test_ast_builder__formula() -> None:
-    parser = QueryParser()
+# def test_ast_builder__formula() -> None:
+#     parser = QueryParser()
 
-    qs = "(abs(avg:aws.ec2.cpu) + 10) / timeshift(sum:aws.ec2.mem, -123)"
+#     qs = "(abs(avg:aws.ec2.cpu) + 10) / timeshift(sum:aws.ec2.mem, -123)"
 
-    ast = parser.parse_ast(qs)
-    cpu = Query(
-        metric=Metric(name="aws.ec2.cpu"),
-        agg=Aggregation(func=AggFunc.AVG),
-    )
-    mem = Query(
-        metric=Metric(name="aws.ec2.mem"),
-        agg=Aggregation(func=AggFunc.SUM),
-    )
-    expected = Div(Add(abs(cpu), Int(10)), timeshift(mem, -123))
+#     ast = parser.parse_ast(qs)
+#     cpu = Query(
+#         metric=Metric(name="aws.ec2.cpu"),
+#         agg=Aggregation(func=AggFunc.AVG),
+#     )
+#     mem = Query(
+#         metric=Metric(name="aws.ec2.mem"),
+#         agg=Aggregation(func=AggFunc.SUM),
+#     )
+#     expected = Div(Add(abs(cpu), Int(10)), timeshift(mem, -123))
 
-    assert ast.codegen() == expected.codegen()
+#     assert ast.codegen() == expected.codegen()

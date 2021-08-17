@@ -1,23 +1,15 @@
-from libddog.metrics.bases import QueryNode
+from libddog.metrics.bases import FormulaNode
 
 
-class Paren(QueryNode):
-    def __init__(self, expr: QueryNode) -> None:
-        self.expr = expr
-
-    def codegen(self) -> str:
-        return f"({self.expr.codegen()})"
-
-
-class BinaryFormula(QueryNode):
+class BinaryFormula(FormulaNode):
     symbol: str = ""
 
-    def __init__(self, left: QueryNode, right: QueryNode) -> None:
+    def __init__(self, left: FormulaNode, right: FormulaNode) -> None:
         self.left = left
         self.right = right
 
     def codegen(self) -> str:
-        return f"{self.left.codegen()} {self.symbol} {self.right.codegen()}"
+        return f"({self.left.codegen()} {self.symbol} {self.right.codegen()})"
 
 
 class Add(BinaryFormula):
@@ -38,3 +30,6 @@ class Div(BinaryFormula):
 
 class Comma(BinaryFormula):
     symbol = ","
+
+    def codegen(self) -> str:
+        return f"{self.left.codegen()}{self.symbol} {self.right.codegen()}"

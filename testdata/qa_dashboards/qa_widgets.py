@@ -45,6 +45,7 @@ from libddog.metrics import (
     Fill,
     FillFunc,
     Filter,
+    Int,
     Metric,
     Query,
     Rollup,
@@ -96,7 +97,6 @@ def get_query_values() -> List[Widget]:
         metric=Metric(name="aws.elb.request_count"),
         filter=Filter(conds=[TmplVar(tvar="region")]),
         agg=Aggregation(func=AggFunc.SUM),
-        # NOTE: fill before rollup
         funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
         name="reqs_all",
     )
@@ -115,10 +115,14 @@ def get_query_values() -> List[Widget]:
         name="reqs_5xx",
     )
 
+    reqs_all = query_all_reqs.identifier()
+
     widgets: List[Widget] = []
     x = 6
 
     for name, query in (("4xx", query_4xx), ("5xx", query_5xx)):
+        reqs_this = query.identifier()
+
         # Exercises most of the properties of a QueryValue
         widget = QueryValue(
             title=f"ELB {name.upper()}",
@@ -127,7 +131,7 @@ def get_query_values() -> List[Widget]:
             precision=1,
             requests=[
                 Request(
-                    formulas=[Formula(text=f"100 * (reqs_{name} / reqs_all)")],
+                    formulas=[Formula(formula=Int(100) * (reqs_this / reqs_all))],
                     queries=[query_all_reqs, query],
                     conditional_formats=[
                         ConditionalFormat(

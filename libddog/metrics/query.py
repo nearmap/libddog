@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from libddog.common.bases import Renderable
 from libddog.metrics.bases import QueryNode
+from libddog.metrics.literals import Identifier
 
 
 class Metric(QueryNode):
@@ -196,6 +197,9 @@ class Query(QueryNode, Renderable):
         counter = self.__class__._instance_counter
         self.__class__._instance_counter += 1
         return "q%s" % counter
+
+    def identifier(self) -> Identifier:
+        return Identifier(self.name)
 
     def codegen(self) -> str:
         agg_func, agg_by, agg_as = "", "", ""

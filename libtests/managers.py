@@ -9,7 +9,7 @@ from libddog.dashboards import Dashboard
 
 class QADashboardManager:
     # detect occurrences of:  %(variable)s
-    rx_string_template = re.compile("%\([a-zA-Z0-9_]+\)s")
+    rx_string_template = re.compile("%\\([a-zA-Z0-9_]+\\)s")
 
     def __init__(self) -> None:
         proj_root = Path(__file__).parent.parent

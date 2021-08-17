@@ -33,16 +33,17 @@ def test_request__minimal() -> None:
 
 
 def test_request__exhaustive() -> None:
-    cpu = Query(
+    query_cpu = Query(
         metric=Metric(name="aws.ec2.cpuutilization"),
         agg=Aggregation(func=AggFunc.AVG),
         name="cpu",
     )
+    cpu = query_cpu.identifier()
 
     request = Request(
         title="cpu usage",
-        formulas=[Formula(text="cpu", alias="cpu")],
-        queries=[cpu],
+        formulas=[Formula(formula=cpu, alias="cpu")],
+        queries=[query_cpu],
         conditional_formats=[
             ConditionalFormat(
                 comparator=Comparator.GT,
