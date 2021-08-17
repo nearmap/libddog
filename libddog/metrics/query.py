@@ -76,17 +76,21 @@ class Tag(FilterCond):
 class TmplVar(FilterCond):
     """A filter using a template variable."""
 
-    def __init__(self, *, tvar: str, operator: FilterOperator = FilterOperator.EQUAL) -> None:
+    def __init__(
+        self, *, tvar: str, operator: FilterOperator = FilterOperator.EQUAL
+    ) -> None:
         assert not tvar.startswith("$")
 
         self.tvar = tvar
         self.operator = operator
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, self.__class__) and all((
-            self.tvar == other.tvar,
-            self.operator == other.operator,
-        ))
+        return isinstance(other, self.__class__) and all(
+            (
+                self.tvar == other.tvar,
+                self.operator == other.operator,
+            )
+        )
 
     def codegen(self) -> str:
         key = f"${self.tvar}"

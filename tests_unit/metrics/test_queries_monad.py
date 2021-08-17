@@ -140,7 +140,7 @@ def test__filter__pass_tag_as_tmpl_var() -> None:
     )
 
 
-def test__filter__tmpl_var_as_tag() -> None:
+def test__filter__pass_tmpl_var_as_tag() -> None:
     with pytest.raises(QueryValidationError) as ctx:
         Query("aws.ec2.cpuutilization").agg("sum").filter(**{"$role": "cache"})
 
