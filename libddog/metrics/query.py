@@ -296,10 +296,9 @@ class QueryMonad:
 
     def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
+        state.filter = state.filter or Filter(conds=[])
 
         parser = QueryParser.get_instance()
-
-        state.filter = state.filter or Filter(conds=[])
 
         for tmplvar in tmplvars:
             if not tmplvar.startswith("$"):
@@ -307,6 +306,9 @@ class QueryMonad:
                     "Filter key %r without value must be a template variable, not a tag"
                     % tmplvar
                 )
+
+            if not parser.is_valid_tmpl_var(tmplvar):
+                raise QueryValidationError("Invalid template variable: %r" % tmplvar)
 
             tmpl_cond = TmplVar(tvar=tmplvar[1:])
             if tmpl_cond not in state.filter.conds:
@@ -332,10 +334,9 @@ class QueryMonad:
 
     def filter_ne(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()
+        state.filter = state.filter or Filter(conds=[])
 
         parser = QueryParser.get_instance()
-
-        state.filter = state.filter or Filter(conds=[])
 
         for tmplvar in tmplvars:
             if not tmplvar.startswith("$"):
@@ -343,6 +344,9 @@ class QueryMonad:
                     "Filter key %r without value must be a template variable, not a tag"
                     % tmplvar
                 )
+
+            if not parser.is_valid_tmpl_var(tmplvar):
+                raise QueryValidationError("Invalid template variable: %r" % tmplvar)
 
             tmpl_cond = TmplVar(tvar=tmplvar[1:], operator=FilterOperator.NOT_EQUAL)
             if tmpl_cond not in state.filter.conds:
@@ -397,8 +401,13 @@ class QueryMonad:
                 "aggregation function is not set yet" % tags_fmt
             )
 
-        by = state.agg.by or By(tags=list(tags))
+        by = state.agg.by or By(tags=[])
         for tag in tags:
+            if tag.startswith("$"):
+                raise QueryValidationError(
+                    "Aggregation by %r must be a tag, not a template variable" % tag
+                )
+
             if not parser.is_valid_tag_name(tag):
                 raise QueryValidationError("Invalid tag name: %r" % tag)
 

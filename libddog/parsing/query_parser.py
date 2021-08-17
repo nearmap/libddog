@@ -32,12 +32,19 @@ class QueryParser:
         st = self.parse_st(query_string)
         visitor = QueryVisitor()
         ast: QueryNode = visitor.visit(st)
-        # import pdb; pdb.set_trace()
         return ast
 
     def is_valid_tag_name(self, token: str) -> bool:
         try:
             self.grammar["tag_name"].parse(token)
+        except (IncompleteParseError, ParseError) as exc:
+            return False
+
+        return True
+
+    def is_valid_tmpl_var(self, token: str) -> bool:
+        try:
+            self.grammar["tvar_name"].parse(token)
         except (IncompleteParseError, ParseError) as exc:
             return False
 

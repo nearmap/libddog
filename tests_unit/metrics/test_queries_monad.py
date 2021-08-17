@@ -1,22 +1,6 @@
 import pytest
 
-from libddog.metrics import (
-    AggFunc,
-    Aggregation,
-    As,
-    By,
-    Fill,
-    FillFunc,
-    Filter,
-    FilterOperator,
-    Metric,
-    Query,
-    QueryState,
-    Rollup,
-    RollupFunc,
-    Tag,
-    TmplVar,
-)
+from libddog.metrics import Query
 from libddog.metrics.query import QueryValidationError
 
 # 'empty' and 'full' states
@@ -68,6 +52,15 @@ def test__duplicate_agg_func() -> None:
 
 
 # aggregation by
+
+
+def test__agg_by__pass_tmpl_var_as_tag() -> None:
+    with pytest.raises(QueryValidationError) as ctx:
+        Query("aws.ec2.cpuutilization").agg("sum").by("$role")
+
+    assert ctx.value.args[0] == (
+        "Aggregation by '$role' must be a tag, not a template variable"
+    )
 
 
 def test__agg_by_without_func() -> None:
@@ -334,19 +327,24 @@ def test__duplicate_fill_func() -> None:
 VALID_TAG_NAMES = [
     ("upper case", "TAG_NAME"),
     ("mixed case", "tagValue"),
+    ("dotted name", "looks.like.a.metric.name"),
+    ("infix dash", "first-name"),
+    ("infix slash", "person/name"),
 ]
 
 INVALID_TAG_NAMES = [
     ("space", "availability zone"),
-    # ("wildcard", "regio*"),
-    # ("starts with digit", "3d"),
-    # ("wildcard suffix", "us-east-*"),
-    # ("wildcard prefix", "*-east-1"),
-    # ("filesystem path", "/dev/null"),
-    # ("dotted name", "looks.like.a.metric.name"),
-    # ("dash terminator", "-secret-"),
-    # ("key value", "key:value"),
+    ("wildcard", "regio*"),
+    ("starts with digit", "3d"),
+    ("wildcard suffix", "us-east-*"),
+    ("wildcard prefix", "*-east-1"),
+    ("filesystem path", "/dev/null"),
+    ("dash terminator", "-secret-"),
+    ("key value", "key:value"),
 ]
+
+VALID_TMPL_VARS = [(case, f"${pattern}") for case, pattern in VALID_TAG_NAMES]
+INVALID_TMPL_VARS = [(case, f"${pattern}") for case, pattern in INVALID_TAG_NAMES]
 
 VALID_TAG_VALUES = [
     ("upper case", "TAG_VALUE"),
@@ -354,8 +352,10 @@ VALID_TAG_VALUES = [
     ("starts with digit", "3d"),
     ("wildcard suffix", "us-east-*"),
     ("wildcard prefix", "*-east-1"),
+    ("infix slash", "person/name"),
     ("filesystem path", "/dev/null"),
     ("dotted name", "looks.like.a.metric.name"),
+    ("infix dash", "first-name"),
     ("dash terminator", "-secret-"),
     # yes, it's valid even though it looks like a tag:tag:value situation
     ("key value", "key:value"),
@@ -388,6 +388,23 @@ def test_charset__tag_name() -> None:
         with pytest.raises(QueryValidationError) as ctx:
             query.filter_ne(**{tag_name: "value"})
         assert ctx.value.args[0] == f"Invalid tag name: '{tag_name}'"
+
+
+def test_charset__tmpl_var() -> None:
+    query = Query("aws.ec2.cpuutilization").agg("avg")
+
+    for _, tag_name in VALID_TMPL_VARS:
+        query.filter(tag_name)  # does not raise
+        query.filter_ne(tag_name)  # does not raise
+
+    for _, tag_name in INVALID_TMPL_VARS:
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter(tag_name)
+        assert ctx.value.args[0] == f"Invalid template variable: '{tag_name}'"
+
+        with pytest.raises(QueryValidationError) as ctx:
+            query.filter_ne(tag_name)
+        assert ctx.value.args[0] == f"Invalid template variable: '{tag_name}'"
 
 
 def test_charset__tag_value() -> None:
