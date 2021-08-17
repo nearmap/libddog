@@ -51,7 +51,7 @@ class Tag(FilterCond):
         self.value = value
         self.operator = operator
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and all(
             (
                 self.tag == other.tag,
@@ -81,7 +81,7 @@ class TmplVar(FilterCond):
 
         self.tvar = tvar
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.tvar == other.tvar
 
     def codegen(self) -> str:
