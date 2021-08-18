@@ -12,7 +12,7 @@ import json
 import os
 
 from libddog.parsing.extract_queries import get_queries
-from libddog.parsing.query import QueryParser
+from libddog.parsing.query_parser import QueryParser
 
 
 def main(download_dir) -> None:
@@ -34,7 +34,7 @@ def main(download_dir) -> None:
             # print(qf.query)
             try:
                 parser.parse(qf.query)
-            except:
+            except Exception:
                 sys.stderr.write("FAILED: %s\n" % qf.query)
 
 

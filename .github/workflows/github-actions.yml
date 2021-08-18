@@ -13,6 +13,18 @@ jobs:
       - run: pip install -r dev-requirements.txt
       - run: ci/run-format-checker
 
+  run-style-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: sudo apt-get install -y python3-venv
+      - run: python -m venv ve
+      - run: echo "ve/bin" >> $GITHUB_PATH
+      - run: pip install -r requirements.txt
+      - run: pip install -r dev-requirements.txt
+      - run: ./stylecheck
+
   run-type-checker:
     runs-on: ubuntu-latest
     steps:

@@ -229,7 +229,10 @@ class top(Function):
 
     def codegen(self) -> str:
         func_name = self.__class__.__name__
-        return f"{func_name}({self.node.codegen()}, {self.limit_to}, '{self.by}', '{self.dir}')"
+        return (
+            f"{func_name}({self.node.codegen()}, {self.limit_to}, "
+            f"'{self.by}', '{self.dir}')"
+        )
 
 
 # TODO: variants of top / bottom
