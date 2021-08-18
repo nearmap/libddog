@@ -44,7 +44,7 @@ from libddog.metrics.functions import (
     week_before,
 )
 from libddog.metrics.literals import Float, Identifier, Int
-from libddog.metrics.query import Query
+from libddog.metrics.query import Query, QueryMonad
 
 __all__ = (
     "Add",
@@ -55,6 +55,7 @@ __all__ = (
     "Int",
     "Mul",
     "Query",
+    "QueryMonad",
     "Sub",
     "abs",
     "anomalies",
