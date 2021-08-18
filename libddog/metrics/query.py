@@ -109,13 +109,6 @@ class Filter(QueryNode):
     def codegen(self) -> str:
         return "{%s}" % ", ".join((cond.codegen() for cond in self.conds))
 
-    def __and__(self, other: Optional["Filter"]) -> "Filter":
-        if other:
-            conds = self.conds + other.conds
-            return self.__class__(conds=conds)
-
-        return self
-
 
 class AggFunc(enum.Enum):
     AVG = "avg"
@@ -243,9 +236,6 @@ class QueryState(QueryNode, Renderable):
         self.__class__._instance_counter += 1
         return "q%s" % counter
 
-    def identifier(self) -> Identifier:
-        return Identifier(self.name)
-
     def codegen(self) -> str:
         agg_func, agg_by, agg_as = "", "", ""
         if self.agg:
@@ -293,6 +283,9 @@ class QueryMonad:
 
     def __init__(self, state: QueryState) -> None:
         self._state = state
+
+    def identifier(self) -> Identifier:
+        return Identifier(self._state.name)
 
     def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
         state = self._state.clone()

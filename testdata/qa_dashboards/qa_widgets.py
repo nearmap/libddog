@@ -38,28 +38,17 @@ from libddog.dashboards import (
     Widget,
     YAxis,
 )
-from libddog.metrics import (
-    AggFunc,
-    Aggregation,
-    By,
-    Fill,
-    FillFunc,
-    Filter,
-    Int,
-    Metric,
-    QueryState,
-    Rollup,
-    RollupFunc,
-    TmplVar,
-)
+from libddog.metrics import Int, Query
 
 
 def get_timeseries() -> Widget:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.AVG, by=By(tags=["availability-zone"])),
-        funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.AVG, period_s=60)],
+    query = (
+        Query("aws.ec2.cpuutilization")
+        .filter("$region")
+        .agg("avg")
+        .by("availability-zone")
+        .fill("linear")
+        .rollup("avg", 60)
     )
 
     # Exercises most of the properties of a Timeseries
@@ -93,26 +82,26 @@ def get_timeseries() -> Widget:
 
 
 def get_query_values() -> List[Widget]:
-    query_all_reqs = QueryState(
-        metric=Metric(name="aws.elb.request_count"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.SUM),
-        funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
-        name="reqs_all",
+    query_all_reqs = (
+        Query("aws.elb.request_count", name="reqs_all")
+        .filter("$region")
+        .agg("sum")
+        .fill("linear")
+        .rollup("sum", 60)
     )
-    query_4xx = QueryState(
-        metric=Metric(name="aws.elb.httpcode_elb_4xx"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.SUM),
-        funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
-        name="reqs_4xx",
+    query_4xx = (
+        Query("aws.elb.httpcode_elb_4xx", name="reqs_4xx")
+        .filter("$region")
+        .agg("sum")
+        .fill("linear")
+        .rollup("sum", 60)
     )
-    query_5xx = QueryState(
-        metric=Metric(name="aws.elb.httpcode_elb_5xx"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.SUM),
-        funcs=[Fill(func=FillFunc.LINEAR), Rollup(func=RollupFunc.SUM, period_s=60)],
-        name="reqs_5xx",
+    query_5xx = (
+        Query("aws.elb.httpcode_elb_5xx", name="reqs_5xx")
+        .filter("$region")
+        .agg("sum")
+        .fill("linear")
+        .rollup("sum", 60)
     )
 
     reqs_all = query_all_reqs.identifier()

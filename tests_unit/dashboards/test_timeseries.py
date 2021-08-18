@@ -13,15 +13,11 @@ from libddog.dashboards import (
     TitleAlign,
     YAxis,
 )
-from libddog.metrics import AggFunc, Aggregation, Metric, QueryState
+from libddog.metrics import Query
 
 
 def test_timeseries__minimal() -> None:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="q1",
-    )
+    query = Query("aws.ec2.cpuutilization", name="q1").agg("avg")
 
     ts = Timeseries(title="cpu", requests=[Request(queries=[query])])
 
@@ -68,11 +64,7 @@ def test_timeseries__minimal() -> None:
 
 
 def test_timeseries__exhaustive() -> None:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="q1",
-    )
+    query = Query("aws.ec2.cpuutilization", name="q1").agg("avg")
 
     ts = Timeseries(
         title="cpu",

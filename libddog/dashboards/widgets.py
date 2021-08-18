@@ -90,7 +90,7 @@ class Widget:
         self._filter_dict_keys(dct, allowed_atts)
 
         # overwrite 'queries' using our custom implementation
-        dct["queries"] = [self.query_as_dict(query) for query in request.queries]
+        dct["queries"] = [self.query_as_dict(query._state) for query in request.queries]
 
         return dct
 

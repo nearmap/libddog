@@ -7,15 +7,11 @@ from libddog.dashboards import (
     Time,
     TitleAlign,
 )
-from libddog.metrics import AggFunc, Aggregation, Metric, QueryState
+from libddog.metrics import Query
 
 
 def test_query_value__minimal() -> None:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="q1",
-    )
+    query = Query("aws.ec2.cpuutilization", name="q1").agg("avg")
 
     qv = QueryValue(
         title="nodes",
@@ -30,7 +26,7 @@ def test_query_value__minimal() -> None:
                 {
                     "conditional_formats": [],
                     "formulas": [{"formula": "q1"}],
-                    "queries": [query.as_dict()],
+                    "queries": [query._state.as_dict()],
                     "response_format": "scalar",
                 }
             ],
@@ -45,11 +41,7 @@ def test_query_value__minimal() -> None:
 
 
 def test_query_value__exhaustive() -> None:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="q1",
-    )
+    query = Query("aws.ec2.cpuutilization", name="q1").agg("avg")
 
     qv = QueryValue(
         title="nodes",
@@ -73,7 +65,7 @@ def test_query_value__exhaustive() -> None:
                 {
                     "conditional_formats": [],
                     "formulas": [{"formula": "q1"}],
-                    "queries": [query.as_dict()],
+                    "queries": [query._state.as_dict()],
                     "response_format": "scalar",
                 }
             ],

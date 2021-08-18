@@ -1,51 +1,35 @@
-from libddog.metrics import (
-    AggFunc,
-    Aggregation,
-    As,
-    By,
-    Filter,
-    Metric,
-    QueryState,
-    Rollup,
-    RollupFunc,
-    Tag,
-    TmplVar,
-)
+from libddog.metrics import Query
 from libtests.matchers import dict_matcher
 
 
 def test_exhaustive__with_name() -> None:
-    query = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        filter=Filter(conds=[TmplVar(tvar="az"), Tag(tag="role", value="cache")]),
-        agg=Aggregation(func=AggFunc.AVG, by=By(tags=["az", "role"]), as_=As.COUNT),
-        funcs=[Rollup(func=RollupFunc.MAX, period_s=110)],
-        name="cpu",
+    query = (
+        Query("aws.ec2.cpuutilization", name="cpu")
+        .filter("$az", role="cache")
+        .agg("avg")
+        .by("az", "role")
+        .as_count()
+        .rollup("max", 110)
+        .fill("last", 112)
     )
 
-    assert query.as_dict() == {
+    assert query._state.as_dict() == {
         "aggregator": "avg",
         "data_source": "metrics",
         "name": "cpu",
         "query": (
             "avg:aws.ec2.cpuutilization{$az, role:cache} "
-            "by {az, role}.as_count().rollup(max, 110)"
+            "by {az, role}.as_count().rollup(max, 110).fill(last, 112)"
         ),
     }
 
 
 def test_minimal__without_name() -> None:
-    query1 = QueryState(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-    )
-    query2 = QueryState(
-        metric=Metric(name="aws.ec2.memory"),
-        agg=Aggregation(func=AggFunc.MAX),
-    )
+    query1 = Query("aws.ec2.cpuutilization").agg("avg")
+    query2 = Query("aws.ec2.memory").agg("max")
 
-    dct1 = query1.as_dict()
-    dct2 = query2.as_dict()
+    dct1 = query1._state.as_dict()
+    dct2 = query2._state.as_dict()
 
     assert dict_matcher(dct1, name="q1") == {
         "aggregator": "avg",
