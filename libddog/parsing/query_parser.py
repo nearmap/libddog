@@ -34,26 +34,19 @@ class QueryParser:
         ast: QueryNode = visitor.visit(st)
         return ast
 
-    def is_valid_tag_name(self, token: str) -> bool:
+    def is_valid_token(self, rule: str, token: str) -> bool:
         try:
-            self.grammar["tag_name"].parse(token)
+            self.grammar[rule].parse(token)
         except (IncompleteParseError, ParseError) as exc:
             return False
 
         return True
+
+    def is_valid_tag_name(self, token: str) -> bool:
+        return self.is_valid_token('tag_name', token)
 
     def is_valid_tmpl_var(self, token: str) -> bool:
-        try:
-            self.grammar["tvar_name"].parse(token)
-        except (IncompleteParseError, ParseError) as exc:
-            return False
-
-        return True
+        return self.is_valid_token('tvar_name', token)
 
     def is_valid_tag_value(self, token: str) -> bool:
-        try:
-            self.grammar["tag_value"].parse(token)
-        except (IncompleteParseError, ParseError) as exc:
-            return False
-
-        return True
+        return self.is_valid_token('tag_value', token)
