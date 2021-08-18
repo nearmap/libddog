@@ -43,10 +43,10 @@ class QueryParser:
         return True
 
     def is_valid_tag_name(self, token: str) -> bool:
-        return self.is_valid_token('tag_name', token)
+        return self.is_valid_token("tag_name", token)
 
     def is_valid_tmpl_var(self, token: str) -> bool:
-        return self.is_valid_token('tvar_name', token)
+        return self.is_valid_token("tvar_name", token)
 
     def is_valid_tag_value(self, token: str) -> bool:
-        return self.is_valid_token('tag_value', token)
+        return self.is_valid_token("tag_value", token)
