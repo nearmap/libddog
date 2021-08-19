@@ -32,6 +32,7 @@ class Size:
     def get_defaults(cls) -> Dict[Any, Any]:
         from libddog.dashboards.widgets import (
             Group,
+            Heatmap,
             Note,
             QueryValue,
             Timeseries,
@@ -40,6 +41,7 @@ class Size:
 
         return {
             Group: (12, 1),
+            Heatmap: (4, 2),
             Note: (2, 2),
             QueryValue: (2, 2),
             Timeseries: (4, 2),
@@ -198,6 +200,7 @@ class YAxis(Renderable):
 
 class FormulaLimit(Renderable):
     def __init__(self, count: int, order: LimitOrder) -> None:
+        # TODO: validate count is 5, 10, 25, 50, 100
         self.count = count
         self.order = order
 

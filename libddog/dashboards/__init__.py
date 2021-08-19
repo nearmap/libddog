@@ -41,6 +41,7 @@ from libddog.dashboards.enums import (
 from libddog.dashboards.presets import NotePreset
 from libddog.dashboards.widgets import (
     Group,
+    Heatmap,
     Note,
     QueryValue,
     Timeseries,
@@ -58,6 +59,7 @@ __all__ = (
     "Formula",
     "FormulaLimit",
     "Group",
+    "Heatmap",
     "LayoutType",
     "LegendColumn",
     "LegendLayout",

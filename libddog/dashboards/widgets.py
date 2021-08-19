@@ -96,6 +96,66 @@ class Widget:
         return dct
 
 
+class Heatmap(Widget):
+    _allowed_atts = {
+        QueryState: [
+            "aggregator",
+            "data_source",
+            "name",
+            "query",
+        ],
+        Formula: [
+            "formula",
+            "limit",
+        ],
+        Request: [
+            "formulas",
+            "queries",
+        ],
+    }
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        title_size: int = 16,
+        title_align: TitleAlign = TitleAlign.LEFT,
+        time: Optional[Time] = None,
+        requests: List[Request],
+        size: Optional[Size] = None,
+        position: Optional[Position] = None,
+    ) -> None:
+        self.title = title
+        self.title_size = title_size
+        self.title_align = title_align
+        self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
+        self.requests = requests
+        self.size = Size.backfill(self, size)
+        self.position = position or Position()
+
+    def as_dict(self) -> JsonDict:
+        dct = {
+            "definition": {
+                "requests": [
+                    {
+                        "q": self.requests[0].queries[0]._state.codegen(),
+                        "style": {
+                            "palette": "dog_classic",
+                        },
+                    }
+                ],
+                "time": self.time.as_dict(),
+                "title": self.title,
+                "title_align": self.title_align.value,
+                "title_size": str(self.title_size),
+                "type": "heatmap",
+            },
+        }
+
+        self.add_layout(dct, size=self.size, position=self.position)
+        return dct
+
+
 class Note(Widget):
     def __init__(
         self,

@@ -14,6 +14,7 @@ from libddog.dashboards import (
     DisplayType,
     Formula,
     Group,
+    Heatmap,
     LegendColumn,
     LegendLayout,
     LineMarker,
@@ -211,12 +212,29 @@ def get_toplist() -> Widget:
     return widget
 
 
+def get_heatmap() -> Widget:
+    query_cpu = Query("aws.ec2.cpuutilization").agg("avg").by("availability-zone")
+
+    # Exercises most of the properties of a Heatmap
+    widget = Heatmap(
+        title="EC2: average CPU utilization per az",
+        requests=[Request(queries=[query_cpu])],
+        size=Size(height=3, width=6),
+        position=Position(x=6, y=4),
+    )
+
+    return widget
+
+
 def get_group() -> Widget:
     wid_ec2_cpu = get_timeseries()
     wids_5xx_perc = get_query_values()
     wids_notes = get_notes()
     wid_toplist = get_toplist()
-    widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + wids_notes + [wid_toplist]
+    wid_heatmap = get_heatmap()
+    widgets: List[Widget] = (
+        [wid_ec2_cpu] + wids_5xx_perc + wids_notes + [wid_toplist, wid_heatmap]
+    )
 
     # Exercises most of the properties of a Group
     group = Group(
