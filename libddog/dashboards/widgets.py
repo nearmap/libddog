@@ -97,22 +97,7 @@ class Widget:
 
 
 class Heatmap(Widget):
-    _allowed_atts = {
-        QueryState: [
-            "aggregator",
-            "data_source",
-            "name",
-            "query",
-        ],
-        Formula: [
-            "formula",
-            "limit",
-        ],
-        Request: [
-            "formulas",
-            "queries",
-        ],
-    }
+    _allowed_atts: Dict[Any, Sequence[str]] = {}
 
     def __init__(
         self,
@@ -249,6 +234,53 @@ class Note(Widget):
         }
 
         instance.add_layout(dct, size=instance.size, position=instance.position)
+        return dct
+
+
+class QueryTable(Widget):
+    _allowed_atts: Dict[Any, Sequence[str]] = {}
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        title_size: int = 16,
+        title_align: TitleAlign = TitleAlign.LEFT,
+        time: Optional[Time] = None,
+        requests: List[Request],
+        size: Optional[Size] = None,
+        position: Optional[Position] = None,
+    ) -> None:
+        self.title = title
+        self.title_size = title_size
+        self.title_align = title_align
+        self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
+        self.requests = requests
+        self.size = Size.backfill(self, size)
+        self.position = position or Position()
+
+    def as_dict(self) -> JsonDict:
+        dct = {
+            "definition": {
+                "has_search_bar": "auto",
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "cell_display_mode": ["bar"],
+                        "limit": 50,
+                        "order": "desc",
+                        "q": self.requests[0].queries[0]._state.codegen(),
+                    }
+                ],
+                "time": self.time.as_dict(),
+                "title": self.title,
+                "title_align": self.title_align.value,
+                "title_size": str(self.title_size),
+                "type": "query_table",
+            },
+        }
+
+        self.add_layout(dct, size=self.size, position=self.position)
         return dct
 
 

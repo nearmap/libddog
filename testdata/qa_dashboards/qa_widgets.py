@@ -26,6 +26,7 @@ from libddog.dashboards import (
     NotePreset,
     Palette,
     Position,
+    QueryTable,
     QueryValue,
     RangeMarker,
     Request,
@@ -226,14 +227,32 @@ def get_heatmap() -> Widget:
     return widget
 
 
+def get_query_table() -> Widget:
+    query_cpu = Query("aws.ec2.cpuutilization").agg("avg").by("availability-zone")
+
+    # Exercises most of the properties of a QueryTable
+    widget = QueryTable(
+        title="EC2: average CPU utilization per az",
+        requests=[Request(queries=[query_cpu])],
+        size=Size(height=4, width=4),
+        position=Position(x=0, y=7),
+    )
+
+    return widget
+
+
 def get_group() -> Widget:
     wid_ec2_cpu = get_timeseries()
     wids_5xx_perc = get_query_values()
     wids_notes = get_notes()
     wid_toplist = get_toplist()
     wid_heatmap = get_heatmap()
+    wid_query_table = get_query_table()
     widgets: List[Widget] = (
-        [wid_ec2_cpu] + wids_5xx_perc + wids_notes + [wid_toplist, wid_heatmap]
+        [wid_ec2_cpu]
+        + wids_5xx_perc
+        + wids_notes
+        + [wid_toplist, wid_heatmap, wid_query_table]
     )
 
     # Exercises most of the properties of a Group
