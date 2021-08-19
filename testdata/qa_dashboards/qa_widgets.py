@@ -35,9 +35,12 @@ from libddog.dashboards import (
     TickEdge,
     Time,
     Timeseries,
+    Toplist,
     Widget,
     YAxis,
 )
+from libddog.dashboards.components import FormulaLimit
+from libddog.dashboards.enums import LimitOrder
 from libddog.metrics import Int, Query
 
 
@@ -183,11 +186,37 @@ def get_notes() -> List[Widget]:
     return [note_timeseries, note_query_value]
 
 
+def get_toplist() -> Widget:
+    query_cpu = Query("aws.ec2.cpuutilization").agg("avg").by("availability-zone")
+    cpu = query_cpu.identifier()
+
+    # Exercises most of the properties of a Toplist
+    widget = Toplist(
+        title="EC2: average CPU utilization per az",
+        requests=[
+            # TODO: conditional_formats
+            Request(
+                formulas=[
+                    Formula(
+                        formula=cpu, limit=FormulaLimit(count=10, order=LimitOrder.DESC)
+                    )
+                ],
+                queries=[query_cpu],
+            ),
+        ],
+        size=Size(height=3, width=6),
+        position=Position(x=0, y=4),
+    )
+
+    return widget
+
+
 def get_group() -> Widget:
     wid_ec2_cpu = get_timeseries()
     wids_5xx_perc = get_query_values()
     wids_notes = get_notes()
-    widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + wids_notes
+    wid_toplist = get_toplist()
+    widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + wids_notes + [wid_toplist]
 
     # Exercises most of the properties of a Group
     group = Group(
