@@ -1,10 +1,23 @@
 import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
 from libddog.command_line.dashboards import DashboardManagerCli
 from libddog.crud import DashboardManager
 from libddog.dashboards import Dashboard
+
+
+class GitHelper:
+    def get_current_branch(self) -> str:
+        code, output = subprocess.getstatusoutput("git branch --show-current")
+        if code == 0:
+            return output
+
+        raise RuntimeError(
+            "Failed to get git branch name with code: %r and output: %r"
+            % (code, output)
+        )
 
 
 class QADashboardManager:
@@ -18,6 +31,8 @@ class QADashboardManager:
 
         self.mgr = DashboardManager()
         self.mgr.load_credentials_from_environment()
+
+        self.git = GitHelper()
 
     def load_definition_by_title(self, title: str) -> Dashboard:
         dashboards = self.cli.load_definitions()
@@ -39,9 +54,14 @@ class QADashboardManager:
         # TODO: else create a new dash so we can use that id
         raise NotImplementedError
 
-    def timestamp_dashboard(self, dashboard: Dashboard) -> None:
+    def stamp_dashboard(self, dashboard: Dashboard) -> None:
         dt = datetime.now()
-        dashboard.desc = dashboard.desc % {"test_run_time": dt.ctime()}
+        branch = self.git.get_current_branch()
+
+        dashboard.desc = dashboard.desc % {
+            "branch": branch,
+            "test_run_time": dt.ctime(),
+        }
 
     def update_live_dashboard(self, dashboard: Dashboard, id: str) -> None:
         if self.rx_string_template.search(dashboard.desc):
