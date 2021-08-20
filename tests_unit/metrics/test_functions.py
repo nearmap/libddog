@@ -46,7 +46,6 @@ from libddog.metrics import (
     week_before,
 )
 from libddog.metrics.exceptions import FormulaValidationError
-from libddog.metrics.functions import forecast
 
 # arithmetic
 

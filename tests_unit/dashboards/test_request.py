@@ -10,7 +10,7 @@ from libddog.dashboards import (
     Request,
     Style,
 )
-from libddog.metrics import AggFunc, Aggregation, Metric, Query
+from libddog.metrics import Query
 
 
 def test_request__minimal() -> None:
@@ -33,11 +33,7 @@ def test_request__minimal() -> None:
 
 
 def test_request__exhaustive() -> None:
-    query_cpu = Query(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="cpu",
-    )
+    query_cpu = Query("aws.ec2.cpuutilization", name="cpu").agg("avg")
     cpu = query_cpu.identifier()
 
     request = Request(
@@ -95,16 +91,8 @@ def test_request__exhaustive() -> None:
 
 
 def test_request__synthesize_formulas_from_queries() -> None:
-    reqs = Query(
-        metric=Metric(name="aws.elb.http_requests"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="reqs",
-    )
-    cpu = Query(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="cpu",
-    )
+    reqs = Query("aws.elb.http_requests", name="reqs").agg("avg")
+    cpu = Query("aws.ec2.cpuutilization", name="cpu").agg("avg")
 
     request = Request(
         queries=[reqs, cpu],

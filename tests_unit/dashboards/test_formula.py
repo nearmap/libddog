@@ -2,21 +2,13 @@ import pytest
 
 from libddog.common.errors import UnresolvedFormulaIdentifiers
 from libddog.dashboards import Formula, Request
-from libddog.metrics import AggFunc, Aggregation, Metric, Query
+from libddog.metrics import Query
 from libddog.metrics.literals import Identifier
 
 
 def test_formula__exhaustive() -> None:
-    query_reqs = Query(
-        metric=Metric(name="aws.elb.http_requests"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="reqs",
-    )
-    query_cpu = Query(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="cpu",
-    )
+    query_reqs = Query("aws.elb.http_requests", name="reqs").agg("avg")
+    query_cpu = Query("aws.ec2.cpuutilization", name="cpu").agg("avg")
 
     reqs = query_reqs.identifier()
     cpu = query_cpu.identifier()
@@ -31,7 +23,7 @@ def test_formula__exhaustive() -> None:
         "display_type": "line",
         "formulas": [{"alias": "requests per cpu", "formula": "(reqs / cpu)"}],
         "on_right_yaxis": False,
-        "queries": [query_reqs.as_dict(), query_cpu.as_dict()],
+        "queries": [query_reqs._state.as_dict(), query_cpu._state.as_dict()],
         "style": {
             "line_type": "solid",
             "line_width": "normal",
@@ -44,11 +36,7 @@ def test_formula__exhaustive() -> None:
 
 
 def test_formula__unresolved_identifier() -> None:
-    query = Query(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="q1",
-    )
+    query = Query("aws.ec2.cpuutilization", name="q1").agg("avg")
 
     q1 = query.identifier()
     q2 = Identifier("q2")  # we just made it up

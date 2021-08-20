@@ -23,7 +23,7 @@ from libddog.dashboards.enums import (
     VerticalAlign,
 )
 from libddog.dashboards.presets import NotePreset
-from libddog.metrics.query import Query
+from libddog.metrics.query import QueryState
 
 
 class Widget:
@@ -78,7 +78,7 @@ class Widget:
             if key not in allowed_atts:
                 del dct[key]
 
-    def query_as_dict(self, query: Query) -> JsonDict:
+    def query_as_dict(self, query: QueryState) -> JsonDict:
         dct = query.as_dict()
         allowed_atts = self._get_allowed_atts(query)
         self._filter_dict_keys(dct, allowed_atts)
@@ -90,7 +90,7 @@ class Widget:
         self._filter_dict_keys(dct, allowed_atts)
 
         # overwrite 'queries' using our custom implementation
-        dct["queries"] = [self.query_as_dict(query) for query in request.queries]
+        dct["queries"] = [self.query_as_dict(query._state) for query in request.queries]
 
         return dct
 
@@ -193,7 +193,7 @@ class Note(Widget):
 
 class QueryValue(Widget):
     _allowed_atts = {
-        Query: [
+        QueryState: [
             "aggregator",
             "data_source",
             "name",
@@ -259,7 +259,7 @@ class QueryValue(Widget):
 
 class Timeseries(Widget):
     _allowed_atts = {
-        Query: [
+        QueryState: [
             "data_source",
             "name",
             "query",

@@ -10,7 +10,7 @@ from libddog.crud import DashboardManager
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
-from libddog.metrics.query import Query
+from libddog.metrics.query import QueryMonad
 
 
 def count_groups(obj: Union[Dashboard, Widget]) -> int:
@@ -31,7 +31,7 @@ def count_widgets(obj: Union[Dashboard, Widget]) -> int:
         return 1
 
 
-def count_queries(obj: Union[Dashboard, Widget, Request, Query]) -> int:
+def count_queries(obj: Union[Dashboard, Widget, Request, QueryMonad]) -> int:
     if isinstance(obj, Dashboard):
         return sum([count_queries(w) for w in obj.widgets])
     elif isinstance(obj, Group):
@@ -40,7 +40,7 @@ def count_queries(obj: Union[Dashboard, Widget, Request, Query]) -> int:
         return sum([count_queries(req) for req in getattr(obj, "requests", [])])
     elif isinstance(obj, Request):
         return sum([count_queries(q) for q in obj.queries])
-    elif isinstance(obj, Query):
+    elif isinstance(obj, QueryMonad):
         return 1
 
 

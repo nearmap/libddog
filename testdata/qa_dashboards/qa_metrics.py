@@ -16,22 +16,10 @@ from libddog.dashboards import (
     Widget,
 )
 from libddog.metrics import (
-    AggFunc,
-    Aggregation,
-    As,
-    By,
     Comma,
-    Fill,
-    FillFunc,
-    Filter,
-    FilterOperator,
+    Float,
     Int,
-    Metric,
     Query,
-    Rollup,
-    RollupFunc,
-    Tag,
-    TmplVar,
     abs,
     anomalies,
     autosmooth,
@@ -77,170 +65,140 @@ from libddog.metrics import (
 )
 
 QUERY_CASES = [
-    (
-        "minimal query",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            agg=Aggregation(func=AggFunc.AVG),
-        ),
-    ),
+    ("minimal query", Query("aws.ec2.cpuutilization").agg("avg")),
     (
         "exhaustive query",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "no aggregation",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "aggregation without as",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(func=AggFunc.AVG, by=By(tags=["availability-zone"])),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "aggregation without by",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(func=AggFunc.AVG, as_=As.RATE),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "aggregation without by/as",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(func=AggFunc.AVG),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "no filter",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "inclusive filter",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(
-                conds=[
-                    TmplVar(tvar="region"),
-                    Tag(
-                        tag="availability-zone",
-                        value="*a",
-                    ),
-                ]
-            ),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region", **{"availability-zone": "*a"})
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
-        "negating filter",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(
-                conds=[
-                    TmplVar(tvar="region"),
-                    Tag(
-                        tag="availability-zone",
-                        value="*a",
-                        operator=FilterOperator.NOT_EQUAL,
-                    ),
-                ]
-            ),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        "negating tag filter",
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .filter_ne(**{"availability-zone": "*a"})
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
+        ),
+    ),
+    (
+        "negating tmpl var filter",
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter_ne("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
+            .fill("last", 112)
         ),
     ),
     (
         "no rollup",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Fill(func=FillFunc.LAST, limit_s=112),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .fill("last", 112)
         ),
     ),
     (
         "no fill",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Rollup(func=RollupFunc.MAX, period_s=110),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .rollup("max", 110)
         ),
     ),
     (
         "fill before rollup",
-        Query(
-            metric=Metric(name="aws.ec2.cpuutilization"),
-            filter=Filter(conds=[TmplVar(tvar="region")]),
-            agg=Aggregation(
-                func=AggFunc.AVG, by=By(tags=["availability-zone"]), as_=As.RATE
-            ),
-            funcs=[
-                Fill(func=FillFunc.LAST, limit_s=112),
-                Rollup(func=RollupFunc.MAX, period_s=110),
-            ],
+        (
+            Query("aws.ec2.cpuutilization")
+            .filter("$region")
+            .agg("avg")
+            .by("availability-zone")
+            .as_rate()
+            .fill("last", 112)
+            .rollup("max", 110)
         ),
     ),
 ]
@@ -309,17 +267,9 @@ def get_queries_group() -> Widget:
 
 
 def get_formulas_group() -> Widget:
-    query_cpu = Query(
-        metric=Metric(name="aws.ec2.cpuutilization"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="cpu",
-    )
-    query_reqs = Query(
-        metric=Metric(name="aws.elb.request_count"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="reqs",
+    query_cpu = Query("aws.ec2.cpuutilization", name="cpu").filter("$region").agg("avg")
+    query_reqs = (
+        Query("aws.elb.request_count", name="reqs").filter("$region").agg("avg")
     )
 
     cpu = query_cpu.identifier()
@@ -328,7 +278,8 @@ def get_formulas_group() -> Widget:
     cases = [
         (
             "All arithmetic operators",
-            ((abs(cpu) * Int(2)) - reqs) + (log2(cpu) / timeshift(reqs, -3600)),
+            ((abs(cpu) * Int(2)) - reqs)
+            + (Float(3.14) * log2(cpu) / timeshift(reqs, -3600)),
         ),
         (
             "Comma as binary operator",
@@ -375,11 +326,8 @@ def get_formulas_group() -> Widget:
 
 
 def get_functions_group() -> Widget:
-    query_reqs = Query(
-        metric=Metric(name="aws.elb.request_count"),
-        filter=Filter(conds=[TmplVar(tvar="region")]),
-        agg=Aggregation(func=AggFunc.AVG),
-        name="reqs",
+    query_reqs = (
+        Query("aws.elb.request_count", name="reqs").filter("$region").agg("avg")
     )
 
     reqs = query_reqs.identifier()

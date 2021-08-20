@@ -1,9 +1,26 @@
+import copy
 import enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from libddog.common.bases import Renderable
 from libddog.metrics.bases import QueryNode
 from libddog.metrics.literals import Identifier
+from libddog.parsing.query_parser import QueryParser
+
+
+class QueryValidationError(Exception):
+    pass
+
+
+def reverse_enum(enum_cls: Type[enum.Enum], literal: str, label: str) -> enum.Enum:
+    alternatives: List[enum.Enum] = list(enum_cls)
+    for alternative in alternatives:
+        if literal == alternative.value:
+            return alternative
+
+    values = [alt.value for alt in alternatives if alt.value]
+    values_fmt = ", ".join([f"{alt!r}" for alt in sorted(values)])
+    raise QueryValidationError("%s %r must be one of %s" % (label, literal, values_fmt))
 
 
 class Metric(QueryNode):
@@ -35,6 +52,15 @@ class Tag(FilterCond):
         self.value = value
         self.operator = operator
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and all(
+            (
+                self.tag == other.tag,
+                self.value == other.value,
+                self.operator == other.operator,
+            )
+        )
+
     def codegen(self) -> str:
         key = self.tag
         colon_value = ""
@@ -51,13 +77,29 @@ class Tag(FilterCond):
 class TmplVar(FilterCond):
     """A filter using a template variable."""
 
-    def __init__(self, *, tvar: str) -> None:
+    def __init__(
+        self, *, tvar: str, operator: FilterOperator = FilterOperator.EQUAL
+    ) -> None:
         assert not tvar.startswith("$")
 
         self.tvar = tvar
+        self.operator = operator
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and all(
+            (
+                self.tvar == other.tvar,
+                self.operator == other.operator,
+            )
+        )
 
     def codegen(self) -> str:
-        return "$%s" % self.tvar
+        key = f"${self.tvar}"
+
+        if self.operator is FilterOperator.NOT_EQUAL:
+            key = f"!{key}"
+
+        return key
 
 
 class Filter(QueryNode):
@@ -66,13 +108,6 @@ class Filter(QueryNode):
 
     def codegen(self) -> str:
         return "{%s}" % ", ".join((cond.codegen() for cond in self.conds))
-
-    def __and__(self, other: Optional["Filter"]) -> "Filter":
-        if other:
-            conds = self.conds + other.conds
-            return self.__class__(conds=conds)
-
-        return self
 
 
 class AggFunc(enum.Enum):
@@ -158,7 +193,7 @@ class FillFunc(enum.Enum):
 
 
 class Fill(QueryFunc):
-    def __init__(self, *, func: FillFunc, limit_s: int = 300) -> None:
+    def __init__(self, *, func: FillFunc, limit_s: Optional[int] = None) -> None:
         self.func = func
         self.limit_s = limit_s
 
@@ -169,7 +204,7 @@ class Fill(QueryFunc):
         return ".fill(%s)" % ", ".join(args)
 
 
-class Query(QueryNode, Renderable):
+class QueryState(QueryNode, Renderable):
     _instance_counter = 1
 
     def __init__(
@@ -193,13 +228,13 @@ class Query(QueryNode, Renderable):
         self.aggregator = aggregator
         self.query = query
 
+    def clone(self) -> "QueryState":
+        return copy.deepcopy(self)
+
     def get_next_unique_name(self) -> str:
         counter = self.__class__._instance_counter
         self.__class__._instance_counter += 1
         return "q%s" % counter
-
-    def identifier(self) -> Identifier:
-        return Identifier(self.name)
 
     def codegen(self) -> str:
         agg_func, agg_by, agg_as = "", "", ""
@@ -235,3 +270,219 @@ class Query(QueryNode, Renderable):
         }
 
         return dct
+
+
+class QueryMonad:
+    """
+    QueryMonad provides a more succinct and convenient syntax to build up a
+    query string than using QueryState directly. Internally, it just stores a
+    QueryState and each time a method is called the internal QueryState is
+    cloned and then mutated, before re-wrapping it into a QueryMonad. This
+    allows chaining method calls.
+    """
+
+    def __init__(self, state: QueryState) -> None:
+        self._state = state
+
+    def identifier(self) -> Identifier:
+        return Identifier(self._state.name)
+
+    def filter(self, *tmplvars: str, **tags: str) -> "QueryMonad":
+        state = self._state.clone()
+        state.filter = state.filter or Filter(conds=[])
+
+        parser = QueryParser.get_instance()
+
+        for tmplvar in tmplvars:
+            if not tmplvar.startswith("$"):
+                raise QueryValidationError(
+                    "Filter key %r without value must be a template variable, not a tag"
+                    % tmplvar
+                )
+
+            if not parser.is_valid_tmpl_var(tmplvar):
+                raise QueryValidationError("Invalid template variable: %r" % tmplvar)
+
+            tmpl_cond = TmplVar(tvar=tmplvar[1:])
+            if tmpl_cond not in state.filter.conds:
+                state.filter.conds.append(tmpl_cond)
+
+        for tag, value in tags.items():
+            if tag.startswith("$"):
+                raise QueryValidationError(
+                    "Filter '%s:%s' must be a tag, not a template variable"
+                    % (tag, value)
+                )
+
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+            if not parser.is_valid_tag_value(value):
+                raise QueryValidationError("Invalid tag value: %r" % value)
+
+            tag_cond = Tag(tag=tag, value=value)
+            if tag_cond not in state.filter.conds:
+                state.filter.conds.append(tag_cond)
+
+        return self.__class__(state)
+
+    def filter_ne(self, *tmplvars: str, **tags: str) -> "QueryMonad":
+        state = self._state.clone()
+        state.filter = state.filter or Filter(conds=[])
+
+        parser = QueryParser.get_instance()
+
+        for tmplvar in tmplvars:
+            if not tmplvar.startswith("$"):
+                raise QueryValidationError(
+                    "Filter key %r without value must be a template variable, not a tag"
+                    % tmplvar
+                )
+
+            if not parser.is_valid_tmpl_var(tmplvar):
+                raise QueryValidationError("Invalid template variable: %r" % tmplvar)
+
+            tmpl_cond = TmplVar(tvar=tmplvar[1:], operator=FilterOperator.NOT_EQUAL)
+            if tmpl_cond not in state.filter.conds:
+                state.filter.conds.append(tmpl_cond)
+
+        for tag, value in tags.items():
+            if tag.startswith("$"):
+                raise QueryValidationError(
+                    "Filter '%s:%s' must be a tag, not a template variable"
+                    % (tag, value)
+                )
+
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+            if not parser.is_valid_tag_value(value):
+                raise QueryValidationError("Invalid tag value: %r" % value)
+
+            tag_cond = Tag(tag=tag, value=value, operator=FilterOperator.NOT_EQUAL)
+            if tag_cond not in state.filter.conds:
+                state.filter.conds.append(tag_cond)
+
+        return self.__class__(state)
+
+    def agg(self, func: str) -> "QueryMonad":
+        state = self._state.clone()
+
+        agg_func_existing = state.agg.func if state.agg else None
+        if agg_func_existing is not None:
+            raise QueryValidationError(
+                "Cannot set aggregation function %r because "
+                "query already contains aggregation function %r"
+                % (func, agg_func_existing.value)
+            )
+
+        agg_func = reverse_enum(AggFunc, func, label="Aggregation function")
+        assert isinstance(agg_func, AggFunc)  # help mypy
+        state.agg = Aggregation(func=agg_func)
+
+        return self.__class__(state)
+
+    def by(self, *tags: str) -> "QueryMonad":
+        state = self._state.clone()
+
+        parser = QueryParser.get_instance()
+
+        # 'func' has to be set before 'by' - otherwise it would be possible to
+        # construct queries with 'by' only and that wouldn't be valid syntax
+        if not state.agg:
+            tags_fmt = ", ".join([f"{tag!r}" for tag in tags])
+            raise QueryValidationError(
+                "Cannot set aggregation by %s because "
+                "aggregation function is not set yet" % tags_fmt
+            )
+
+        by = state.agg.by or By(tags=[])
+        for tag in tags:
+            if tag.startswith("$"):
+                raise QueryValidationError(
+                    "Aggregation by %r must be a tag, not a template variable" % tag
+                )
+
+            if not parser.is_valid_tag_name(tag):
+                raise QueryValidationError("Invalid tag name: %r" % tag)
+
+            if tag not in by.tags:
+                by.tags.append(tag)
+
+        state.agg.by = by
+        return self.__class__(state)
+
+    def as_count(self) -> "QueryMonad":
+        state = self._state.clone()
+
+        # 'func' has to be set before 'as' - otherwise it would be possible to
+        # construct queries with 'as' only and that wouldn't be valid syntax
+        if not state.agg:
+            raise QueryValidationError(
+                "Cannot set as_count() because aggregation function is not set yet"
+            )
+
+        state.agg.as_ = As.COUNT
+        return self.__class__(state)
+
+    def as_rate(self) -> "QueryMonad":
+        state = self._state.clone()
+
+        # 'func' has to be set before 'as' - otherwise it would be possible to
+        # construct queries with 'as' only and that wouldn't be valid syntax
+        if not state.agg:
+            raise QueryValidationError(
+                "Cannot set as_rate() because aggregation function is not set yet"
+            )
+
+        state.agg.as_ = As.RATE
+        return self.__class__(state)
+
+    def rollup(self, func: str, period: Optional[int] = None) -> "QueryMonad":
+        state = self._state.clone()
+
+        existing_rollup = None
+        for existing_func in state.funcs:
+            if isinstance(existing_func, Rollup):
+                existing_rollup = existing_func
+
+        if existing_rollup is not None:
+            raise QueryValidationError(
+                "Cannot set rollup function %r because "
+                "query already contains rollup function %r"
+                % (func, existing_rollup.func.value)
+            )
+
+        rollup_func = reverse_enum(RollupFunc, func, label="Rollup function")
+        assert isinstance(rollup_func, RollupFunc)  # help mypy
+        rollup = Rollup(func=rollup_func, period_s=period)
+
+        state.funcs.append(rollup)
+
+        return self.__class__(state)
+
+    def fill(self, func: str, limit: Optional[int] = None) -> "QueryMonad":
+        state = self._state.clone()
+
+        existing_fill = None
+        for existing_func in state.funcs:
+            if isinstance(existing_func, Fill):
+                existing_fill = existing_func
+
+        if existing_fill is not None:
+            raise QueryValidationError(
+                "Cannot set fill function %r because "
+                "query already contains fill function %r"
+                % (func, existing_fill.func.value)
+            )
+
+        fill_func = reverse_enum(FillFunc, func, label="Fill function")
+        assert isinstance(fill_func, FillFunc)  # help mypy
+        fill = Fill(func=fill_func, limit_s=limit)
+
+        state.funcs.append(fill)
+
+        return self.__class__(state)
+
+
+def Query(metric: str, name: Optional[str] = None) -> QueryMonad:
+    state = QueryState(metric=Metric(name=metric), name=name)
+    return QueryMonad(state)
