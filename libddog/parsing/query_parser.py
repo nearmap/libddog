@@ -4,8 +4,6 @@ from parsimonious import Grammar
 from parsimonious.exceptions import IncompleteParseError, ParseError
 from parsimonious.nodes import Node
 
-from libddog.metrics.bases import QueryNode
-
 
 class QueryParser:
     _instance = None
@@ -26,13 +24,13 @@ class QueryParser:
     def parse_st(self, query_string: str) -> Node:
         return self.grammar.parse(query_string)
 
-    def parse_ast(self, query_string: str) -> QueryNode:
-        from libddog.parsing.query_visitor import QueryVisitor
+    # def parse_ast(self, query_string: str) -> QueryNode:
+    #     from libddog.parsing.query_visitor import QueryVisitor
 
-        st = self.parse_st(query_string)
-        visitor = QueryVisitor()
-        ast: QueryNode = visitor.visit(st)
-        return ast
+    #     st = self.parse_st(query_string)
+    #     visitor = QueryVisitor()
+    #     ast: QueryNode = visitor.visit(st)
+    #     return ast
 
     def is_valid_token(self, rule: str, token: str) -> bool:
         try:

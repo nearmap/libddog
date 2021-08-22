@@ -11,8 +11,10 @@ except ImportError:
 import json
 import os
 
+from parsimonious.exceptions import IncompleteParseError, ParseError
+
 from libddog.parsing.extract_queries import get_queries
-from libddog.parsing.query import QueryParser
+from libddog.parsing.query_parser import QueryParser
 
 
 def main(download_dir) -> None:
@@ -33,8 +35,8 @@ def main(download_dir) -> None:
         for qf in get_queries(doc):
             # print(qf.query)
             try:
-                parser.parse(qf.query)
-            except:
+                parser.parse_st(qf.query)
+            except (IncompleteParseError, ParseError) as exc:
                 sys.stderr.write("FAILED: %s\n" % qf.query)
 
 
