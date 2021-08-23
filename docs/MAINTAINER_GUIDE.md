@@ -3,16 +3,20 @@
 
 ## Steps to release a new version
 
-Performing a release:
+Create a commit for the release:
 
 1. Bump version in `libddog/__init__.py`.
 2. Update [CHANGELOG](../CHANGELOG.md).
-3. Git tag the new version: `git tag -a <version> -m <version>`
-4. Push the new tag: `git push --tags`
-5. Make sure there are no lingering distributions: `rm -rf dist/`
-6. Create a source distribution: `python setup.py sdist`
-7. Create a binary distribution: `python setup.py bdist_wheel`
-8. Push the distributions to PyPi: `twine upload dist/* -u <username> -p <password>`
+3. Create a commit: `git commit ...`
+
+Perform the release:
+
+1. Git tag the new version: `git tag -a <version> -m <version>`
+2. Push the new tag: `git push --tags`
+3. Make sure there are no lingering distributions: `rm -rf dist/`
+4. Create a source distribution: `python setup.py sdist`
+5. Create a binary distribution: `python setup.py bdist_wheel`
+6. Push the distributions to PyPI: `twine upload dist/* -u <username> -p <password>`
 
 Post-release checks:
 
