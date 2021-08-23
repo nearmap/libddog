@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+# The purpose of this test is to validate that the packaging parameters
+# contained in setup.py / MANIFEST.in produce a working distribution which can
+# be installed, the ddog cli works, and we can run the unit tests against the
+# installed libddog.
+#
+# Workflow:
+# 1) Package libddog
+# 2) Install into fresh virtualenv
+# 3) Run unit tests
+# 4) Run ddog tool
+
+
+# Constants
+
+PROJDIR=$(pwd)
+DIST_DEST=${PROJDIR}/dist/
+
+DISTDIR=libddog-*
+DISTFILE=${DISTDIR}.tar.gz
+
+TEMP_WORKSPACE=/tmp/libddog-pkgtest
+TEMP_VENVDIR=/tmp/libddog-venv
+TEMP_VENV_PY=${TEMP_VENVDIR}/bin/python
+TEMP_VENV_PIP=${TEMP_VENVDIR}/bin/pip
+TEMP_VENV_PYTEST=${TEMP_VENVDIR}/bin/pytest
+TEMP_VENV_DDOG=${TEMP_VENVDIR}/bin/ddog
+
+
+# Functions
+
+function die {
+    local msg="$1"; shift;
+    echo -e "\033[31m$msg\033[0m"
+    exit 2
+}
+
+
+# Script start
+
+rm -rf ${DIST_DEST} || die "failed to remove ${DIST_DEST}"
+rm -rf ${TEMP_VENVDIR} || die "failed to remove ${TEMP_VENVDIR}"
+rm -rf ${TEMP_WORKSPACE} || die "failed to remove ${TEMP_WORKSPACE}"
+
+python setup.py sdist || die "failed to run setup.py sdist"
+
+python -m venv ${TEMP_VENVDIR} || die "failed to create virtualenv"
+
+# unpack distribution in the workspace, and install it into the venv
+
+mkdir -p ${TEMP_WORKSPACE} || die "failed to mkdir ${TEMP_WORKSPACE}"
+cd ${TEMP_WORKSPACE} || die "failed to cd into ${TEMP_WORKSPACE}"
+
+tar zxvf ${DIST_DEST}/${DISTFILE} || die "failed to untar distribution archive"
+cd ${DISTDIR} || die "failed to cd into ${DISTDIR}"
+
+${TEMP_VENV_PY} setup.py install || die "failed to run setup.py install"
+
+# run unit tests against the install libddog (remove the libddog from the workspace first)
+
+rm -rf libddog || die "failed to delete libddog in workspace"
+${TEMP_VENV_PIP} install -r dev-requirements.txt || die "failed to pip install dev-requirements.txt"
+${TEMP_VENV_PYTEST} tests_unit/ || die "failed to run unit tests"
+
+# run ddog to list definitions in testdata
+
+cd testdata || die "failed to cd into testdata/"
+${TEMP_VENV_DDOG} dash list-defs || die "failed to run ddog list-defs"
