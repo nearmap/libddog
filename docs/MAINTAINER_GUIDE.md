@@ -7,7 +7,7 @@ Create a commit for the release:
 
 1. Bump version in `libddog/__init__.py`.
 2. Update [CHANGELOG](../CHANGELOG.md).
-3. Create a commit: `git commit ...`
+3. Create a commit: `git commit -am'bump version to <version>'`
 
 Perform the release:
 
