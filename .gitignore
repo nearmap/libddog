@@ -2,6 +2,7 @@
 *.pyc
 .coverage
 .mypy_cache
+.tox/
 __pycache__
 dist/
 htmlcov/
