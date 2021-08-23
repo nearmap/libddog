@@ -1,4 +1,4 @@
 #!/bin/sh
 
-isort bin/* libddog/ libtests/ tests_*/ testdata/  # sort imports
-black bin/* libddog/ libtests/ tests_*/ testdata/  # all other code formatting
+isort bin/* docs/skel/ libddog/ libtests/ tests_*/ testdata/  # sort imports
+black bin/* docs/skel/ libddog/ libtests/ tests_*/ testdata/  # all other code formatting
