@@ -1,3 +1,4 @@
+include CHANGELOG.md
 include README.md
 include dev-requirements.txt
 include requirements.txt
