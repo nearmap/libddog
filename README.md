@@ -12,7 +12,7 @@ First you write the query:
 query = (Query("aws.elb.request_count")
         .filter(region="us-east-1")
         .agg("sum").by("availability-zone")
-        .rollup("sum", 300))
+        .rollup("sum", 5 * 60))
 
 # produces:
 #   sum:aws.elb.request_count{region:us-east-1}
@@ -21,7 +21,7 @@ query = (Query("aws.elb.request_count")
 
 The query language closely resembles the Datadog syntax, but because it's Python code and not just a string it is validated and known to be well formed at definition time.
 
-Then you define what the widget looks like:
+Then you define what the graph looks like:
 
 ```python
 Timeseries(
@@ -39,3 +39,9 @@ Timeseries(
 This gives you the widget you want, with all the parameters supported by the Datadog UI:
 
 ![ELB request count](docs/assets/elb-reqs-graph.png)
+
+
+
+## Why libddog?
+
+Monitoring tools like Datadog make it easy to experiment with different metrics and widgets, and create dashboards for many different visualizations of your systems. This is great for prototyping your monitoring setup, but it is not great for maintainability. Over time, as your team accumulates dashboards, they become a maintenance burden. Many of the graphs stop working because the metric names have changed, or the data shown isn't correct because what the metrics mean no longer agrees with how they are graphed.
