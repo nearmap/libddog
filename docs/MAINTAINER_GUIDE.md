@@ -1,4 +1,4 @@
-# Maintainer guide
+# libddog maintainer guide
 
 
 ## Steps to release a new version
