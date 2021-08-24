@@ -1,3 +1,6 @@
+# DataDog feature support
+
+
 ## Dashboards
 
 | Type        | Supported?         | Comments |
@@ -5,6 +8,7 @@
 | Dashboard   | :heavy_check_mark: | :100:    |
 | Timeboard   | :x:                |          |
 | Screenboard | :x:                |          |
+
 
 ## Widgets
 
