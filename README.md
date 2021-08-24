@@ -44,4 +44,6 @@ This gives you the widget you want, with all the parameters supported by the Dat
 
 ## Why libddog?
 
-Monitoring tools like Datadog make it easy to experiment with different metrics and widgets, and create dashboards for many different visualizations of your systems. This is great for prototyping your monitoring setup, but it is not great for maintainability. Over time, as your team accumulates dashboards, they become a maintenance burden. Many of the graphs stop working because the metric names have changed, or the data shown isn't correct because what the metrics mean no longer agrees with how they are graphed.
+Monitoring tools like Datadog make it easy to experiment with different metrics and widgets, and create dashboards for many different visualizations of your systems. This is great for prototyping your monitoring setup, but it is not great for maintainability. Over time, as your team accumulates dashboards, they become a maintenance burden. Many of the graphs stop working because the metrics have changed, or the data shown isn't correct anymore. The enthusiasm that goes into creating the dashboards typically doesn't extend to maintaining their whole lifecycle. And let's be fair: it is not especially fun to manually change 20 graphs on a dashboard to update the name of a metric, change a tag, or update the aggregation or rollup parameters.
+
+In order to remain useful your dashboards needs to change to keep pace with the continuous change in your systems. How can we make this easier?
