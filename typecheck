@@ -1,3 +1,4 @@
 #!/bin/sh
 
-mypy --strict libddog libtests testdata tests_*  # apply static type checker
+mypy --strict libddog/ libtests/ testdata/ tests_*/
+mypy --strict docs/skel/

@@ -1,3 +1,4 @@
 #!/bin/sh
 
 pycodestyle bin/* libddog/ libtests/ tests_*/ testdata/
+pycodestyle docs/skel/
