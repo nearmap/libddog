@@ -1,0 +1,4 @@
+#!/bin/sh
+
+isort config/ dashboards/
+black config/ dashboards/

@@ -1,5 +1,3 @@
-from dashboards.shared import get_region_tmpl_var_presets
-
 from libddog.dashboards import (
     Dashboard,
     DisplayType,
@@ -13,6 +11,8 @@ from libddog.dashboards import (
     Widget,
 )
 from libddog.metrics import Query
+
+from dashboards.shared import get_region_tmpl_var_presets
 
 
 def get_cpu_per_az() -> Widget:
