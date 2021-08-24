@@ -1,4 +1,4 @@
-# DataDog feature support
+# Datadog feature support
 
 
 ## Dashboards
