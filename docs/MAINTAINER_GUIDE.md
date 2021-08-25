@@ -1,11 +1,11 @@
-# Maintainer guide
+# libddog maintainer guide
 
 
 ## Steps to release a new version
 
 Create a commit for the release:
 
-1. Bump version in `libddog/__init__.py`.
+1. Bump version in `libddog/__init__.py` to a final release version, eg. `0.0.2`.
 2. Update [CHANGELOG](../CHANGELOG.md).
 3. Create a commit: `git commit -am'bump version to <version>'`
 
@@ -21,6 +21,7 @@ Perform the release:
 Post-release checks:
 
 1. Run tox env to test the released version: `tox -e pypi-cli`
+2. Bump version in `libddog/__init__.py` to an alpha release version, eg. `0.0.3a0`.
 
 If at this point you discover that the release is broken PyPI will let you
 yank/delete it and you can redo it. As long as this happens as part of the

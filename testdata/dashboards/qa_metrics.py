@@ -1,7 +1,4 @@
-from qa_dashboards.shared import (
-    get_dashboard_desc_template,
-    get_region_tmpl_var_presets,
-)
+from dashboards.shared import get_dashboard_desc_template, get_region_tmpl_var_presets
 
 from libddog.dashboards import (
     Dashboard,
