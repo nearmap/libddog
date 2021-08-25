@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.2a0
+## 0.0.2
 
 - Added docs.
 - Added docs/skel - an example skeleton project.
