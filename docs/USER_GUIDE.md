@@ -63,7 +63,7 @@ TODO: create, remove
 
 ## What Datadog features are supported?
 
-libddog is a young project and currently supports a small but useful subset of dashboard functionality. See the **[Feature support](docs/FEATURE_SUPPORT.md)** page for details.
+libddog is a young project and currently supports a small but useful subset of dashboard functionality. See the **[Feature support](FEATURE_SUPPORT.md)** page for details.
 
 The skeleton project represents a minimal example of what you can do with libddog. For an exhaustive example of everything you can do with metrics and widgets have a look the definitions used in our [integration tests](../testdata).
 
