@@ -26,7 +26,7 @@ You can now use the `ddog` command line tool to manage your dashboards. To list 
 ```bash
 (monitoring-project) $ ddog dash list-defs
 ID           GROUPS  WIDGETS  QUERIES  TITLE
-None              0        1        1  libddog skel: AWS EC2 dashboard
+None              0        1        1  libddog skel: AWS ELB dashboard
 ```
 
 
@@ -43,6 +43,21 @@ These two keys need to be set in your environment:
 export DATADOG_API_KEY=...
 export DATADOG_APPLICATION_KEY=...
 ```
+
+
+
+## The dashboard lifecycle
+
+### Updating
+
+`ddog` can update multiple dashboards in one go. We recommend you narrow this down to just the dashboard definitions you've changed locally and that you want to push.
+
+```bash
+(monitoring-project) $ ddog dash update-live --title '*skel*'
+Updating dashboard 'xyz-123-def' entitled 'libddog skel: AWS ELB dashboard'
+```
+
+TODO: create, remove
 
 
 
