@@ -11,7 +11,7 @@ First you write the query:
 ```python
 query = (Query("aws.elb.request_count")
         .filter(region="us-east-1")
-        .agg("sum").by("availability-zone")
+        .agg("sum").by("availability-zone").as_count()
         .rollup("sum", 5 * 60))
 
 # produces:
@@ -40,6 +40,7 @@ This gives you the widget you want, with all the parameters supported by the Dat
 
 ![ELB request count](docs/assets/elb-reqs-graph.png)
 
+Learn more in the **[User guide](docs/USER_GUIDE.md)**.
 
 
 ## Why libddog?
@@ -96,7 +97,7 @@ Timeseries(
 Notice that every decision about how to construct the query represents a different concern:
 
 - Is the metric a count or a rate?
-- Does it represent a sum or an average (min or max)?
+- Does it represent a sum or an average, min or max?
 - What dimensions do we filter on?
 - What dimensions do we group by?
 
