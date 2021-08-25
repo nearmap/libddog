@@ -10,6 +10,7 @@ except ImportError:
 # isort: split
 import click
 
+import libddog
 from libddog.command_line.dashboards import (
     CommandLineError,
     ConsoleWriter,
@@ -32,6 +33,15 @@ def dash(ctx):
 
     ctx.dash_mgr = DashboardManagerCli(proj_path=".")
     ctx.writer = ConsoleWriter()
+
+
+@click.command()
+@click.pass_context
+def version(ctx):
+    "ddog version"
+
+    writer = ConsoleWriter()
+    writer.println(f"libddog version {libddog.__version__}")
 
 
 @click.command()
@@ -81,6 +91,7 @@ def update_live(ctx, title: str, dry_run: bool = False):
 
 
 cli.add_command(dash)
+cli.add_command(version)
 dash.add_command(list_defs)
 dash.add_command(update_live)
 attach_help_option(cli)
