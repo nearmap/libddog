@@ -38,7 +38,7 @@ There are some helpful scripts in the `ci/` directory to run `black` (code forma
 (monitoring-project) $ pip install -r dev-requirements.txt 
 ```
 
-libddog uses type annotations and we highly recommend that you take advantage of them to keep your code working correctly. A clean slate execution will look like this:
+libddog uses type annotations and we highly recommend that you take advantage of them to keep your code working correctly by running `mypy`. A clean slate execution will look like this:
 
 ```bash
 (monitoring-project) $ ci/typecheck 
