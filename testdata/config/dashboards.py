@@ -1,6 +1,6 @@
 from typing import List
 
-from qa_dashboards import qa_metrics, qa_widgets
+from dashboards import qa_metrics, qa_widgets
 
 from libddog.dashboards import Dashboard
 

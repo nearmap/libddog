@@ -1,4 +1,4 @@
-from qa_dashboards.shared import (
+from dashboards.shared import (
     get_dashboard_desc_template,
     get_region_tmpl_var_presets,
 )
