@@ -46,7 +46,7 @@ Learn more in the **[User guide](docs/USER_GUIDE.md)**.
 
 ## The state of the project
 
-libddog is a young project and currently supports a small but useful subset of dashboard functionality. See the **[Feature support](docs/FEATURES_SUPPORT.md)** page for details.
+libddog is a young project and currently supports a small but useful subset of dashboard functionality. See the **[Feature support](docs/FEATURE_SUPPORT.md)** page for details.
 
 We plan to support more dashboard features over time. We also plan to support monitors.
 
