@@ -1,6 +1,7 @@
 # libddog user guide
 
 
+
 ## How to get started
 
 The easiest way to get started with libddog is to use the [example skeleton project](skel) as a starting point:
@@ -17,7 +18,7 @@ You will need to install libddog on your system. Using a [virtualenv](https://vi
 ```bash
 $ mkvirtualenv monitoring-project
 (monitoring-project) $ pip install -r requirements.txt 
-Successfully installed libddog-0.0 ...snip...
+Successfully installed libddog-0.0.1 ...snip...
 ```
 
 You can now use the `ddog` command line tool to manage your dashboards. To list the dashboards defined in the project:
@@ -27,6 +28,14 @@ You can now use the `ddog` command line tool to manage your dashboards. To list 
 ID           GROUPS  WIDGETS  QUERIES  TITLE
 None              0        1        1  libddog skel: AWS EC2 dashboard
 ```
+
+
+
+## Datadog credentials
+
+The `ddog` tool communicates with the Datadog API and this requires valid credentials:
+1) An API key which is specific to your organization. You can create one [on this page](https://app.datadoghq.com/account/settings#api).
+2) An application key which is specific to your user account. You can create one [on this page](https://app.datadoghq.com/access/application-keys).
 
 
 
