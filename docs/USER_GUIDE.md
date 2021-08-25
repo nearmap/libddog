@@ -28,15 +28,27 @@ ID           GROUPS  WIDGETS  QUERIES  TITLE
 None              0        1        1  libddog skel: AWS EC2 dashboard
 ```
 
-There are also some helpful scripts in the `ci/` directory to run `black` (code formatter) and `mypy` (static type checker) on your project. To get these working first install the development tools:
+
+
+## Keeping your code quality high
+
+There are some helpful scripts in the `ci/` directory to run `black` (code formatter) and `mypy` (static type checker) on your project. To get these working first install the development tools:
 
 ```bash
 (monitoring-project) $ pip install -r dev-requirements.txt 
 ```
 
-libddog uses type annotations and we highly recommend that you take advantage of them to keep your code working correctly. A clean slate execution will say:
+libddog uses type annotations and we highly recommend that you take advantage of them to keep your code working correctly. A clean slate execution will look like this:
 
 ```bash
 (monitoring-project) $ ci/typecheck 
 Success: no issues found in 5 source files
+```
+
+If you pass the wrong type of parameter to a function `mypy` will help you fix it:
+
+```bash
+(monitoring-project) $ ci/typecheck 
+dashboards/aws_ec2.py:31: error: Argument "display_type" to "Request" has incompatible type "LineWidth"; expected "DisplayType"
+Found 1 error in 1 file (checked 5 source files)
 ```
