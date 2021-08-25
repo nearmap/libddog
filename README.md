@@ -81,16 +81,28 @@ query = service_requests_totals.filter(region="us-east-1")
 Finally, we want to graph this metric. At this point we have a choice to make - we can visualize just one single number that represents all requests to our service globally, or we can break down the request totals by some dimension like availability zone:
 
 ```python
-query = query..by("availability-zone")
-
 Timeseries(
     title="Total service requests by AZ",
     requests=[
         Request(
-            queries=[query],
+            queries=[query.by("availability-zone")],
             display_type=DisplayType.BARS,
         ),
     ],
     ...
 )
+```
+
+Notice that every decision about how to construct the query represents a different concern:
+
+- Is the metric a count or a rate?
+- Does it represent a sum or an average (min or max)?
+- What dimensions do we filter on?
+- What dimensions do we group by?
+
+You can structure your code to answer these questions where it most makes sense, depending on what the code is responsible for. A function that applies a particular filter to queries (eg. a template variable) can apply it consistently to any number of queries. This is how we can achieve consistency:
+
+```python
+def apply_tmpl_var_to_all(queries):
+    return [query.filter("$region") for query in queries]
 ```
