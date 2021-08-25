@@ -11,7 +11,7 @@ $ cp -r /tmp/libddog/docs/skel monitoring-project
 $ cd monitoring-project
 ```
 
-You will need to install libddog on your system. A [virtualenv](https://virtualenv.pypa.io/en/latest/) and (virtualenvwrapper)[https://virtualenvwrapper.readthedocs.io/en/latest/] is a highly recommended. We will assume you are using `virtualenvwrapper`:
+You will need to install libddog on your system. Using a [virtualenv](https://virtualenv.pypa.io/en/latest/) and [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) are highly recommended. We will assume you are using `virtualenvwrapper`:
 
 ```bash
 $ mkvirtualenv monitoring-project
