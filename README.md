@@ -100,7 +100,7 @@ Notice that every decision about how to construct the query represents a differe
 - What dimensions do we filter on?
 - What dimensions do we group by?
 
-You can structure your code to answer these questions where it most makes sense, depending on what the code is responsible for. A function that applies a particular filter to queries (eg. a template variable) can apply it consistently to any number of queries. This is how we can achieve consistency:
+You can structure your code to answer these questions where it most makes sense, depending on what the code is responsible for. A function that applies a particular filter to queries (eg. a template variable) can apply it consistently to any number of queries. This is how we can achieve consistency on our dashboards:
 
 ```python
 def apply_tmpl_var_to_all(queries):
