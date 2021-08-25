@@ -52,16 +52,45 @@ Well, how do we manage this change in our systems? We architect our systems. We 
 
 How would we apply these ideas to dashboards?
 
-Let's start by defining the name of the metric in one place and reuse that. Every graph on every dashboard should use this definition when doing anything with ELB request counts:
+Let's start by defining the name of the metric in one place and reuse that. Every graph on every dashboard should use this definition when doing anything with service request counts:
 
 ```python
-elb_requests = Query("aws.elb.request_count")
+service_requests = Query("service.request_count")
 ```
 
-Next, the choice of aggregation function has to do with how we want to combine this metric coming from multiple nodes. If you want to compute a global count of requests we would sum them. But if we do that we should also make sure that we aggregate the samples in time the same way, and apply a rollup which agrees with the aggregation:
+Next, we'll be consuming this metric in different ways depending on the use case. One use case is to count all service requests across our nodes. To do this we need to aggregate by `sum`. In the same breath we should also think about the rollup, because the rollup is an aggregation over time. So let's make sure they are consistent:
 
 ```python
-elb_requests_totals = elb_requests.agg("sum").rollup("sum")
+service_requests_totals = service_requests.as_count().agg("sum").rollup("sum")
 ```
 
-Finally, the way we want to visualize these requests counts 
+We now have a reusable use case in `service_requests_totals` that we can consume in many different graphs.
+
+On one dashboard we might have a template variable that filters by region. So for this dashboard we'll add the template variable to our query:
+
+```python
+query = service_requests_totals.filter("$region")
+```
+
+We might have another dashboard that is specific to a particular region, eg. `us-east-1`. In this case we'll want to filter on that region directly:
+
+```python
+query = service_requests_totals.filter(region="us-east-1")
+```
+
+Finally, we want to graph this metric. At this point we have a choice to make - we can visualize just one single number that represents all requests to our service globally, or we can break down the request totals by some dimension like availability zone:
+
+```python
+query = query..by("availability-zone")
+
+Timeseries(
+    title="Total service requests by AZ",
+    requests=[
+        Request(
+            queries=[query],
+            display_type=DisplayType.BARS,
+        ),
+    ],
+    ...
+)
+```
