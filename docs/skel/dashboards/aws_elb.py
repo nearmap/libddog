@@ -16,7 +16,9 @@ def get_reqs_per_elb() -> Widget:
     query = (
         Query("aws.elb.request_count")
         .filter("$region")
-        .agg("sum").by("availability-zone").as_count()
+        .agg("sum")
+        .by("availability-zone")
+        .as_count()
         .rollup("sum", 5 * 60)
     )
 
