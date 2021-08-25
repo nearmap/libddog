@@ -46,4 +46,22 @@ This gives you the widget you want, with all the parameters supported by the Dat
 
 Monitoring tools like Datadog make it easy to experiment with different metrics and widgets, and create dashboards for many different visualizations of your systems. This is great for prototyping your monitoring setup, but it is not great for maintainability. Over time, as your team accumulates dashboards, they become a maintenance burden. Many of the graphs stop working because the metrics have changed, or the data shown isn't correct anymore. The enthusiasm that goes into creating the dashboards typically doesn't extend to maintaining their whole lifecycle. And let's be fair: it is not especially fun to manually change 20 graphs on a dashboard to update the name of a metric, change a tag, or update the aggregation or rollup parameters.
 
-In order to remain useful your dashboards needs to change to keep pace with the continuous change in your systems. How can we make this easier?
+The thing is - in order to remain useful your dashboards need to keep pace with the continuous change in your systems. How can we make this easier?
+
+Well, how do we manage this change in our systems? We architect our systems. We strive for single source of truth, modularity and code reuse. Why should we not do the same with our monitoring architecture? 
+
+How would we apply these ideas to dashboards?
+
+Let's start by defining the name of the metric in one place and reuse that. Every graph on every dashboard should use this definition when doing anything with ELB request counts:
+
+```python
+elb_requests = Query("aws.elb.request_count")
+```
+
+Next, the choice of aggregation function has to do with how we want to combine this metric coming from multiple nodes. If you want to compute a global count of requests we would sum them. But if we do that we should also make sure that we aggregate the samples in time the same way, and apply a rollup which agrees with the aggregation:
+
+```python
+elb_requests_totals = elb_requests.agg("sum").rollup("sum")
+```
+
+Finally, the way we want to visualize these requests counts 
