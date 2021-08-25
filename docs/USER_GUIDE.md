@@ -16,4 +16,13 @@ You will need to install libddog on your system. Using a [virtualenv](https://vi
 ```bash
 $ mkvirtualenv monitoring-project
 (monitoring-project) $ pip install -r requirements.txt 
+Successfully installed libddog-0.0 ...snip...
+```
+
+You can now use the `ddog` command line tool to manage your dashboards. To list the dashboards defined in the project:
+
+```bash
+(monitoring-project) $ ddog dash list-defs
+ID           GROUPS  WIDGETS  QUERIES  TITLE
+None              0        1        1  libddog skel: AWS EC2 dashboard
 ```
