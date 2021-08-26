@@ -47,7 +47,7 @@ Passing unit tests are a good proxy for passing integration tests, because they 
 
 Our **type checks** target #2 and both rely on, and validate, our persistent use of type annotations in libddog. Type annotations are also a key benefit for users of libddog, because their IDE can use them for code completion and highlight errors.
 
-Our **style checks** target #3 to remain close to idiomatic use of Python and avoiding common pitfalls in the language.
+Our **style checks** target #3 to remain close to idiomatic use of Python and avoid common pitfalls in the language.
 
 Our **code formatter** targets #3 by keeping code style consistent across the project in the library, tests and example code.
 
@@ -57,6 +57,19 @@ When it comes to problems with our packaging we use tox to create a fresh enviro
 
 We also use tox to run `ddog` against a version of libddog that is installed directly from PyPI as part of our post-release checks. (The `pypi-cli` env in tox).
 
+No testing method is perfect, but the more testing we do the greater the chance that we will find problems.
+
+As much as possible we run our tests and checks in CI so that developers are alerted to problems as early as possible.
+
+| Method                    | How to run             | Runs in CI?        |
+|---------------------------|------------------------|--------------------|
+| Integration tests         | `./integtests`         | :x:                |
+| Unit tests                | `./unittests`          | :heavy-check-mark: |
+| Unit tests under coverage | `./unittests_coverage` | :heavy-check-mark: |
+| Static type checker       | `./typecheck`          | :heavy-check-mark: |
+| Style checker             | `./stylecheck`         | :heavy-check-mark: |
+| Code formatter            | `./reformat`           | :heavy-check-mark: |
+| Tox                       | `tox`                  | :heavy-check-mark: |
 
 
 ## Steps to release a new version
