@@ -92,8 +92,9 @@ As much as possible we run our tests and checks in CI so that developers are ale
 
 QA steps to run to make sure `master` is in a releasable state:
 
-1. Make sure that all CI jobs are green.
-2. Run the integration tests.
+1. Make sure the API is in a consistent state (there are no half implemented features).
+2. Make sure that all CI jobs are green.
+3. Run the integration tests.
 
 Create a commit for the release:
 
