@@ -11,6 +11,7 @@ from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
 from libddog.metrics.query import QueryMonad
+from libddog.tools.timekeeping import parse_date, time_since, utcnow
 
 
 def count_groups(obj: Union[Dashboard, Widget]) -> int:
@@ -68,7 +69,8 @@ class ConsoleWriter:
 
     def errorln(self, msg: str, *args: Any, exc: Optional[Exception] = None) -> None:
         exc_state = None
-        msg = msg % args
+        if args:
+            msg = msg % args
 
         if exc:
             msg = f"{msg}: {exc!r}"
@@ -100,6 +102,16 @@ class DashboardManagerCli:
         self.containing_dir = "config"
         self.definition_module = "dashboards"
         self.import_path = f"{self.containing_dir}.{self.definition_module}"
+
+        self._dashboard_manager: Optional[DashboardManager] = None  # lazy attribute
+
+    @property
+    def dashboard_manager(self) -> DashboardManager:
+        if self._dashboard_manager is None:
+            self._dashboard_manager = DashboardManager()
+            self._dashboard_manager.load_credentials_from_environment()
+
+        return self._dashboard_manager
 
     def load_definitions_module(self) -> ModuleType:
         # add '.' to sys.path to make 'config' importable
@@ -159,14 +171,54 @@ class DashboardManagerCli:
                 dash.title,
             )
 
+    def list_live(self) -> None:
+        fmt = "%11s  %20s  %9s  %9s  %s"
+        header_cols = (
+            "ID",
+            "AUTHOR",
+            "CREATED",
+            "MODIFIED",
+            "TITLE",
+        )
+        self.writer.println(fmt % header_cols)
+
+        dashboard_dcts = self.dashboard_manager.list()
+
+        tuples = []
+        for dct in dashboard_dcts:
+            modified_at = parse_date(dct["modified_at"])
+            modified_ago = utcnow() - modified_at
+            tuples.append((modified_ago, dct))
+
+        # sort by oldest modified time first
+        tuples.sort(reverse=True)
+
+        for modified_ago, dct in tuples:
+            id = dct["id"]
+            author_handle = dct["author_handle"]
+            title = dct["title"]
+            created_at = parse_date(dct["created_at"])
+            created_ago = utcnow() - created_at
+
+            # user@company.com -> user
+            author_handle = author_handle.split("@")[0]  # remove domain name
+
+            cols = (
+                id,
+                author_handle,
+                time_since(created_ago),
+                time_since(modified_ago),
+                title,
+            )
+            self.writer.println(fmt % cols)
+
+        self.writer.println("%d dashboards found" % len(tuples))
+
     def update_live(self, *, title_pat: str, dry_run: bool = False) -> None:
         dashes = self.load_definitions()
         dashes = self.filter_definitions(title_pat, dashes)
 
         verb = "Updating" if not dry_run else "Dry run: Updating"
-
-        mgr = DashboardManager()
-        mgr.load_credentials_from_environment()
 
         for dash in dashes:
             msg = f"{verb} dashboard {dash.id!r} entitled {dash.title!r}"
@@ -175,4 +227,4 @@ class DashboardManagerCli:
             if dry_run:
                 continue
 
-            mgr.update(dash)
+            self.dashboard_manager.update(dash)

@@ -60,6 +60,21 @@ def list_defs(ctx):
 
 
 @click.command()
+@click.pass_context
+def list_live(ctx):
+    "List live dashboards in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    try:
+        mgr.list_live()
+    except CommandLineError as exc:
+        writer.errorln(exc.message, exc=exc.exc)
+        sys.exit(2)
+
+
+@click.command()
 @click.option(
     "-t",
     "--title",
@@ -93,6 +108,7 @@ def update_live(ctx, title: str, dry_run: bool = False):
 cli.add_command(dash)
 cli.add_command(version)
 dash.add_command(list_defs)
+dash.add_command(list_live)
 dash.add_command(update_live)
 attach_help_option(cli)
 
