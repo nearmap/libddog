@@ -201,7 +201,7 @@ class DashboardManagerCli:
             created_ago = utcnow() - created_at
 
             # user@company.com -> user
-            author_handle = author_handle.split("@")[0]  # remove domain name
+            author_handle = author_handle.split("@")[0]
 
             cols = (
                 id,
