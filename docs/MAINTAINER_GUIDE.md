@@ -37,9 +37,23 @@ We have identified the following risks that we are attempting to mitigate with o
 
 Here is how our testing efforts map onto these risks:
 
-Our **integration tests** squarely target #1 and aim to fully (or close to fully) exercise the libddog API against the Datadog API. This is our best defense against changes in the Datadog API breaking libddog over time. Our tests consist of dashboards modeled using libddog and pushed to Datadog. We also verify that the update succeeded by fetching the dashboard from Datadog (in JSON) and comparing the JSON document we sent to the one Datadog echoes back to us. Modulo of a few unique identifiers, timestamps and other fields the client doesn't (or doesn't want to) control they should be identical.
+Our **integration tests** squarely target #1 and aim to fully (or close to fully) exercise the libddog API against the Datadog API. This is our best defense against changes in the Datadog API breaking libddog over time. Our tests consist of dashboards modeled using libddog and pushed to Datadog. We also verify that the update succeeded by fetching the dashboard from Datadog and comparing the JSON document we sent to the one Datadog echoes back to us. Modulo of a few unique identifiers, timestamps and other fields the client doesn't (or doesn't want to) control they should be identical.
 
-As usual with integration tests, they are slow and inconvenient to run. They require a Datadog account and valid credentials, so they cannot be run in CI.
+As usual with integration tests, they are slow and inconvenient to run. They require a Datadog account and valid credentials, so they cannot be run in CI. They should also be checked visually in Datadog to make sure they actually work.
+
+Our **unit tests** target #2 by exercising as much code as possible. We tend to apply the approaches of minimal API usage (passing as few arguments as possible), maximal usage (passing every argument possible) as well as explicitly targeting corner cases. We measure code coverage and for the key namespaces (`libddog.dashboards`, `libddog.metrics`) we aim for 100% coverage.
+
+Our **type checks** target #2 and both rely on, and validate, our persistent use of type annotations in libddog. Type annotations are also a key benefit for users of libddog, because their IDE can use them for code completion or highlighting of errors.
+
+Our **style checks** target #3 to stick to remain close to idiomatic use of Python and avoiding common pitfalls in the language.
+
+Our **code formatter** targets #3 by keeping code style consistent across the project in the library, tests and example code.
+
+Our use of **tox** targets #4 and #5. When it comes to testing the `ddog` command line tool we use tox to exercise commands that don't require any dependencies (like listing definitions). This amounts to a smoke test.
+
+When it comes to problems with our packaging we use tox to create a fresh environment, install libddog into it (exercising `setup.py`, `MANIFEST.in` and friends), and then run tests or `ddog` inside of that.
+
+We also use tox to run `ddog` against a version of libddog that is installed directly from PyPI as part of our post-release checks. (The `pypi-cli` env in tox).
 
 
 
