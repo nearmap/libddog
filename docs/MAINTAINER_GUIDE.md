@@ -20,7 +20,7 @@ When making changes to the public API this must be reflected in the version:
 - A significant new feature added (like a new class or method) warrants a minor version bump: ```1.2.3 -> 1.3.0```.
 - A breaking change (a public API removed or changed in a backwards incompatible way) warrants a major version bump: ```1.2.3 -> 2.0.0```.
 
-As much as possible we should aim to avoid breaking changes by making additive changes only, eg. add a new method which supercedes an existing method (and mark it deprecated) instead of changing an existing method.
+As much as possible we should aim to avoid breaking changes by making additive changes only, eg. add a new method which supercedes an existing method (and mark the existing method deprecated) instead of changing an existing method.
 
 
 
