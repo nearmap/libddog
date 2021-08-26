@@ -1,6 +1,16 @@
 # libddog maintainer guide
 
 
+## Our challenge
+
+In libddog we provide a library API that maps onto the Datadog (service) API and indirectly, onto the Datadog UI that users see and interact with. We do not control the Datadog API, and our understanding of it will always be imperfect. It will always be limited to specific cases we have seen of dashboards and widgets exported to JSON that we can learn from. This information fees into the assumptions we make about Datadog's internal data architecture, and our design designs will often fall out of that. The trick is to not be too closely tied to Datadog's representation of metrics and widgets - giving us some wiggle room to choose the API we think is best for users, and to allow us to evolve things internally in libddog without making breaking changes - but without going as far introducing whole new abstractions that don't exist in Datadog, and which could become very difficult to sustain over time.
+
+**Our goal is provide a stable and understandable API which keeps working**, even when the Datadog API may slowly evolve over time. **Whenever possible we want to avoid breaking changes** and keep user code working.
+
+If we deem that breaking changes are necessary **this must be reflected in the version by bumping the major version**. Instructions must also be provided in the [CHANGELOG](../CHANGELOG.md) on what code changes users need to make in order to upgrade.
+
+
+
 ## Steps to release a new version
 
 Create a commit for the release:
@@ -20,14 +30,17 @@ Perform the release:
 
 Post-release checks:
 
-1. Run tox env to test the released version: `tox -e pypi-cli`
-2. Bump version in `libddog/__init__.py` to an alpha release version, eg. `0.0.3a0`.
+1. Run tox env to test the released version: `tox -e pypi-cli`. *Make sure the libddog version listed as installed is the version you just released.* If not rm -rf the tox env and re-run.
 
 If at this point you discover that the release is broken PyPI will let you
 yank/delete it and you can redo it. As long as this happens as part of the
 release process, it's fair to assume that noone is using the new version yet, so
 it should be okay.
 
-By contrast, if you discover that an earlier released version is broken it's
+By contrast, if you discover that an *earlier* released version is broken it's
 better to yank it than to leave it up for users to stumble over. Update the
 [CHANGELOG](../CHANGELOG.md) as well to document this.
+
+Finalizing steps:
+
+1. Bump version in `libddog/__init__.py` to an alpha release version, eg. `0.0.3a0`.
