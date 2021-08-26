@@ -39,13 +39,13 @@ Here is how our testing efforts map onto these risks:
 
 Our **integration tests** target #1 and aim to fully (or close to fully) exercise the libddog API against the Datadog API. This is our best defense against changes in the Datadog API breaking libddog over time. Our tests consist of dashboards modeled using libddog and pushed to Datadog. We also verify that the update succeeded by fetching the dashboard from Datadog and comparing the JSON document we sent to the one Datadog echoes back to us. Modulo of a few unique identifiers, timestamps and other fields the client doesn't (or doesn't want to) control they should be identical.
 
-As usual with integration tests, they are slow and inconvenient to run. They require a Datadog account and valid credentials, so they cannot be run in CI. They should also be checked visually in Datadog to make sure they actually work.
+As usual with integration tests, they are slow and inconvenient to run. They require a Datadog account and valid credentials, so they cannot be run in CI. The dashboards they create should also be checked visually in Datadog to make sure they actually work.
 
 Our **unit tests** target #2 by exercising as much code as possible. We tend to apply the approaches of minimal API usage (passing as few arguments as possible), maximal usage (passing every argument possible) as well as explicitly targeting corner cases. We measure code coverage and for the key namespaces (`libddog.dashboards`, `libddog.metrics`) we aim for 100% coverage.
 
 Passing unit tests are a good proxy for passing integration tests, because they are a superset of the same code under test.
 
-Our **type checks** target #2 and both rely on, and validate, our persistent use of type annotations in libddog. Type annotations are also a key benefit for users of libddog, because their IDE can use them for code completion or highlighting of errors.
+Our **type checks** target #2 and both rely on, and validate, our persistent use of type annotations in libddog. Type annotations are also a key benefit for users of libddog, because their IDE can use them for code completion and highlight errors.
 
 Our **style checks** target #3 to stick to remain close to idiomatic use of Python and avoiding common pitfalls in the language.
 
