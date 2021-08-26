@@ -180,7 +180,7 @@ class DashboardManagerCli:
             "MODIFIED",
             "TITLE",
         )
-        self.writer.println(fmt % header_cols)
+        self.writer.println(fmt, *header_cols)
 
         dashboard_dcts = self.dashboard_manager.list()
 
@@ -210,7 +210,7 @@ class DashboardManagerCli:
                 time_since(modified_ago),
                 title,
             )
-            self.writer.println(fmt % cols)
+            self.writer.println(fmt, *cols)
 
         self.writer.println("%d dashboards found" % len(tuples))
 
