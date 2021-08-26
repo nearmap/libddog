@@ -57,9 +57,7 @@ When it comes to problems with our packaging we use tox to create a fresh enviro
 
 We also use tox to run `ddog` against a version of libddog that is installed directly from PyPI as part of our post-release checks. (The `pypi-cli` env in tox).
 
-No testing method is perfect, but the more testing we do the greater the chance that we will find problems.
-
-As much as possible we run our tests and checks in CI so that developers are alerted to problems as early as possible.
+No testing method is perfect, but the more testing we do the greater the chance that we will catch problems.
 
 | Method                    | How to run             | Runs in CI?        |
 |---------------------------|------------------------|--------------------|
@@ -71,12 +69,15 @@ As much as possible we run our tests and checks in CI so that developers are ale
 | Code formatter            | `./reformat`           | :heavy_check_mark: |
 | Tox                       | `tox`                  | :heavy_check_mark: |
 
+As much as possible we run our tests and checks in CI so that developers are alerted to problems as early as possible.
+
 
 ## Steps to release a new version
 
 QA steps to run to make sure `master` is in a releasable state:
 
-*TODO*
+1. Make sure that all CI jobs are green.
+2. Run the integration tests.
 
 Create a commit for the release:
 
