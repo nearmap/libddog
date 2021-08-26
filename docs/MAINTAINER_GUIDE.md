@@ -1,4 +1,5 @@
-# libddog maintainer guide
+# Maintainer guide
+
 
 
 ## Our challenge
@@ -26,11 +27,21 @@ As much as possible we should aim to avoid breaking changes by making additive c
 
 ## Quality assurance process
 
+We have identified the following risks that we are attempting to mitigate with our QA process:
 
+1. We've misunderstood how something works in Datadog or just implemented it wrong.
+2. Code inside libddog is inconsistent/broken and can turn into latent TypeErrors, ValueErrors, NameErrors, ImportErrors and the like.
+3. Code inside libddog is not very readable, is brittle and painful to maintain.
+4. Some commands in `ddog` are broken, or don't work given certain inputs.
+5. The way we package and release libddog is broken and leads to released versions being broken or unusable.
 
 
 
 ## Steps to release a new version
+
+QA steps to run to make sure `master` is in a releasable state:
+
+*TODO*
 
 Create a commit for the release:
 

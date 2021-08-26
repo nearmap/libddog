@@ -1,4 +1,4 @@
-# libddog user guide
+# User guide
 
 
 
