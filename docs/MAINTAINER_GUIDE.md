@@ -37,7 +37,7 @@ As much as possible we should aim to avoid breaking changes by making additive c
 * `tests_integ` - the integration tests
 * `tests_unit` - the unit tests
 
-When libddog is installed using pip only `bin` and `libddog` will be included.
+When libddog is installed using pip only `bin` and `libddog` will be installed.
 
 
 
