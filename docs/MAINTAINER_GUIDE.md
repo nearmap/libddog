@@ -27,7 +27,7 @@ As much as possible we should aim to avoid breaking changes by making additive c
 
 ## Directory structure
 
-* `bin` - command line tools, eg. `ddog`
+* `bin` - command line tools, ie. `ddog`
 * `ci` - executables that are needed for CI
 * `docs` - documentation
 * `docs/skel` - an example skeleton project for users
