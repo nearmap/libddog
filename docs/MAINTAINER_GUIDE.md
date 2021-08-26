@@ -25,6 +25,22 @@ As much as possible we should aim to avoid breaking changes by making additive c
 
 
 
+## Directory structure
+
+* `bin` - command line tools, eg. `ddog`
+* `ci` - executables that are needed for CI
+* `docs` - documentation
+* `docs/skel` - an example skeleton project for users
+* `libddog` - the libddog library itself
+* `libtests` - library code required by our tests
+* `testdata` - code that consumes libddog as a library, used by our integration tests
+* `tests_integ` - the integration tests
+* `tests_unit` - the unit tests
+
+When libddog is installed using pip only `bin` and `libddog` will be included.
+
+
+
 ## Quality assurance process
 
 We have identified the following risks that we are attempting to mitigate with our QA process:
