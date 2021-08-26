@@ -47,7 +47,7 @@ Passing unit tests are a good proxy for passing integration tests, because they 
 
 Our **type checks** target #2 and both rely on, and validate, our persistent use of type annotations in libddog. Type annotations are also a key benefit for users of libddog, because their IDE can use them for code completion and highlight errors.
 
-Our **style checks** target #3 to stick to remain close to idiomatic use of Python and avoiding common pitfalls in the language.
+Our **style checks** target #3 to remain close to idiomatic use of Python and avoiding common pitfalls in the language.
 
 Our **code formatter** targets #3 by keeping code style consistent across the project in the library, tests and example code.
 
