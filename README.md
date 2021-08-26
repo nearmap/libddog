@@ -48,9 +48,9 @@ Learn more in the **[User guide](docs/USER_GUIDE.md)**.
 
 libddog is a young project and currently supports a small but useful subset of dashboard functionality. See the **[Feature support](docs/FEATURE_SUPPORT.md)** page for details.
 
-Want to know what's new in the project? Read the **[CHANGELOG](CHANGELOG.md)**.
-
 We plan to support more dashboard features over time. We also plan to support monitors.
+
+Want to know what's new in the project? Read the **[CHANGELOG](CHANGELOG.md)**.
 
 Want to contribute? Start by reading the **[Maintainer guide](docs/MAINTAINER_GUIDE.md)**.
 

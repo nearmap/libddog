@@ -53,7 +53,7 @@ We have identified the following risks that we are attempting to mitigate with o
 
 Here is how our testing efforts map onto these risks:
 
-Our **integration tests** target #1 and aims to fully (or close to fully) exercise the libddog API against the Datadog API. This is our best defense against changes in the Datadog API breaking libddog over time. Our tests consist of dashboards modeled using libddog and pushed to Datadog. We also verify that the update succeeded by fetching the dashboard from Datadog and comparing the JSON document we sent to the one Datadog echoes back to us. Modulo of a few unique identifiers, timestamps and other fields the client doesn't (or doesn't want to) control they should be identical.
+Our **integration tests** target #1 and aim to fully (or close to fully) exercise the libddog API against the Datadog API. This is our best defense against changes in the Datadog API breaking libddog over time. Our tests consist of dashboards modeled using libddog and pushed to Datadog. We also verify that the update succeeded by fetching the dashboard from Datadog and comparing the JSON document we sent to the one Datadog echoes back to us. Modulo of a few unique identifiers, timestamps and other fields the client doesn't (or doesn't want to) control they should be identical.
 
 As usual with integration tests, they are slow and inconvenient to run. They require a Datadog account and valid credentials, so they cannot be run in CI. The dashboards they create should also be checked visually in Datadog to make sure they actually work.
 
