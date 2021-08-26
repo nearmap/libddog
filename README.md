@@ -50,6 +50,8 @@ libddog is a young project and currently supports a small but useful subset of d
 
 We plan to support more dashboard features over time. We also plan to support monitors.
 
+Want to contribute? Start by reading the **[Maintainer guide](docs/MAINTAINER_GUIDE.md)**.
+
 
 
 ## Why libddog?
@@ -117,9 +119,3 @@ class ServiceDashboard:
     def apply_tmpl_var_to_all(self, queries):
         return [query.filter("$region") for query in queries]
 ```
-
-
-
-## Want to contribute?
-
-Start by reading the **[Maintainer guide](docs/MAINTAINER_GUIDE.md)**.
