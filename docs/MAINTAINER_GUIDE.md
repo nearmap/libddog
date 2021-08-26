@@ -16,9 +16,11 @@ If we deem that breaking changes are necessary **this must be reflected in the v
 libddog is still a young project and this is the reflected in the current version being in the `0.0.x` series. At some point we will bump to `1.0.0` to reflect that it has become quite a mature project.
 
 When making changes to the public API this must be reflected in the version:
-- A bug fix or a small incremental feature (like a new kwarg added to an existing method) warrants a patch version bump: `1.2.3 -> 1.2.4`.
-- A significant new feature added (like a new class or method) warrants a minor version bump: `1.2.3 -> 1.3.0`.
+- A bug fix or a small incremental feature (like a new kwarg added to an existing method) warrants a patch version bump: ```1.2.3 -> 1.2.4```.
+- A significant new feature added (like a new class or method) warrants a minor version bump: ```1.2.3 -> 1.3.0```.
 - A breaking change (a public API removed or changed in a backwards incompatible way) warrants a major version bump: ```1.2.3 -> 2.0.0```.
+
+As much as possible we should aim to avoid breaking changes by making additive changes only, eg. add a new method which supercedes an existing method (and mark it deprecated) instead of changing an existing method.
 
 
 
