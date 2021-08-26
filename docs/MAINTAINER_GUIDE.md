@@ -64,12 +64,12 @@ As much as possible we run our tests and checks in CI so that developers are ale
 | Method                    | How to run             | Runs in CI?        |
 |---------------------------|------------------------|--------------------|
 | Integration tests         | `./integtests`         | :x:                |
-| Unit tests                | `./unittests`          | :heavy-check-mark: |
-| Unit tests under coverage | `./unittests_coverage` | :heavy-check-mark: |
-| Static type checker       | `./typecheck`          | :heavy-check-mark: |
-| Style checker             | `./stylecheck`         | :heavy-check-mark: |
-| Code formatter            | `./reformat`           | :heavy-check-mark: |
-| Tox                       | `tox`                  | :heavy-check-mark: |
+| Unit tests                | `./unittests`          | :heavy_check_mark: |
+| Unit tests under coverage | `./unittests_coverage` | :heavy_check_mark: |
+| Static type checker       | `./typecheck`          | :heavy_check_mark: |
+| Style checker             | `./stylecheck`         | :heavy_check_mark: |
+| Code formatter            | `./reformat`           | :heavy_check_mark: |
+| Tox                       | `tox`                  | :heavy_check_mark: |
 
 
 ## Steps to release a new version
