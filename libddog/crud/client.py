@@ -1,9 +1,11 @@
 import os
 import pprint
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import datadog
+import datadog.api
 
+from libddog.common.types import JsonDict
 from libddog.dashboards import Dashboard
 
 
@@ -39,19 +41,26 @@ class DatadogClient:
 
         return None
 
-    def get(self, id: str) -> Any:
+    def get_dashboard(self, id: str) -> JsonDict:
         result = datadog.api.Dashboard.get(id=id)  # type: ignore
+
+        assert isinstance(result, dict)  # help mypy
+
         return result
 
-    def list(self) -> Any:
+    def list_dashboards(self) -> List[JsonDict]:
         result = datadog.api.Dashboard.get_all()  # type: ignore
-        return result["dashboards"]
 
-    def update(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
+        dashboards = result["dashboards"]
+        assert isinstance(dashboards, list)  # help mypy
+
+        return dashboards
+
+    def update_dashboard(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
         id = id or dashboard.id
 
         if not id:
-            raise RuntimeError(
+            raise ValueError(
                 "Cannot update dashboard without an id: %r" % dashboard.title
             )
 

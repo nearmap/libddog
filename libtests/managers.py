@@ -28,7 +28,7 @@ class QADashboardManager:
         raise RuntimeError("Failed to get dashboard with title: %s" % title)
 
     def assign_id_to_dashboard(self, dashboard: Dashboard) -> str:
-        all_dashboards = self.mgr.list()
+        all_dashboards = self.mgr.list_dashboards()
 
         existing_id: str = ""
         for dash in all_dashboards:
@@ -49,4 +49,4 @@ class QADashboardManager:
                 "Dashboard desc contains unpopulated template: %s" % dashboard.desc
             )
 
-        self.mgr.update(dashboard, id)
+        self.mgr.update_dashboard(dashboard, id)

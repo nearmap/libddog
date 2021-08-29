@@ -182,7 +182,7 @@ class DashboardManagerCli:
         )
         self.writer.println(fmt, *header_cols)
 
-        dashboard_dcts = self.dashboard_manager.list()
+        dashboard_dcts = self.dashboard_manager.list_dashboards()
 
         tuples = []
         for dct in dashboard_dcts:
@@ -227,4 +227,4 @@ class DashboardManagerCli:
             if dry_run:
                 continue
 
-            self.dashboard_manager.update(dash)
+            self.dashboard_manager.update_dashboard(dash)
