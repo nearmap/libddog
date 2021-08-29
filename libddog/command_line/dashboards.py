@@ -6,7 +6,7 @@ from types import ModuleType
 from typing import Any, List, Optional, Union
 
 from libddog.command_line.errors import ExceptionState
-from libddog.crud import DashboardManager
+from libddog.client import DatadogClient
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
@@ -103,12 +103,12 @@ class DashboardManagerCli:
         self.definition_module = "dashboards"
         self.import_path = f"{self.containing_dir}.{self.definition_module}"
 
-        self._dashboard_manager: Optional[DashboardManager] = None  # lazy attribute
+        self._dashboard_manager: Optional[DatadogClient] = None  # lazy attribute
 
     @property
-    def dashboard_manager(self) -> DashboardManager:
+    def dashboard_manager(self) -> DatadogClient:
         if self._dashboard_manager is None:
-            self._dashboard_manager = DashboardManager()
+            self._dashboard_manager = DatadogClient()
             self._dashboard_manager.load_credentials_from_environment()
 
         return self._dashboard_manager

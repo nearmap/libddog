@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from libddog.command_line.dashboards import DashboardManagerCli
-from libddog.crud import DashboardManager
+from libddog.client import DatadogClient
 from libddog.dashboards import Dashboard
 
 
@@ -16,7 +16,7 @@ class QADashboardManager:
         testdata_dir = proj_root.joinpath("testdata").absolute()
         self.cli = DashboardManagerCli(proj_path=str(testdata_dir))
 
-        self.mgr = DashboardManager()
+        self.mgr = DatadogClient()
         self.mgr.load_credentials_from_environment()
 
     def load_definition_by_title(self, title: str) -> Dashboard:

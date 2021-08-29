@@ -7,7 +7,7 @@ import datadog
 from libddog.dashboards import Dashboard
 
 
-class DashboardManager:
+class DatadogClient:
     env_varname_api_key = "DATADOG_API_KEY"
     env_varname_app_key = "DATADOG_APPLICATION_KEY"
 
