@@ -6,7 +6,7 @@ from types import ModuleType
 from typing import Any, List, Optional, Union
 
 from libddog.command_line.errors import ExceptionState
-from libddog.client import DatadogClient
+from libddog.crud.client import DatadogClient
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget

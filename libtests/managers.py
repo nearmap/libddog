@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from libddog.command_line.dashboards import DashboardManagerCli
-from libddog.client import DatadogClient
+from libddog.crud.client import DatadogClient
 from libddog.dashboards import Dashboard
 
 
