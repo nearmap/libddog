@@ -161,7 +161,7 @@ class DashboardManagerCli:
         dashboard_dcts = None
 
         try:
-            dashboard_dcts = self.manager.client.list_dashboards()
+            dashboard_dcts = self.manager.list_dashboards()
 
         except AbstractCrudError as exc:
             self.writer.report_failed(exc)
@@ -236,7 +236,7 @@ class DashboardManagerCli:
                 continue
 
             try:
-                self.manager.client.update_dashboard(dash)
+                self.manager.update_dashboard(dash)
                 self.writer.println("done")
 
             except AbstractCrudError as exc:

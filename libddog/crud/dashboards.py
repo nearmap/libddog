@@ -1,5 +1,6 @@
 import importlib
 import json
+from libddog.common.types import JsonDict
 import os
 import re
 import sys
@@ -117,3 +118,12 @@ class DashboardManager:
             fl.write("\n")
 
         return fp
+
+    def get_dashboard(self, *, id: str) -> JsonDict:
+        return self.client.get_dashboard(id=id)
+
+    def list_dashboards(self) -> List[JsonDict]:
+        return self.client.list_dashboards()
+
+    def update_dashboard(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
+        self.client.update_dashboard(dashboard=dashboard, id=id)
