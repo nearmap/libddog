@@ -121,16 +121,7 @@ class DashboardManagerCli:
         self.proj_path = os.path.abspath(proj_path)
         self.writer = ConsoleWriter()
 
-        self.manager = DashboardManager(proj_path)
-        self._dashboard_manager: Optional[DatadogClient] = None  # lazy attribute
-
-    @property
-    def dashboard_manager(self) -> DatadogClient:
-        if self._dashboard_manager is None:
-            self._dashboard_manager = DatadogClient()
-            self._dashboard_manager.load_credentials_from_environment()
-
-        return self._dashboard_manager
+        self.manager = DashboardManager(self.proj_path)
 
     def filter_definitions(
         self, pattern: str, dashes: List[Dashboard]
@@ -170,7 +161,7 @@ class DashboardManagerCli:
         dashboard_dcts = None
 
         try:
-            dashboard_dcts = self.dashboard_manager.list_dashboards()
+            dashboard_dcts = self.manager.client.list_dashboards()
 
         except AbstractCrudError as exc:
             self.writer.report_failed(exc)
@@ -245,8 +236,8 @@ class DashboardManagerCli:
                 continue
 
             try:
-                self.manager.update(dash)
-                self.writer.println("ok")
+                self.manager.client.update_dashboard(dash)
+                self.writer.println("done")
 
             except AbstractCrudError as exc:
                 self.writer.report_failed(exc)

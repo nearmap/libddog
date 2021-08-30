@@ -39,20 +39,13 @@ class AbstractCrudError(Exception):
 class DashboardGetFailed(AbstractCrudError):
     pass
 
+
 class DashboardListFailed(AbstractCrudError):
     pass
 
 
-
 class DashboardUpdateFailed(AbstractCrudError):
-    def __init__(
-        self, id: str, dashboard: Dashboard, errors: Optional[List[str]] = None
-    ) -> None:
-        super().__init__(id)
-
-        self.id = id
-        self.dashboard = dashboard
-        self.errors = errors or []
+    pass
 
 
 class DashboardDefinitionsImportError(AbstractCrudError):

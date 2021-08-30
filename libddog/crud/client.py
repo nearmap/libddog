@@ -79,11 +79,7 @@ class DatadogClient:
         client_kwargs = dashboard.as_dict()
         client_kwargs.pop("id", None)  # we pass it separately
 
-        try:
-            resp = datadog.api.Dashboard.update(id=id, **client_kwargs)  # type: ignore
-            errors = self.parse_response_errors(resp)
-            if errors:
-                raise DashboardUpdateFailed(id=id, dashboard=dashboard, errors=errors)
-
-        except Exception as exc:
-            raise DashboardUpdateFailed(id=id, dashboard=dashboard) from exc
+        resp = datadog.api.Dashboard.update(id=id, **client_kwargs)  # type: ignore
+        errors = self.parse_response_errors(resp)
+        if errors:
+            raise DashboardUpdateFailed(errors=errors)

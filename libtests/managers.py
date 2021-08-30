@@ -2,8 +2,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from libddog.command_line.dashboards import DashboardManagerCli
-from libddog.crud.client import DatadogClient
+from libddog.crud.dashboards import DashboardManager
 from libddog.dashboards import Dashboard
 
 
@@ -14,13 +13,12 @@ class QADashboardManager:
     def __init__(self) -> None:
         proj_root = Path(__file__).parent.parent
         testdata_dir = proj_root.joinpath("testdata").absolute()
-        self.cli = DashboardManagerCli(proj_path=str(testdata_dir))
 
-        self.mgr = DatadogClient()
-        self.mgr.load_credentials_from_environment()
+        self.manager = DashboardManager(proj_path=str(testdata_dir))
+        self.client = self.manager.client
 
     def load_definition_by_title(self, title: str) -> Dashboard:
-        dashboards = self.cli.load_definitions()
+        dashboards = self.manager.load_definitions()
         for dashboard in dashboards:
             if dashboard.title == title:
                 return dashboard
@@ -28,7 +26,7 @@ class QADashboardManager:
         raise RuntimeError("Failed to get dashboard with title: %s" % title)
 
     def assign_id_to_dashboard(self, dashboard: Dashboard) -> str:
-        all_dashboards = self.mgr.list_dashboards()
+        all_dashboards = self.manager.client.list_dashboards()
 
         existing_id: str = ""
         for dash in all_dashboards:
@@ -49,4 +47,4 @@ class QADashboardManager:
                 "Dashboard desc contains unpopulated template: %s" % dashboard.desc
             )
 
-        self.mgr.update_dashboard(dashboard, id)
+        self.manager.client.update_dashboard(dashboard, id)
