@@ -25,7 +25,7 @@ def cli(ctx):
 @click.group()
 @click.pass_context
 def dash(ctx):
-    "Datadog management actions"
+    "Datadog dashboards management actions"
 
     ctx.dash_mgr = DashboardManagerCli(proj_path=".")
     ctx.writer = ConsoleWriter()
