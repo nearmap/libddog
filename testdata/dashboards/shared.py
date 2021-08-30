@@ -14,7 +14,8 @@ def get_dashboard_desc_template() -> str:
         "open source Datadog automation tool created by Nearmap.\n\n"
         "It is used during automated test runs as well as for manual (visual) "
         "inspection that everything looks correct.\n\n"
-        "Last updated during test run on: *%(test_run_time)s*"
+        "Last updated during test run from branch **%(branch)s** "
+        "on **%(test_run_time)s**"
     )
     return desc
 
