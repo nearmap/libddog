@@ -29,7 +29,7 @@ def test_put_and_get_metrics() -> None:
 
     # now read it back and assert that it matches our model
     expected = dashboard.as_dict()
-    actual = mgr.client.get_dashboard(id=dash_id)
+    actual = mgr.mgr.get_dashboard(id=dash_id)
 
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
 
@@ -46,6 +46,6 @@ def test_put_and_get_widgets() -> None:
 
     # now read it back and assert that it matches our model
     expected = dashboard.as_dict()
-    actual = mgr.client.get_dashboard(id=dash_id)
+    actual = mgr.mgr.get_dashboard(id=dash_id)
 
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)

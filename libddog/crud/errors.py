@@ -35,16 +35,13 @@ class AbstractCrudError(Exception):
         block = "\n".join([f"- {error}" for error in self.errors])
         return f"{prefix}:\n{block}\n"
 
-    def __str__(self) -> str:
-        return self.format_expanded()
-
 
 class DashboardGetFailed(AbstractCrudError):
     pass
 
-
 class DashboardListFailed(AbstractCrudError):
     pass
+
 
 
 class DashboardUpdateFailed(AbstractCrudError):
