@@ -46,6 +46,7 @@ def version(ctx):
 @click.option(
     "-i",
     "--id",
+    required=True,
     help="The id of the dashboard to delete",
 )
 @click.pass_context
@@ -53,11 +54,6 @@ def delete_live(ctx, id: str):
     "Delete a live dashboard in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
-
-    if not id:
-        writer.errorln("Must pass --id")
-        sys.exit(os.EX_USAGE)
 
     exit_code = mgr.delete_live(id=id)
     sys.exit(exit_code)
@@ -89,6 +85,7 @@ def list_live(ctx):
 @click.option(
     "-t",
     "--title",
+    required=True,
     help="Select the dashboard to publish by title, matched like a wildcard",
 )
 @click.pass_context
@@ -96,11 +93,6 @@ def publish_draft(ctx, title: str):
     "Publish a dashboard definition as a [draft] live dashboard in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
-
-    if not title:
-        writer.errorln("Must pass --title")
-        sys.exit(os.EX_USAGE)
 
     exit_code = mgr.publish_draft(title_pat=title)
     sys.exit(exit_code)
@@ -108,8 +100,26 @@ def publish_draft(ctx, title: str):
 
 @click.command()
 @click.option(
+    "-t",
+    "--title",
+    required=True,
+    help="Select dashboards to update by title, matched like a wildcard",
+)
+@click.pass_context
+def publish_live(ctx, title: str):
+    "Publish dashboard definitions as live dashboards in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+
+    exit_code = mgr.publish_live(title_pat=title)
+    sys.exit(exit_code)
+
+
+@click.command()
+@click.option(
     "-i",
     "--id",
+    required=True,
     help="The id of the dashboard to snapshot",
 )
 @click.pass_context
@@ -117,41 +127,8 @@ def snapshot_live(ctx, id: str):
     "Create a snapshot on disk of a live dashboard in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
-
-    if not id:
-        writer.errorln("Must pass --id")
-        sys.exit(os.EX_USAGE)
 
     exit_code = mgr.snapshot_live(id=id)
-    sys.exit(exit_code)
-
-
-@click.command()
-@click.option(
-    "-t",
-    "--title",
-    help="Select dashboards to update by title, matched like a wildcard",
-)
-@click.option(
-    "-n",
-    "--dry-run",
-    default=False,
-    is_flag=True,
-    help="Only display which dashboards would be updated, do not actually update them",
-)
-@click.pass_context
-def update_live(ctx, title: str, dry_run: bool = False):
-    "Update live dashboards in Datadog"
-
-    mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
-
-    if not title:
-        writer.errorln("Must pass --title")
-        sys.exit(os.EX_USAGE)
-
-    exit_code = mgr.update_live(title_pat=title, dry_run=dry_run)
     sys.exit(exit_code)
 
 
@@ -161,8 +138,8 @@ dash.add_command(delete_live)
 dash.add_command(list_defs)
 dash.add_command(list_live)
 dash.add_command(publish_draft)
+dash.add_command(publish_live)
 dash.add_command(snapshot_live)
-dash.add_command(update_live)
 attach_help_option(cli)
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from libddog.crud.client import DatadogClient
 from libddog.crud.errors import (
     DashboardDefinitionsImportError,
     DashboardDefinitionsLoadError,
+    DashboardDeleteFailed,
 )
 from libddog.dashboards.dashboards import Dashboard
 from libddog.tools.timekeeping import format_datetime_for_filename, utcnow
@@ -95,6 +96,9 @@ class DashboardManager:
         module = self.load_definitions_module()
         dashes: List[Dashboard] = module.get_dashboards()  # type: ignore
         return dashes
+
+    def get_draft_title(self, dashboard: Dashboard) -> str:
+        return f"[draft] {dashboard.title}"
 
     def ensure_snapshot_path_exists(self) -> None:
         if not os.path.exists(self.snapshots_path):

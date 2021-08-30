@@ -105,7 +105,9 @@ class DashboardManagerCli:
 
     def delete_live(self, *, id: str) -> int:
         # Take a snapshot first to make restoring it possible
-        self.snapshot_live(id=id)
+        exit_code = self.snapshot_live(id=id)
+        if exit_code != os.EX_OK:
+            return exit_code
 
         self.writer.print("Deleting live dashboard with id: %r... ", id)
 
@@ -218,7 +220,7 @@ class DashboardManagerCli:
             return os.EX_USAGE
 
         dash = dashes[0]
-        dash.title = f"[draft] {dash.title}"
+        dash.title = self.manager.get_draft_title(dash)
         existing = self.manager.find_first_dashboard_with_title(dash.title)
 
         if existing:
@@ -247,6 +249,46 @@ class DashboardManagerCli:
 
         return os.EX_OK
 
+    def publish_live(self, *, title_pat: str) -> int:
+        dashes = self.manager.load_definitions()
+        dashes = self.filter_definitions(title_pat, dashes)
+
+        for dash in dashes:
+            existing = self.manager.find_first_dashboard_with_title(dash.title)
+
+            if existing:
+                id = existing["id"]
+
+                # Take a snapshot first to make restoring it possible
+                exit_code = self.snapshot_live(id=id)
+                if exit_code != os.EX_OK:
+                    return exit_code
+
+                self.writer.print(
+                    f"Updating dashboard with id: {id!r} entitled: {dash.title!r}... "
+                )
+
+                try:
+                    self.manager.update_dashboard(dashboard=dash, id=id)
+                    self.writer.println("done")
+
+                except AbstractCrudError as exc:
+                    self.writer.report_failed(exc)
+                    return os.EX_IOERR
+
+            else:
+                self.writer.print(f"Creating dashboard entitled: {dash.title!r}... ")
+
+                try:
+                    id = self.manager.create_dashboard(dashboard=dash)
+                    self.writer.println("created with id: %r", id)
+
+                except AbstractCrudError as exc:
+                    self.writer.report_failed(exc)
+                    return os.EX_IOERR
+
+        return os.EX_OK
+
     def snapshot_live(self, *, id: str) -> int:
         self.writer.print("Creating snapshot of live dashboard with id: %r... ", id)
 
@@ -257,28 +299,5 @@ class DashboardManagerCli:
         except AbstractCrudError as exc:
             self.writer.report_failed(exc)
             return os.EX_UNAVAILABLE
-
-        return os.EX_OK
-
-    def update_live(self, *, title_pat: str, dry_run: bool = False) -> int:
-        dashes = self.manager.load_definitions()
-        dashes = self.filter_definitions(title_pat, dashes)
-
-        for dash in dashes:
-            self.writer.print(
-                f"Updating dashboard with id: {dash.id!r} entitled: {dash.title!r}... "
-            )
-
-            if dry_run:
-                self.writer.println("skipped (dry run)")
-                continue
-
-            try:
-                self.manager.update_dashboard(dash)
-                self.writer.println("done")
-
-            except AbstractCrudError as exc:
-                self.writer.report_failed(exc)
-                return os.EX_IOERR
 
         return os.EX_OK
