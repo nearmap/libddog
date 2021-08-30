@@ -12,7 +12,6 @@ from libddog.crud.client import DatadogClient
 from libddog.crud.errors import (
     DashboardDefinitionsImportError,
     DashboardDefinitionsLoadError,
-    DashboardDeleteFailed,
 )
 from libddog.dashboards.dashboards import Dashboard
 from libddog.tools.timekeeping import format_datetime_for_filename, utcnow

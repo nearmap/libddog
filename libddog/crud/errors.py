@@ -1,7 +1,5 @@
 from typing import List, Optional
 
-from libddog.dashboards.dashboards import Dashboard
-
 
 class AbstractCrudError(Exception):
     """

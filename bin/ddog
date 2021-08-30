@@ -8,8 +8,6 @@ except ImportError:
     sys.path.append(".")
 
 # isort: split
-import os
-
 import click
 
 import libddog

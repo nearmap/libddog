@@ -7,7 +7,6 @@ import datadog.api
 from libddog.common.types import JsonDict
 from libddog.crud.errors import (
     DashboardCreateFailed,
-    DashboardDefinitionsLoadError,
     DashboardDeleteFailed,
     DashboardGetFailed,
     DashboardListFailed,
