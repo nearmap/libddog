@@ -7,6 +7,8 @@ import datadog.api
 from libddog.common.types import JsonDict
 from libddog.crud.errors import (
     DashboardCreateFailed,
+    DashboardDefinitionsLoadError,
+    DashboardDeleteFailed,
     DashboardGetFailed,
     DashboardListFailed,
     DashboardUpdateFailed,
@@ -57,6 +59,13 @@ class DatadogClient:
 
         id: str = resp["id"]
         return id
+
+    def delete_dashboard(self, *, id: str) -> None:
+        result = datadog.api.Dashboard.delete(id=id)  # type: ignore
+
+        errors = self.parse_response_errors(result)
+        if errors:
+            raise DashboardDeleteFailed(errors=errors)
 
     def get_dashboard(self, *, id: str) -> JsonDict:
         result = datadog.api.Dashboard.get(id=id)  # type: ignore

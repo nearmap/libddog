@@ -43,6 +43,27 @@ def version(ctx):
 
 
 @click.command()
+@click.option(
+    "-i",
+    "--id",
+    help="The id of the dashboard to delete",
+)
+@click.pass_context
+def delete_live(ctx, id: str):
+    "Delete a live dashboard in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    if not id:
+        writer.errorln("Must pass --id")
+        sys.exit(os.EX_USAGE)
+
+    exit_code = mgr.delete_live(id=id)
+    sys.exit(exit_code)
+
+
+@click.command()
 @click.pass_context
 def list_defs(ctx):
     "List dashboard definitions in this project"
@@ -72,7 +93,7 @@ def list_live(ctx):
 )
 @click.pass_context
 def publish_draft(ctx, title: str):
-    "Publish a dashboard definition as a draft live dashboards in Datadog"
+    "Publish a dashboard definition as a [draft] live dashboard in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
     writer: ConsoleWriter = ctx.parent.writer
@@ -136,6 +157,7 @@ def update_live(ctx, title: str, dry_run: bool = False):
 
 cli.add_command(dash)
 cli.add_command(version)
+dash.add_command(delete_live)
 dash.add_command(list_defs)
 dash.add_command(list_live)
 dash.add_command(publish_draft)

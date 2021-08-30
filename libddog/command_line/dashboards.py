@@ -103,6 +103,22 @@ class DashboardManagerCli:
     ) -> List[Dashboard]:
         return [dash for dash in dashes if fnmatch.fnmatch(dash.title, pattern)]
 
+    def delete_live(self, *, id: str) -> int:
+        # Take a snapshot first to make restoring it possible
+        self.snapshot_live(id=id)
+
+        self.writer.print("Deleting live dashboard with id: %r... ", id)
+
+        try:
+            self.manager.delete_dashboard(id=id)
+            self.writer.println("done")
+
+        except AbstractCrudError as exc:
+            self.writer.report_failed(exc)
+            return os.EX_UNAVAILABLE
+
+        return os.EX_OK
+
     def list_defs(self) -> int:
         dashes = None
 
@@ -203,7 +219,7 @@ class DashboardManagerCli:
 
         dash = dashes[0]
         dash.title = f"[draft] {dash.title}"
-        existing = self.manager.find_dashboard_with_title(dash.title)
+        existing = self.manager.find_first_dashboard_with_title(dash.title)
 
         if existing:
             id = existing["id"]

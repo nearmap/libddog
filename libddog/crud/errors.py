@@ -40,6 +40,10 @@ class DashboardCreateFailed(AbstractCrudError):
     pass
 
 
+class DashboardDeleteFailed(AbstractCrudError):
+    pass
+
+
 class DashboardGetFailed(AbstractCrudError):
     pass
 
