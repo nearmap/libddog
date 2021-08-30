@@ -66,8 +66,8 @@ class CommandLineError(Exception):
 
 
 class ConsoleWriter:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, use_color_output=True) -> None:
+        self.use_color_output = use_color_output
 
     def report_failed(self, exc: AbstractCrudError) -> None:
         msg = exc.format_expanded()
@@ -77,7 +77,10 @@ class ConsoleWriter:
         if not msg.endswith("\n"):
             msg = f"{msg}\n"
 
-        line = f"\033[31m" + msg + "\033[0m"
+        if self.use_color_output:
+            line = f"\033[31m" + msg + "\033[0m"
+        else:
+            line = msg
 
         sys.stderr.write(line)
         sys.stderr.flush()
@@ -117,20 +120,20 @@ class ConsoleWriter:
 
 
 class DashboardManagerCli:
-    def __init__(self, proj_path: str) -> None:
+    def __init__(self, proj_path: str, use_color_output=True) -> None:
         self.proj_path = os.path.abspath(proj_path)
-        self.writer = ConsoleWriter()
+        self.writer = ConsoleWriter(use_color_output=use_color_output)
 
-        self.manager = DashboardManager(proj_path)
-        self._dashboard_manager: Optional[DatadogClient] = None  # lazy attribute
+        self.manager = DashboardManager(self.proj_path)
+        self._client: Optional[DatadogClient] = None  # lazy attribute
 
     @property
-    def dashboard_manager(self) -> DatadogClient:
-        if self._dashboard_manager is None:
-            self._dashboard_manager = DatadogClient()
-            self._dashboard_manager.load_credentials_from_environment()
+    def client(self) -> DatadogClient:
+        if self._client is None:
+            self._client = DatadogClient()
+            self._client.load_credentials_from_environment()
 
-        return self._dashboard_manager
+        return self._client
 
     def filter_definitions(
         self, pattern: str, dashes: List[Dashboard]
@@ -170,7 +173,7 @@ class DashboardManagerCli:
         dashboard_dcts = None
 
         try:
-            dashboard_dcts = self.dashboard_manager.list_dashboards()
+            dashboard_dcts = self.client.list_dashboards()
 
         except AbstractCrudError as exc:
             self.writer.report_failed(exc)
@@ -245,8 +248,8 @@ class DashboardManagerCli:
                 continue
 
             try:
-                self.manager.update(dash)
-                self.writer.println("ok")
+                self.client.update_dashboard(dash)
+                self.writer.println("done")
 
             except AbstractCrudError as exc:
                 self.writer.report_failed(exc)
