@@ -49,7 +49,12 @@ def version(ctx):
 )
 @click.pass_context
 def delete_live(ctx, id: str):
-    "Delete a live dashboard in Datadog"
+    """
+    Deletes a live dashboard in Datadog.
+
+    First takes a snapshot of the dashboard so that the deleted dashboard can be
+    restored if needed.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
@@ -60,7 +65,9 @@ def delete_live(ctx, id: str):
 @click.command()
 @click.pass_context
 def list_defs(ctx):
-    "List dashboard definitions in this project"
+    """
+    Lists dashboard definitions in this project.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
@@ -71,7 +78,9 @@ def list_defs(ctx):
 @click.command()
 @click.pass_context
 def list_live(ctx):
-    "List live dashboards in Datadog"
+    """
+    Lists live dashboards in Datadog.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
@@ -88,7 +97,13 @@ def list_live(ctx):
 )
 @click.pass_context
 def publish_draft(ctx, title: str):
-    "Publish a dashboard definition as a [draft] live dashboard in Datadog"
+    """
+    Publishes a dashboard definition as a [draft] live dashboard in Datadog.
+
+    Prepends '[draft] ' to the dashboard title.
+    If no live dashboard with this title exists then a new dashboard is created.
+    If a live dashboard with this title does exist it is updated.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
@@ -105,7 +120,13 @@ def publish_draft(ctx, title: str):
 )
 @click.pass_context
 def publish_live(ctx, title: str):
-    "Publish dashboard definitions as live dashboards in Datadog"
+    """
+    Publishes multiple dashboard definitions as live dashboards in Datadog.
+
+    For each dashboard:
+    If no live dashboard with this title exists then a new dashboard is created.
+    If a live dashboard with this title does exist it is updated.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
@@ -122,7 +143,11 @@ def publish_live(ctx, title: str):
 )
 @click.pass_context
 def snapshot_live(ctx, id: str):
-    "Create a snapshot on disk of a live dashboard in Datadog"
+    """
+    Creates a snapshot on disk in JSON format of a live dashboard in Datadog.
+
+    The snapshot can be used to manually restore the dashboard in the Datadog UI.
+    """
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
