@@ -1,6 +1,5 @@
 import importlib
 import json
-from libddog.common.types import JsonDict
 import os
 import re
 import sys
@@ -8,6 +7,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import List, Optional
 
+from libddog.common.types import JsonDict
 from libddog.crud.client import DatadogClient
 from libddog.crud.errors import (
     DashboardDefinitionsImportError,
