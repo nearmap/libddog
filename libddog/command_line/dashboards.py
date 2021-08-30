@@ -1,14 +1,11 @@
 import fnmatch
-import importlib
 import os
 import sys
-from types import ModuleType
-from typing import Any, Generic, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from libddog.command_line.errors import ExceptionState
-from libddog.crud.client import DatadogClient
 from libddog.crud.dashboards import DashboardManager
-from libddog.crud.errors import AbstractCrudError, DashboardGetFailed
+from libddog.crud.errors import AbstractCrudError
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
@@ -47,24 +44,6 @@ def count_queries(obj: Union[Dashboard, Widget, Request, QueryMonad]) -> int:
         return 1
 
 
-class CommandLineError(Exception):
-    def __init__(
-        self, msg: str, *args: object, exc: Optional[Exception] = None
-    ) -> None:
-        super().__init__()
-
-        self.msg = msg
-        self.args = args
-        self.exc = exc
-
-        # if we're in an exception context then save the state
-        self.exc_state = ExceptionState.create()
-
-    @property
-    def message(self) -> str:
-        return self.msg % self.args
-
-
 class ConsoleWriter:
     def __init__(self) -> None:
         pass
@@ -89,10 +68,6 @@ class ConsoleWriter:
 
         if exc:
             msg = f"{msg}: {exc!r}"
-
-            # if we have a saved traceback then use it
-            if isinstance(exc, CommandLineError):
-                exc_state = exc.exc_state
 
         # if we don't have a traceback try to extract it now
         if not exc_state:
