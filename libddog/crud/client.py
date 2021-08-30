@@ -1,11 +1,15 @@
 import os
-import pprint
 from typing import Any, List, Optional
 
 import datadog
 import datadog.api
 
 from libddog.common.types import JsonDict
+from libddog.crud.errors import (
+    DashboardGetFailed,
+    DashboardUpdateFailed,
+    AbstractCrudError,
+)
 from libddog.dashboards import Dashboard
 
 
@@ -18,11 +22,11 @@ class DatadogClient:
         app_key = os.getenv(self.env_varname_app_key)
 
         if not api_key:
-            raise RuntimeError(
+            raise AbstractCrudError(
                 "Could not find %r set in the environment" % self.env_varname_api_key
             )
         if not app_key:
-            raise RuntimeError(
+            raise AbstractCrudError(
                 "Could not find %r set in the environment" % self.env_varname_app_key
             )
 
@@ -32,20 +36,20 @@ class DatadogClient:
         }
         datadog.initialize(**options)  # type: ignore
 
-    def parse_response(self, resp: Any) -> Optional[str]:
+    def parse_response_errors(self, resp: Any) -> List[str]:
         if type(resp) == dict:
-            errors = resp.get("errors")
-            if errors:
-                error_strs = "\n".join(["- %s" % err for err in errors])
-                return error_strs
+            return resp.get("errors") or []
 
-        return None
+        return []
 
-    def get_dashboard(self, id: str) -> JsonDict:
+    def get_dashboard(self, *, id: str) -> JsonDict:
         result = datadog.api.Dashboard.get(id=id)  # type: ignore
 
-        assert isinstance(result, dict)  # help mypy
+        errors = self.parse_response_errors(result)
+        if errors:
+            raise DashboardGetFailed(id=id, errors=errors)
 
+        assert isinstance(result, dict)  # help mypy
         return result
 
     def list_dashboards(self) -> List[JsonDict]:
@@ -69,15 +73,9 @@ class DatadogClient:
 
         try:
             resp = datadog.api.Dashboard.update(id=id, **client_kwargs)  # type: ignore
-            error_strs = self.parse_response(resp)
-            if error_strs:
-                print(
-                    "Failed to update dashboard %r entitled %r:\n%s"
-                    % (id, dashboard.title, error_strs)
-                )
-                pprint.pprint(client_kwargs)
+            errors = self.parse_response_errors(resp)
+            if errors:
+                raise DashboardUpdateFailed(id=id, dashboard=dashboard, errors=errors)
 
-            else:
-                print("Updated dashboard %r entitled %r" % (id, dashboard.title))
         except Exception as exc:
-            raise
+            raise DashboardUpdateFailed(id=id, dashboard=dashboard) from exc

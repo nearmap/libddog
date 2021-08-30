@@ -3,10 +3,12 @@ import importlib
 import os
 import sys
 from types import ModuleType
-from typing import Any, List, Optional, Union
+from typing import Any, Generic, List, Optional, Union
 
 from libddog.command_line.errors import ExceptionState
 from libddog.crud.client import DatadogClient
+from libddog.crud.dashboards import DashboardManager
+from libddog.crud.errors import DashboardGetFailed, AbstractCrudError
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
@@ -67,6 +69,19 @@ class ConsoleWriter:
     def __init__(self) -> None:
         pass
 
+    def report_failed(self, exc: AbstractCrudError) -> None:
+        msg = exc.format_expanded()
+        self.red_errorln(msg)
+
+    def red_errorln(self, msg: str) -> None:
+        if not msg.endswith("\n"):
+            msg = f"{msg}\n"
+
+        line = f"\033[31m" + msg + "\033[0m"
+
+        sys.stderr.write(line)
+        sys.stderr.flush()
+
     def errorln(self, msg: str, *args: Any, exc: Optional[Exception] = None) -> None:
         exc_state = None
         if args:
@@ -92,6 +107,13 @@ class ConsoleWriter:
         sys.stderr.flush()
 
     println = errorln
+
+    def print(self, msg: str, *args: Any) -> None:
+        if args:
+            msg = msg % args
+
+        sys.stderr.write(msg)
+        sys.stderr.flush()
 
 
 class DashboardManagerCli:
@@ -213,6 +235,21 @@ class DashboardManagerCli:
             self.writer.println(fmt, *cols)
 
         self.writer.println("%d dashboards found" % len(tuples))
+
+    def snapshot_live(self, *, id: str) -> int:
+        mgr = DashboardManager()
+
+        self.writer.print("Creating snapshot of live dashboard with id: %r... ", id)
+
+        try:
+            fp = mgr.create_snapshot(id)
+            self.writer.println("saved to: %s", fp)
+
+        except AbstractCrudError as exc:
+            self.writer.report_failed(exc)
+            return os.EX_UNAVAILABLE
+
+        return os.EX_OK
 
     def update_live(self, *, title_pat: str, dry_run: bool = False) -> None:
         dashes = self.load_definitions()

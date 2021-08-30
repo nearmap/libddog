@@ -11,6 +11,13 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def format_datetime_for_filename(dt: datetime) -> str:
+    if dt.tzinfo and dt.tzinfo.utcoffset(dt) == timedelta(0):
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return dt.isoformat()
+
+
 def time_since(delta: timedelta) -> str:
     fmt = ""
 

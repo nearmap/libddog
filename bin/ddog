@@ -8,6 +8,8 @@ except ImportError:
     sys.path.append(".")
 
 # isort: split
+import os
+
 import click
 
 import libddog
@@ -76,6 +78,27 @@ def list_live(ctx):
 
 @click.command()
 @click.option(
+    "-i",
+    "--id",
+    help="The id of the dashboard to snapshot",
+)
+@click.pass_context
+def snapshot_live(ctx, id: str):
+    "Create a snapshot on disk of a live dashboard in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    if not id:
+        writer.errorln("Must pass --id")
+        sys.exit(os.EX_USAGE)
+
+    exit_code = mgr.snapshot_live(id=id)
+    sys.exit(exit_code)
+
+
+@click.command()
+@click.option(
     "-t",
     "--title",
     help="Select dashboards to update by title, matched like a wildcard",
@@ -109,6 +132,7 @@ cli.add_command(dash)
 cli.add_command(version)
 dash.add_command(list_defs)
 dash.add_command(list_live)
+dash.add_command(snapshot_live)
 dash.add_command(update_live)
 attach_help_option(cli)
 
