@@ -36,6 +36,10 @@ class AbstractCrudError(Exception):
         return f"{prefix}:\n{block}\n"
 
 
+class DashboardCreateFailed(AbstractCrudError):
+    pass
+
+
 class DashboardGetFailed(AbstractCrudError):
     pass
 

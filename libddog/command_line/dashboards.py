@@ -184,6 +184,53 @@ class DashboardManagerCli:
 
         return os.EX_OK
 
+    def publish_draft(self, *, title_pat: str) -> int:
+        dashes = self.manager.load_definitions()
+        dashes = self.filter_definitions(title_pat, dashes)
+
+        if not dashes:
+            self.writer.println(
+                "Title pattern %r did not match any dashboards", title_pat
+            )
+            return os.EX_USAGE
+
+        if len(dashes) > 1:
+            fmt = "\n".join([f"- {dash.title}" for dash in dashes])
+            self.writer.println(
+                "Title pattern %r matched multiple dashboards:\n%s", title_pat, fmt
+            )
+            return os.EX_USAGE
+
+        dash = dashes[0]
+        dash.title = f"[draft] {dash.title}"
+        existing = self.manager.find_dashboard_with_title(dash.title)
+
+        if existing:
+            id = existing["id"]
+
+            self.writer.print(
+                f"Updating dashboard with id: {id!r} entitled: {dash.title!r}... "
+            )
+            try:
+                self.manager.update_dashboard(dashboard=dash, id=id)
+                self.writer.println("done")
+
+            except AbstractCrudError as exc:
+                self.writer.report_failed(exc)
+                return os.EX_IOERR
+
+        else:
+            self.writer.print(f"Creating dashboard entitled: {dash.title!r}... ")
+            try:
+                id = self.manager.create_dashboard(dashboard=dash)
+                self.writer.println("created with id: %r", id)
+
+            except AbstractCrudError as exc:
+                self.writer.report_failed(exc)
+                return os.EX_IOERR
+
+        return os.EX_OK
+
     def snapshot_live(self, *, id: str) -> int:
         self.writer.print("Creating snapshot of live dashboard with id: %r... ", id)
 

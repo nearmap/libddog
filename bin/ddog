@@ -13,10 +13,7 @@ import os
 import click
 
 import libddog
-from libddog.command_line.dashboards import (
-    ConsoleWriter,
-    DashboardManagerCli,
-)
+from libddog.command_line.dashboards import ConsoleWriter, DashboardManagerCli
 from libddog.command_line.options import attach_help_option
 
 
@@ -64,6 +61,27 @@ def list_live(ctx):
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
 
     exit_code = mgr.list_live()
+    sys.exit(exit_code)
+
+
+@click.command()
+@click.option(
+    "-t",
+    "--title",
+    help="Select the dashboard to publish by title, matched like a wildcard",
+)
+@click.pass_context
+def publish_draft(ctx, title: str):
+    "Publish a dashboard definition as a draft live dashboards in Datadog"
+
+    mgr: DashboardManagerCli = ctx.parent.dash_mgr
+    writer: ConsoleWriter = ctx.parent.writer
+
+    if not title:
+        writer.errorln("Must pass --title")
+        sys.exit(os.EX_USAGE)
+
+    exit_code = mgr.publish_draft(title_pat=title)
     sys.exit(exit_code)
 
 
@@ -120,6 +138,7 @@ cli.add_command(dash)
 cli.add_command(version)
 dash.add_command(list_defs)
 dash.add_command(list_live)
+dash.add_command(publish_draft)
 dash.add_command(snapshot_live)
 dash.add_command(update_live)
 attach_help_option(cli)

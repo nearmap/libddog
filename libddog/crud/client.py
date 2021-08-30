@@ -6,6 +6,7 @@ import datadog.api
 
 from libddog.common.types import JsonDict
 from libddog.crud.errors import (
+    DashboardCreateFailed,
     DashboardGetFailed,
     DashboardListFailed,
     DashboardUpdateFailed,
@@ -45,6 +46,17 @@ class DatadogClient:
             return resp.get("errors") or []
 
         return []
+
+    def create_dashboard(self, dashboard: Dashboard) -> str:
+        client_kwargs = dashboard.as_dict()
+
+        resp = datadog.api.Dashboard.create(**client_kwargs)  # type: ignore
+        errors = self.parse_response_errors(resp)
+        if errors:
+            raise DashboardCreateFailed(errors=errors)
+
+        id: str = resp["id"]
+        return id
 
     def get_dashboard(self, *, id: str) -> JsonDict:
         result = datadog.api.Dashboard.get(id=id)  # type: ignore

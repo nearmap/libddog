@@ -119,6 +119,9 @@ class DashboardManager:
 
         return fp
 
+    def create_dashboard(self, dashboard: Dashboard) -> str:
+        return self.client.create_dashboard(dashboard=dashboard)
+
     def get_dashboard(self, *, id: str) -> JsonDict:
         return self.client.get_dashboard(id=id)
 
@@ -127,3 +130,12 @@ class DashboardManager:
 
     def update_dashboard(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
         self.client.update_dashboard(dashboard=dashboard, id=id)
+
+    def find_dashboard_with_title(self, title: str) -> Optional[JsonDict]:
+        dashboard_dicts = self.list_dashboards()
+
+        for dashboard_dict in dashboard_dicts:
+            if title == dashboard_dict.get("title"):
+                return dashboard_dict
+
+        return None
