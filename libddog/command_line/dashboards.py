@@ -8,7 +8,7 @@ from typing import Any, Generic, List, Optional, Union
 from libddog.command_line.errors import ExceptionState
 from libddog.crud.client import DatadogClient
 from libddog.crud.dashboards import DashboardManager
-from libddog.crud.errors import DashboardGetFailed, AbstractCrudError
+from libddog.crud.errors import AbstractCrudError, DashboardGetFailed
 from libddog.dashboards.components import Request
 from libddog.dashboards.dashboards import Dashboard
 from libddog.dashboards.widgets import Group, Widget
@@ -121,10 +121,7 @@ class DashboardManagerCli:
         self.proj_path = os.path.abspath(proj_path)
         self.writer = ConsoleWriter()
 
-        self.containing_dir = "config"
-        self.definition_module = "dashboards"
-        self.import_path = f"{self.containing_dir}.{self.definition_module}"
-
+        self.manager = DashboardManager(proj_path)
         self._dashboard_manager: Optional[DatadogClient] = None  # lazy attribute
 
     @property
@@ -135,48 +132,22 @@ class DashboardManagerCli:
 
         return self._dashboard_manager
 
-    def load_definitions_module(self) -> ModuleType:
-        # add '.' to sys.path to make 'config' importable
-        if self.proj_path not in sys.path:
-            sys.path.append(self.proj_path)
-
-        # import the module
-        try:
-            dashes_module = importlib.import_module(self.import_path)
-        except ModuleNotFoundError:
-            raise CommandLineError(
-                "Failed to import definition module %r", self.import_path
-            )
-
-        # try calling get_dashboards
-        try:
-            dashes = dashes_module.get_dashboards()  # type: ignore
-            for dash in dashes:
-                if not isinstance(dash, Dashboard):
-                    raise TypeError("Value returned was not a Dashboard: %r" % dash)
-        except Exception as exc:
-            raise CommandLineError(
-                "Failed call to get_dashboards() in definition module at %r",
-                self.import_path,
-                exc=exc,
-            )
-
-        return dashes_module
-
-    def load_definitions(self) -> List[Dashboard]:
-        module = self.load_definitions_module()
-        dashes: List[Dashboard] = module.get_dashboards()  # type: ignore
-        return dashes
-
     def filter_definitions(
         self, pattern: str, dashes: List[Dashboard]
     ) -> List[Dashboard]:
         return [dash for dash in dashes if fnmatch.fnmatch(dash.title, pattern)]
 
-    def list_definitions(self) -> None:
-        dashes = self.load_definitions()
-        fmt = "%-11s  %6s  %7s  %7s  %s"
+    def list_defs(self) -> int:
+        dashes = None
 
+        try:
+            dashes = self.manager.load_definitions()
+
+        except AbstractCrudError as exc:
+            self.writer.report_failed(exc)
+            return os.EX_UNAVAILABLE
+
+        fmt = "%-11s  %6s  %7s  %7s  %s"
         self.writer.println(fmt, "ID", "GROUPS", "WIDGETS", "QUERIES", "TITLE")
 
         for dash in dashes:
@@ -193,7 +164,18 @@ class DashboardManagerCli:
                 dash.title,
             )
 
-    def list_live(self) -> None:
+        return os.EX_OK
+
+    def list_live(self) -> int:
+        dashboard_dcts = None
+
+        try:
+            dashboard_dcts = self.dashboard_manager.list_dashboards()
+
+        except AbstractCrudError as exc:
+            self.writer.report_failed(exc)
+            return os.EX_UNAVAILABLE
+
         fmt = "%11s  %20s  %9s  %9s  %s"
         header_cols = (
             "ID",
@@ -203,8 +185,6 @@ class DashboardManagerCli:
             "TITLE",
         )
         self.writer.println(fmt, *header_cols)
-
-        dashboard_dcts = self.dashboard_manager.list_dashboards()
 
         tuples = []
         for dct in dashboard_dcts:
@@ -236,13 +216,13 @@ class DashboardManagerCli:
 
         self.writer.println("%d dashboards found" % len(tuples))
 
-    def snapshot_live(self, *, id: str) -> int:
-        mgr = DashboardManager()
+        return os.EX_OK
 
+    def snapshot_live(self, *, id: str) -> int:
         self.writer.print("Creating snapshot of live dashboard with id: %r... ", id)
 
         try:
-            fp = mgr.create_snapshot(id)
+            fp = self.manager.create_snapshot(id)
             self.writer.println("saved to: %s", fp)
 
         except AbstractCrudError as exc:
@@ -251,17 +231,25 @@ class DashboardManagerCli:
 
         return os.EX_OK
 
-    def update_live(self, *, title_pat: str, dry_run: bool = False) -> None:
-        dashes = self.load_definitions()
+    def update_live(self, *, title_pat: str, dry_run: bool = False) -> int:
+        dashes = self.manager.load_definitions()
         dashes = self.filter_definitions(title_pat, dashes)
 
-        verb = "Updating" if not dry_run else "Dry run: Updating"
-
         for dash in dashes:
-            msg = f"{verb} dashboard {dash.id!r} entitled {dash.title!r}"
-            self.writer.println(msg)
+            self.writer.print(
+                f"Updating dashboard with id: {dash.id!r} entitled: {dash.title!r}... "
+            )
 
             if dry_run:
+                self.writer.println("skipped (dry run)")
                 continue
 
-            self.dashboard_manager.update_dashboard(dash)
+            try:
+                self.manager.update(dash)
+                self.writer.println("ok")
+
+            except AbstractCrudError as exc:
+                self.writer.report_failed(exc)
+                return os.EX_IOERR
+
+        return os.EX_OK

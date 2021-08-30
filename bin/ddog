@@ -52,13 +52,9 @@ def list_defs(ctx):
     "List dashboard definitions in this project"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
 
-    try:
-        mgr.list_definitions()
-    except CommandLineError as exc:
-        writer.errorln(exc.message, exc=exc.exc)
-        sys.exit(2)
+    exit_code = mgr.list_defs()
+    sys.exit(exit_code)
 
 
 @click.command()
@@ -67,13 +63,9 @@ def list_live(ctx):
     "List live dashboards in Datadog"
 
     mgr: DashboardManagerCli = ctx.parent.dash_mgr
-    writer: ConsoleWriter = ctx.parent.writer
 
-    try:
-        mgr.list_live()
-    except CommandLineError as exc:
-        writer.errorln(exc.message, exc=exc.exc)
-        sys.exit(2)
+    exit_code = mgr.list_live()
+    sys.exit(exit_code)
 
 
 @click.command()
@@ -119,13 +111,10 @@ def update_live(ctx, title: str, dry_run: bool = False):
 
     if not title:
         writer.errorln("Must pass --title")
-        sys.exit(2)
+        sys.exit(os.EX_USAGE)
 
-    try:
-        mgr.update_live(title_pat=title, dry_run=dry_run)
-    except CommandLineError as exc:
-        writer.errorln(exc.message, exc=exc.exc)
-        sys.exit(2)
+    exit_code = mgr.update_live(title_pat=title, dry_run=dry_run)
+    sys.exit(exit_code)
 
 
 cli.add_command(dash)

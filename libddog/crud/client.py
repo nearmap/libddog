@@ -7,8 +7,10 @@ import datadog.api
 from libddog.common.types import JsonDict
 from libddog.crud.errors import (
     DashboardGetFailed,
+    DashboardListFailed,
     DashboardUpdateFailed,
-    AbstractCrudError,
+    MissingDatadogApiKey,
+    MissingDatadogAppKey,
 )
 from libddog.dashboards import Dashboard
 
@@ -18,17 +20,19 @@ class DatadogClient:
     env_varname_app_key = "DATADOG_APPLICATION_KEY"
 
     def load_credentials_from_environment(self) -> None:
-        api_key = os.getenv(self.env_varname_api_key)
-        app_key = os.getenv(self.env_varname_app_key)
+        var_api_key = self.env_varname_api_key
+        var_app_key = self.env_varname_app_key
+
+        api_key = os.getenv(var_api_key)
+        app_key = os.getenv(var_app_key)
 
         if not api_key:
-            raise AbstractCrudError(
-                "Could not find %r set in the environment" % self.env_varname_api_key
-            )
+            error = f"Could not find {var_api_key!r} set in the environment"
+            raise MissingDatadogApiKey(errors=[error])
+
         if not app_key:
-            raise AbstractCrudError(
-                "Could not find %r set in the environment" % self.env_varname_app_key
-            )
+            error = f"Could not find {var_app_key!r} set in the environment"
+            raise MissingDatadogAppKey(errors=[error])
 
         options = {
             "api_key": api_key,
@@ -47,13 +51,17 @@ class DatadogClient:
 
         errors = self.parse_response_errors(result)
         if errors:
-            raise DashboardGetFailed(id=id, errors=errors)
+            raise DashboardGetFailed(errors=errors)
 
         assert isinstance(result, dict)  # help mypy
         return result
 
     def list_dashboards(self) -> List[JsonDict]:
         result = datadog.api.Dashboard.get_all()  # type: ignore
+
+        errors = self.parse_response_errors(result)
+        if errors:
+            raise DashboardListFailed(errors=errors)
 
         dashboards = result["dashboards"]
         assert isinstance(dashboards, list)  # help mypy
