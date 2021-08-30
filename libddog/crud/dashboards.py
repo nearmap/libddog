@@ -1,7 +1,6 @@
 import importlib
 import json
 import os
-import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -14,13 +13,8 @@ from libddog.crud.errors import (
     DashboardDefinitionsLoadError,
 )
 from libddog.dashboards.dashboards import Dashboard
+from libddog.tools.text import sanitize_title_for_filename
 from libddog.tools.timekeeping import format_datetime_for_filename, utcnow
-
-
-def sanitize_title_for_filename(title: str) -> str:
-    # replace any non-alpha char with '_'
-    title = re.sub("[^a-zA-Z0-9]", "_", title)
-    return title
 
 
 class DashboardManager:
