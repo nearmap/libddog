@@ -1,45 +1,25 @@
 import sys
-from typing import Any, Optional
+from typing import Any
 
-from libddog.command_line.errors import ExceptionState
 from libddog.crud.errors import AbstractCrudError
 
 
 class ConsoleWriter:
-    def report_failed(self, exc: AbstractCrudError) -> None:
-        msg = exc.format_expanded()
-        self.red_errorln(msg)
+    def __init__(self, color_output: bool = True) -> None:
+        self.color_output = color_output
 
-    def red_errorln(self, msg: str) -> None:
-        if not msg.endswith("\n"):
-            msg = f"{msg}\n"
+    def errorln(self, msg: str) -> None:
+        line = msg
 
-        line = f"\033[31m" + msg + "\033[0m"
+        if not line.endswith("\n"):
+            line = f"{line}\n"
+
+        if self.color_output:
+            # in yellow
+            line = f"\033[33m" + line + "\033[0m"
 
         sys.stderr.write(line)
         sys.stderr.flush()
-
-    def errorln(self, msg: str, *args: Any, exc: Optional[Exception] = None) -> None:
-        exc_state = None
-        if args:
-            msg = msg % args
-
-        if exc:
-            msg = f"{msg}: {exc!r}"
-
-        # if we don't have a traceback try to extract it now
-        if not exc_state:
-            exc_state = ExceptionState.create()
-
-        line = f"{msg}\n"
-        sys.stderr.write(line)
-
-        if exc_state:
-            exc_state.print(file=sys.stderr)
-
-        sys.stderr.flush()
-
-    println = errorln
 
     def print(self, msg: str, *args: Any) -> None:
         if args:
@@ -47,3 +27,13 @@ class ConsoleWriter:
 
         sys.stderr.write(msg)
         sys.stderr.flush()
+
+    def println(self, msg: str, *args: Any) -> None:
+        if not msg.endswith("\n"):
+            msg = f"{msg}\n"
+
+        self.print(msg, *args)
+
+    def report_failed(self, exc: AbstractCrudError) -> None:
+        msg = exc.format_expanded()
+        self.errorln(msg)
