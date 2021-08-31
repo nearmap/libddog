@@ -145,30 +145,30 @@ Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/us
 Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashboard'... done
 ```
 
+`publish-live` operates on multiple definitions. When making code changes in our definitions sometimes we make changes that affect multiple dashboards, so updating them all in one go is useful.
+
+WARN
+
 
 ### Taking a snapshot of a dashboard
 
-Once a dashboard exists in Datadog you can take a snapshot of it any time. This is equivalent to the `Export dashboard JSON` option in the Datadog UI. The snapshot is stored on disk as a JSON document and can be used to manually restore the dashboard in the Datadog UI.
+Once a dashboard exists in Datadog you can take a snapshot of it any time with `ddog dash snapshot-live`. This is equivalent to the `Export dashboard JSON` option in the Datadog UI. The snapshot is stored on disk as a JSON document and can be used to manually restore the dashboard in the Datadog UI.
 
 ```bash
 (monitoring-project) $ ddog dash snapshot-live -i m74-ng8-93x
-Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/mmatusiak/tmp/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:42:23Z.json
+Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:42:23Z.json
 ```
 
 
+### Deleting a dashboard
 
-
-
-### Updating
-
-`ddog` can update multiple dashboards in one go. We recommend you narrow this down to just the dashboard definitions you've changed locally and that you want to push.
+You can delete a dashboard with `ddog dash delete-live`. Before deleting a snapshot is taken in case you change your mind and want to restore the dashboard.
 
 ```bash
-(monitoring-project) $ ddog dash update-live --title '*skel*'
-Updating dashboard 'xyz-123-def' entitled 'libddog skel: AWS ELB dashboard'
+(monitoring-project) $ ddog dash delete-live -i m74-ng8-93x
+Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:46:47Z.json
+Deleting live dashboard with id: 'm74-ng8-93x'... done
 ```
-
-TODO: create, remove
 
 
 
