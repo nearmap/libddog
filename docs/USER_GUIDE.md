@@ -124,6 +124,19 @@ Once you are ready to publish your definition as a production dashboard you will
 Creating dashboard entitled: 'libddog skel: AWS ELB dashboard'... created with id: 'm74-ng8-93x'
 ```
 
+It will then show up in your listing of dashboards:
+
+```bash
+(monitoring-project) $ ddog dash list-live
+         ID                AUTHOR    CREATED   MODIFIED  TITLE
+rmz-br5-j7h       martin.matusiak    18 days    57 mins  libddog QA: exercise metrics queries
+km5-y3y-4vq       martin.matusiak    1 hours    57 mins  libddog QA: exercise widgets
+7rf-b25-jht       martin.matusiak     9 mins     5 mins  [draft] libddog skel: AWS ELB dashboard
+m74-ng8-93x       martin.matusiak     2 mins     1 mins  libddog skel: AWS ELB dashboard
+```
+
+Notice that the draft dashboard is still there too.
+
 Next time you publish the production dashboard again it already exists, so it will be updated. But as a precaution a snapshot is taken first:
 
 ```bash
