@@ -63,12 +63,24 @@ One day, the dashboard is no longer needed and it's time to delete it. At this p
 
 ### Listing your dashboard definitions
 
-`ddog dash list-defs` shows you a listing of all your dashboard definitions.
+`ddog dash list-defs` gives you a listing of all your dashboard definitions.
 
 ```bash
 (monitoring-project) $ ddog dash list-defs
 ID           GROUPS  WIDGETS  QUERIES  TITLE
 None              0        1        1  libddog skel: AWS ELB dashboard
+```
+
+
+### Listing dashboards in Datadog
+
+`ddog dash list-live` gives you a listing of the dashboards that exist in your organization's account in Datadog, whether they have a corresponding definition in code or not.
+
+```bash
+(monitoring-project) $ ddog dash list-live
+         ID                AUTHOR    CREATED   MODIFIED  TITLE
+rmz-br5-j7h       martin.matusiak    18 days    44 mins  libddog QA: exercise metrics queries
+km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise widgets
 ```
 
 
