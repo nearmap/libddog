@@ -147,7 +147,7 @@ Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashb
 
 `publish-live` operates on multiple definitions. When making code changes in our definitions sometimes we make changes that affect multiple dashboards, so updating them all in one go is useful.
 
-WARN
+**WARNING:** Even though snapshots are taken `publish-live` is still a destructive operation and we recommend that you only update dashboards whose definitions you have changed.
 
 
 ### Taking a snapshot of a dashboard
@@ -162,7 +162,7 @@ Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/us
 
 ### Deleting a dashboard
 
-You can delete a dashboard with `ddog dash delete-live`. Before deleting a snapshot is taken in case you change your mind and want to restore the dashboard.
+You can delete a dashboard with `ddog dash delete-live`. Before deletion a snapshot is taken in case you change your mind and want to restore the dashboard later.
 
 ```bash
 (monitoring-project) $ ddog dash delete-live -i m74-ng8-93x
