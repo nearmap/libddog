@@ -145,9 +145,9 @@ Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/us
 Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashboard'... done
 ```
 
-`publish-live` operates on multiple definitions. When making code changes in our definitions sometimes we make changes that affect multiple dashboards, so updating them all in one go is useful.
+`publish-live` operates on multiple definitions. When making code changes in our definitions sometimes you make changes that affect multiple dashboards, so updating them all in one go is useful.
 
-**WARNING:** Even though snapshots are taken `publish-live` is still a destructive operation and we recommend that you only update dashboards whose definitions you have changed.
+**WARNING:** Even though snapshots are taken `publish-live` is still a destructive operation and we recommend that you only update dashboards whose definitions you have changed, and avoid using `'*'` (wildcard that matches all definitions).
 
 
 ### Taking a snapshot of a dashboard
