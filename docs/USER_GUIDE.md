@@ -84,6 +84,39 @@ km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise wi
 ```
 
 
+### Working on a draft
+
+When you're developing a new dashboard or redesigning an existing dashboard it's best to do this as a draft. You will use `ddog dash publish-draft` to publish the draft. The string "[draft] " will be prepended to the title of the dashboard to mark it as a draft.
+
+The first time you publish a dashboard as a draft it does not exist yet so it's created:
+
+```bash
+(monitoring-project) $ ddog dash publish-draft -t '*skel*'
+Creating dashboard entitled: '[draft] libddog skel: AWS ELB dashboard'... created with id: '7rf-b25-jht'
+```
+
+It will then show up in your listing of dashboards:
+
+```bash
+(monitoring-project) $ ddog dash list-live
+         ID                AUTHOR    CREATED   MODIFIED  TITLE
+rmz-br5-j7h       martin.matusiak    18 days    44 mins  libddog QA: exercise metrics queries
+km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise widgets
+7rf-b25-jht       martin.matusiak     1 mins     1 mins  [draft] libddog skel: AWS ELB dashboard
+```
+
+The next time you publish the draft it will update the draft dashboard that's already there:
+
+```bash
+(monitoring-project) $ ddog dash publish-draft -t '*skel*'
+Updating dashboard with id: '7rf-b25-jht' entitled: '[draft] libddog skel: AWS ELB dashboard'... done
+```
+
+
+
+
+
+
 ### Updating
 
 `ddog` can update multiple dashboards in one go. We recommend you narrow this down to just the dashboard definitions you've changed locally and that you want to push.
