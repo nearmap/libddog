@@ -146,6 +146,16 @@ Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashb
 ```
 
 
+### Taking a snapshot of a dashboard
+
+Once a dashboard exists in Datadog you can take a snapshot of it any time. This is equivalent to the `Export dashboard JSON` option in the Datadog UI. The snapshot is stored on disk as a JSON document and can be used to manually restore the dashboard in the Datadog UI.
+
+```bash
+(monitoring-project) $ ddog dash snapshot-live -i m74-ng8-93x
+Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/mmatusiak/tmp/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:42:23Z.json
+```
+
+
 
 
 
