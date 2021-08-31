@@ -86,7 +86,7 @@ km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise wi
 
 ### Working on a draft
 
-When you're developing a new dashboard or redesigning an existing dashboard it's best to do this as a draft. You will use `ddog dash publish-draft` to publish the draft. The string "[draft] " will be prepended to the title of the dashboard to mark it as a draft.
+When you're developing a new dashboard or redesigning an existing dashboard it's best to do this as a draft. You will use `ddog dash publish-draft` to publish the draft. The string `[draft] ` will be prepended to the title of the dashboard to mark it as a draft.
 
 The first time you publish a dashboard as a draft it does not exist yet so it's created:
 
@@ -112,7 +112,7 @@ The next time you publish the draft it will update the draft dashboard that's al
 Updating dashboard with id: '7rf-b25-jht' entitled: '[draft] libddog skel: AWS ELB dashboard'... done
 ```
 
-
+`publish-draft` operates on a single definition because you typically work on one draft at a time.
 
 
 
