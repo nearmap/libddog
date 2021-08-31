@@ -115,7 +115,7 @@ Updating dashboard with id: '7rf-b25-jht' entitled: '[draft] libddog skel: AWS E
 `publish-draft` operates on a single definition because you typically work on one draft at a time.
 
 
-## Publishing a final dashboard
+### Publishing a final dashboard
 
 Once you are ready to publish your definition as a production dashboard you will use `ddog dash publish-live`. If the dashboard does not exist yet it will be created:
 
