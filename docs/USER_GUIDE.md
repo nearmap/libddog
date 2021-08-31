@@ -48,6 +48,22 @@ export DATADOG_APPLICATION_KEY=...
 
 ## The dashboard lifecycle
 
+Dashboards generally follow a lifecycle that goes approximately like this...
+
+You perceive the need for a new dashboard. You go into the Datadog UI and experiment with different metrics and widgets, coming up with a useful proof of concept. At this point, what you decide to do next will depend on your use case. Some dashboards are short lived and only used for a one-off load test or investigation. Other dashboards become part of your team's dashboard collection that you want to maintain long term.
+
+Once you've decided that you want to define this dashboard in code you start creating a dashboard definition for it using the libddog API. This does not happen all at once - it's an incremental process. You want to try things out in code, see how it looks and works in Datadog, make further changes, refactor something etc. It works much like any software development effort. During this time it's super useful to be able to see and test each iteration you create in Datadog. But this is not the final dashboard yet, it's a draft dashboard.
+
+Once you're happy with the draft you want to publish the final dashboard. It's now ready for other people to use as well, and you should strive to keep it in good working condition from now on. Think of it as production software.
+
+From time to time you'll need to make updates to your dashboard. Minor updates can be done in place (like pushing to *master*). Major updates introduce the risk of breaking the working dashboard, so it's better to do them on a draft (like using a feature branch). Once you're happy with the state of the draft, you push those changes to the production dashboard again.
+
+One day, the dashboard is no longer needed and it's time to delete it. At this point you may want to take one last snapshot of it in case you change your mind and want to restore it.
+
+
+### 
+
+
 ### Updating
 
 `ddog` can update multiple dashboards in one go. We recommend you narrow this down to just the dashboard definitions you've changed locally and that you want to push.
