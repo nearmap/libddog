@@ -141,7 +141,7 @@ Next time you publish the production dashboard again it already exists, so it wi
 
 ```bash
 (monitoring-project) $ ddog dash publish-live -t '*skel*'
-Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/mmatusiak/tmp/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:36:52Z.json
+Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:36:52Z.json
 Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashboard'... done
 ```
 
