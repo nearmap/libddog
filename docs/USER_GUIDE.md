@@ -61,7 +61,15 @@ From time to time you'll need to make updates to your dashboard. Minor updates c
 One day, the dashboard is no longer needed and it's time to delete it. At this point you may want to take one last snapshot of it in case you change your mind and want to restore it.
 
 
-### 
+### Listing your dashboard definitions
+
+`ddog dash list-defs` shows you a listing of all your dashboard definitions.
+
+```bash
+(monitoring-project) $ ddog dash list-defs
+ID           GROUPS  WIDGETS  QUERIES  TITLE
+None              0        1        1  libddog skel: AWS ELB dashboard
+```
 
 
 ### Updating
