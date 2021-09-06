@@ -113,7 +113,7 @@ Perform the release:
 
 Post-release checks:
 
-1. Run tox env to test the released version: `tox -e pypi-cli`. *Make sure the libddog version listed as installed is the version you just released.* If not rm -rf the tox env and re-run.
+1. Run tox env to test the released version: `tox -e pypi-cli`. *Make sure the libddog version listed as installed is the version you just released.* If not delete the tox env `rm -rf .tox/pypi-cli` and re-run.
 
 If at this point you discover that the release is broken PyPI will let you
 yank/delete it and you can redo it. As long as this happens as part of the
