@@ -22,14 +22,14 @@ def test_put_and_get_metrics() -> None:
     dashboard = mgr.load_definition_by_title("libddog QA: exercise metrics queries")
 
     dash_id = mgr.assign_id_to_dashboard(dashboard)
-    mgr.timestamp_dashboard(dashboard)
+    mgr.stamp_dashboard(dashboard)
 
     # put the dashboard
     mgr.update_live_dashboard(dashboard, dash_id)
 
     # now read it back and assert that it matches our model
     expected = dashboard.as_dict()
-    actual = mgr.mgr.get(dash_id)
+    actual = mgr.manager.get_dashboard(id=dash_id)
 
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
 
@@ -39,13 +39,13 @@ def test_put_and_get_widgets() -> None:
     dashboard = mgr.load_definition_by_title("libddog QA: exercise widgets")
 
     dash_id = mgr.assign_id_to_dashboard(dashboard)
-    mgr.timestamp_dashboard(dashboard)
+    mgr.stamp_dashboard(dashboard)
 
     # put the dashboard
     mgr.update_live_dashboard(dashboard, dash_id)
 
     # now read it back and assert that it matches our model
     expected = dashboard.as_dict()
-    actual = mgr.mgr.get(dash_id)
+    actual = mgr.manager.get_dashboard(id=dash_id)
 
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
