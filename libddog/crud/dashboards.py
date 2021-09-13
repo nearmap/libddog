@@ -2,6 +2,7 @@ import importlib
 import json
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 from types import ModuleType
 from typing import List, Optional
@@ -13,6 +14,7 @@ from libddog.crud.errors import (
     DashboardDefinitionsLoadError,
 )
 from libddog.dashboards.dashboards import Dashboard
+from libddog.tools.git import GitHelper
 from libddog.tools.text import sanitize_title_for_filename
 from libddog.tools.timekeeping import format_datetime_for_filename, utcnow
 
@@ -25,9 +27,13 @@ class DashboardManager:
     _defs_module_name = "dashboards"
     _defs_import_path = f"{_defs_containing_dir}.{_defs_module_name}"
 
+    _libddog_proj_name = "libddog"
+    _libddog_proj_url = "https://github.com/nearmap/libddog"
+
     def __init__(self, proj_path: str) -> None:
         self.proj_path = proj_path
         self.snapshots_path: Path = Path(self.proj_path) / Path(self._snapshot_dirname)
+        self.git = GitHelper()
 
         self._client: Optional[DatadogClient] = None  # lazy attribute
 
@@ -93,6 +99,45 @@ class DashboardManager:
     def get_draft_title(self, dashboard: Dashboard) -> str:
         return f"[draft] {dashboard.title}"
 
+    def insert_libddog_metadata_footer(self, dashboard: Dashboard) -> None:
+        opt_project_phrase = ""
+        opt_branch_phrase = ""
+        time_now = datetime.now().ctime()
+        libddog_link = f"[{self._libddog_proj_name}]({self._libddog_proj_url})"
+
+        output = self.git.get_remotes()
+        if output is not None:
+            remotes = self.git.parse_remotes(output)
+            if remotes:
+                name = self.git.get_repo_name(remotes)
+                url = self.git.get_repo_http_url(remotes)
+
+                if name and url:
+                    opt_project_phrase = (
+                        f"is defined in code as part of "
+                        f"the [{name}]({url}) project and "
+                    )
+                elif name:
+                    opt_project_phrase = (
+                        f"is defined in code as part of the *{name}* project and "
+                    )
+
+        branch = self.git.get_current_branch()
+        if branch:
+            opt_branch_phrase = f"from branch **{branch}** "
+
+        content = (
+            f"\n\n---\n\n"
+            f"This dashboard {opt_project_phrase}is maintained automatically "
+            f"using the {libddog_link} tool. "
+            f"If you make manual changes to it your changes may be lost."
+            f"\n\nIt was last updated {opt_branch_phrase}on **{time_now}**."
+        )
+
+        desc = dashboard.desc or ""
+        if content not in desc:
+            dashboard.desc = f"{desc}{content}"
+
     def ensure_snapshot_path_exists(self) -> None:
         if not os.path.exists(self.snapshots_path):
             os.makedirs(self.snapshots_path)
@@ -117,6 +162,7 @@ class DashboardManager:
         return fp
 
     def create_dashboard(self, dashboard: Dashboard) -> str:
+        self.insert_libddog_metadata_footer(dashboard)
         return self.client.create_dashboard(dashboard=dashboard)
 
     def delete_dashboard(self, *, id: str) -> None:
@@ -129,6 +175,7 @@ class DashboardManager:
         return self.client.list_dashboards()
 
     def update_dashboard(self, dashboard: Dashboard, id: Optional[str] = None) -> None:
+        self.insert_libddog_metadata_footer(dashboard)
         self.client.update_dashboard(dashboard=dashboard, id=id)
 
     def find_first_dashboard_with_title(self, title: str) -> Optional[JsonDict]:
