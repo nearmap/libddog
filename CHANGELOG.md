@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5 (next)
+
+...
+
 ## 0.0.4
 
 - Added metadata blurb to dashboard descriptions to show that:
