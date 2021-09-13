@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.4
+
+- Added metadata blurb to dashboard descriptions to show that:
+    - The dashboard is maintained using libddog.
+    - Changes to the dashboard made manually could be lost.
+    - A link to the project repo, if available (detected via the git remote).
+    - When the dashboard was last updated.
+    - Which branch the dashboard was last updated from, if available.
+
 ## 0.0.3
 
 - New commands introduced for `ddog dash`:
