@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.6 (next)
+
+...
+
 ## 0.0.5
 
 - Fixed bug in `ddog dash publish-draft` and `publish-live` failing on a
