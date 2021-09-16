@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.0.5 (next)
+## 0.0.5
 
-...
+- Fixed bug in `ddog dash publish-draft` and `publish-live` failing on a
+  `Dashboard` object with a populated `.id` attribute. Issue #35.
 
 ## 0.0.4
 
