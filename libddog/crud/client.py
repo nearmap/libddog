@@ -50,6 +50,7 @@ class DatadogClient:
 
     def create_dashboard(self, dashboard: Dashboard) -> str:
         client_kwargs = dashboard.as_dict()
+        client_kwargs.pop("id", None)  # we cannot pass an id when creating
 
         resp = datadog.api.Dashboard.create(**client_kwargs)  # type: ignore
         errors = self.parse_response_errors(resp)
