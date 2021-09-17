@@ -7,6 +7,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import List, Optional
 
+import libddog
 from libddog.common.types import JsonDict
 from libddog.crud.client import DatadogClient
 from libddog.crud.errors import (
@@ -28,6 +29,7 @@ class DashboardManager:
     _defs_import_path = f"{_defs_containing_dir}.{_defs_module_name}"
 
     _libddog_proj_name = "libddog"
+    _libddog_proj_version = libddog.__version__
     _libddog_proj_url = "https://github.com/nearmap/libddog"
 
     def __init__(self, proj_path: str) -> None:
@@ -131,7 +133,8 @@ class DashboardManager:
             f"This dashboard {opt_project_phrase}is maintained automatically "
             f"using the {libddog_link} tool. "
             f"If you make manual changes to it your changes may be lost."
-            f"\n\nIt was last updated {opt_branch_phrase}on **{time_now}**."
+            f"\n\nIt was last updated {opt_branch_phrase}on **{time_now}** "
+            f"using {self._libddog_proj_name} v{self._libddog_proj_version}."
         )
 
         desc = dashboard.desc or ""

@@ -4,6 +4,8 @@
 
 - In `ddog dash list-defs` removed the `ID` column because dashboard
   definitions do not need to have a populated id.
+- The dashboard description footer now also includes the version of libddog that
+  was used in the update.
 
 ## 0.0.5
 
@@ -12,7 +14,7 @@
 
 ## 0.0.4
 
-- Added metadata blurb to dashboard descriptions to show that:
+- Added metadata blurb (footer) to dashboard descriptions to show that:
     - The dashboard is maintained using libddog.
     - Changes to the dashboard made manually could be lost.
     - A link to the project repo, if available (detected via the git remote).
