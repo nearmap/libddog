@@ -83,8 +83,8 @@ class DashboardManagerCli:
             self.writer.report_failed(exc)
             return os.EX_UNAVAILABLE
 
-        fmt = "%-11s  %6s  %7s  %7s  %s"
-        self.writer.println(fmt, "ID", "GROUPS", "WIDGETS", "QUERIES", "TITLE")
+        fmt = "%6s  %7s  %7s  %s"
+        self.writer.println(fmt, "GROUPS", "WIDGETS", "QUERIES", "TITLE")
 
         for dash in dashes:
             n_widgets = count_widgets(dash)
@@ -93,7 +93,6 @@ class DashboardManagerCli:
 
             self.writer.println(
                 fmt,
-                dash.id,
                 n_groups,
                 n_widgets,
                 n_queries,
