@@ -2,7 +2,8 @@
 
 ## 0.0.6 (next)
 
-...
+- In `ddog dash list-defs` removed the `ID` column because dashboard
+  definitions do not need to have a populated id.
 
 ## 0.0.5
 
