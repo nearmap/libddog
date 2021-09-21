@@ -38,13 +38,13 @@ def get_reqs_per_elb() -> Widget:
 
 
 def get_dashboard() -> Dashboard:
-    cpu_per_az = get_reqs_per_elb()
+    reqs_per_az = get_reqs_per_elb()
 
     tmpl_presets_region = get_region_tmpl_var_presets()
     dashboard = Dashboard(
         title="libddog skel: AWS ELB dashboard",
         desc="Sample dashboard showing metrics from ELB",
-        widgets=[cpu_per_az],
+        widgets=[reqs_per_az],
         tmpl_var_presets=tmpl_presets_region,
     )
 
