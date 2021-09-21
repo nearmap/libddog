@@ -23,13 +23,21 @@ $ mkvirtualenv monitoring-project
 Successfully installed libddog-0.0.1 ...snip...
 ```
 
-You can now use the `ddog` command line tool to manage your dashboards. To list the dashboards defined in the project:
+You can now use the `ddog` command line tool to manage your dashboards. To verify that it's working correctly:
 
 ```bash
-(monitoring-project) $ ddog dash list-defs
-ID           GROUPS  WIDGETS  QUERIES  TITLE
-None              0        1        1  libddog skel: AWS ELB dashboard
+(monitoring-project) $ ddog version
+libddog version 0.0.6
 ```
+
+Next time you return to the project you will just need to activate the virtual environment before you start working on it:
+
+```bash
+$ workon monitoring-project
+(monitoring-project) $
+```
+
+> `libddog` is an actively developed project with [improvements](../CHANGELOG.md) being made frequently. We highly recommend staying close to the [latest version](https://pypi.org/project/libddog/#history). You can update libddog by doing `pip install -U libddog` in your virtual environment.
 
 
 
@@ -69,8 +77,8 @@ One day, the dashboard is no longer needed and it's time to delete it. At this p
 
 ```bash
 (monitoring-project) $ ddog dash list-defs
-ID           GROUPS  WIDGETS  QUERIES  TITLE
-None              0        1        1  libddog skel: AWS ELB dashboard
+GROUPS  WIDGETS  QUERIES  TITLE
+     0        1        1  libddog skel: AWS ELB dashboard
 ```
 
 
