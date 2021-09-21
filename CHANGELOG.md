@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.7 (next)
+
+...
+
 ## 0.0.6
 
 - In `ddog dash list-defs` removed the `ID` column because dashboard

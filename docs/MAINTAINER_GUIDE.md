@@ -127,3 +127,6 @@ better to yank it than to leave it up for users to stumble over. Update the
 Finalizing steps:
 
 1. Bump version in `libddog/__init__.py` to an alpha release version, eg. `0.0.3a0`.
+2. In the CHANGELOG create a heading for the next (upcoming) version so that changes can be added there incrementally.
+3. Create a commit: `git commit -am'bump version to <alpha-version>'`
+
