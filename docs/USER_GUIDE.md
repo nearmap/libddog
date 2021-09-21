@@ -4,6 +4,8 @@
 
 ## How to get started
 
+libddog requires **Python 3.8** or later.
+
 The easiest way to get started with libddog is to use the [example skeleton project](skel) as a starting point:
 
 ```bash
