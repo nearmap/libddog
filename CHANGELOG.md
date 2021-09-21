@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.6 (next)
+## 0.0.6
 
 - In `ddog dash list-defs` removed the `ID` column because dashboard
   definitions do not need to have a populated id.
