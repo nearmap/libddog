@@ -1,6 +1,6 @@
 import fnmatch
 import os
-from typing import List, Union
+from typing import Any, List, Union
 
 from libddog.command_line.console import ConsoleWriter
 from libddog.crud.dashboards import DashboardManager
@@ -46,8 +46,8 @@ def count_queries(obj: Union[Dashboard, Widget, Request, QueryMonad]) -> int:
 class DashboardManagerCli:
     def __init__(self, proj_path: str) -> None:
         self.proj_path = os.path.abspath(proj_path)
-        self.writer = ConsoleWriter()
 
+        self.writer = ConsoleWriter()
         self.manager = DashboardManager(self.proj_path)
 
     def filter_definitions(

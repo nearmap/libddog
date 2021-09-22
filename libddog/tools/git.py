@@ -49,6 +49,7 @@ class GitHelper:
         return remotes
 
     def parse_remote_http_url(self, verbatim_url: str) -> Optional[str]:
+        # git@github.com:nearmap/libddog.git -> https://github.com/nearmap/libddog
         match = self.rx_remote_url.match(verbatim_url)
         if match:
             _, netloc, path = match.groups()
