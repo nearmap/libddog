@@ -4,7 +4,7 @@ from pathlib import Path
 import libddog
 
 proj_dir = Path(__file__).parent
-long_desc = (proj_dir / "README.md").read_text()
+long_desc = (proj_dir / "README-PYPI.md").read_text()
 
 setup(
     name="libddog",
