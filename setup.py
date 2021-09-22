@@ -1,11 +1,17 @@
 from setuptools import find_packages, setup
+from pathlib import Path
 
 import libddog
+
+proj_dir = Path(__file__).parent
+long_desc = (proj_dir / "README.md").read_text()
 
 setup(
     name="libddog",
     version=libddog.__version__,
     description="Datadog automation tool",
+    long_description=long_desc,
+    long_description_content_type='text/markdown',
     author="Martin Matusiak",
     author_email="martin.matusiak@nearmap.com",
     url="https://github.com/nearmap/libddog",
