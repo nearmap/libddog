@@ -9,6 +9,7 @@ setup(
     author="Martin Matusiak",
     author_email="martin.matusiak@nearmap.com",
     url="https://github.com/nearmap/libddog",
+    license="MIT",
     packages=find_packages('.', exclude=('libtests', 'testdata', 'tests_*',)),
     package_dir={"": "."},
     package_data={
