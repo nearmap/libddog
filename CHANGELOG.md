@@ -1,8 +1,11 @@
 # Changelog
 
-## 0.0.7 (next)
+## 0.0.7
 
-...
+- Added an upgrade-check in the cli. When using the cli it checks the installed
+  version against the latest version in PyPI and gives instructions on how to
+  upgrade. The check is not repeated for the next 24h. The flag
+  `--no-upgrade-check` tells the cli to skip the check.
 
 ## 0.0.6
 
