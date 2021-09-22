@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.8 (next)
+
+...
+
 ## 0.0.7
 
 - Added an upgrade-check in the cli. When using the cli it checks the installed
