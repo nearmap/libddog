@@ -1,4 +1,5 @@
 click==8.0.1
 datadog==0.41.0
+packaging==21.0
 parsimonious==0.8.1
 python-dateutil==2.8.1

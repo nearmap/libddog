@@ -13,28 +13,44 @@ import click
 import libddog
 from libddog.command_line.dashboards import ConsoleWriter, DashboardManagerCli
 from libddog.command_line.options import attach_help_option
+from libddog.command_line.upgrade_check import UpgradeChecker
 
 
 @click.group()
 @click.pass_context
 def cli(ctx):
-    "Datadog dashboard automation cli"
+    "Datadog automation cli"
+
     pass
 
 
 @click.group()
+@click.option(
+    "-U",
+    "--no-upgrade-check",
+    help="Skip libddog upgrade check.",
+    is_flag=True,
+    default=False,
+)
 @click.pass_context
-def dash(ctx):
+def dash(ctx, no_upgrade_check: bool):
     "Datadog dashboards management actions"
 
     ctx.dash_mgr = DashboardManagerCli(proj_path=".")
     ctx.writer = ConsoleWriter()
+
+    if not no_upgrade_check:
+        upgrade_checker = UpgradeChecker()
+        upgrade_checker.run()
 
 
 @click.command()
 @click.pass_context
 def version(ctx):
     "ddog version"
+
+    upgrade_checker = UpgradeChecker()
+    upgrade_checker.run()
 
     writer = ConsoleWriter()
     writer.println(f"libddog version {libddog.__version__}")
