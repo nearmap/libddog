@@ -4,7 +4,25 @@
 
 ## How to get started
 
-libddog requires **Python 3.8** or later.
+libddog requires **Python 3.8** or later. Using a [virtual environment](https://virtualenv.pypa.io/en/latest/) is not required, but still highly recommended. We will assume you are using `virtualenvwrapper`.
+
+
+### Installing the pre-requisites
+
+On Ubuntu:
+
+```bash
+$ sudo apt install virtualenvwrapper
+
+# to source the shell functions `workon`, `mkvirtualenv` etc
+$ . /usr/share/bash-completion/completions/virtualenvwrapper
+
+# make them work in your shell when you log in
+$ echo ". /usr/share/bash-completion/completions/virtualenvwrapper" >> ~/.bashrc
+```
+
+
+### Creating a new monitoring project
 
 The easiest way to get started with libddog is to use the [example skeleton project](skel) as a starting point:
 
@@ -15,7 +33,7 @@ $ cd monitoring-project
 $ git init
 ```
 
-You will need to install libddog on your system. Using a [virtualenv](https://virtualenv.pypa.io/en/latest/) and [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) are highly recommended. We will assume you are using `virtualenvwrapper`:
+You will need to install libddog on your system.
 
 ```bash
 $ mkvirtualenv monitoring-project
