@@ -4,6 +4,8 @@ about: Report a bug
 labels: kind/bug
 ---
 
+<!-- REMINDER: Please be aware that this is a public project, so do not include any company specific information in your issue! -->
+
 ## Describe the bug
 
 A clear and concise description of what the bug is.
