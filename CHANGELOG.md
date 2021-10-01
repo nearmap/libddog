@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.0.8 (next)
+## 0.0.8
 
-...
+- Added validation to make sure that all query names in a `Request` are unique.
+  The validation runs when the `Request` is constructed. Formula validation now
+  also runs at `Request` construction time, to avoid a latent error. Issue #45.
 
 ## 0.0.7
 
