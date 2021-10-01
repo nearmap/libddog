@@ -129,20 +129,18 @@ def test_request__synthesize_formulas_from_queries() -> None:
 
 
 def test_request__non_distinct_query_names() -> None:
-    request = Request(
-        queries=[
-            # both the metric name and the query name should vary on the loop
-            # variable in some way, but here the query name is just a constant
-            Query(f"svc.req.timing.{percentile}", name="p95")
-            .filter("$cluster")
-            .agg("avg")
-            .rollup("avg")
-            for percentile in ["95percentile", "median"]
-        ],
-    )
-
     with pytest.raises(RequestQueryNamesNotUnique) as ctx:
-        request.as_dict()
+        Request(
+            queries=[
+                # both the metric name and the query name should vary on the loop
+                # variable in some way, but here the query name is just a constant
+                Query(f"svc.req.timing.{percentile}", name="p95")
+                .filter("$cluster")
+                .agg("avg")
+                .rollup("avg")
+                for percentile in ["95percentile", "median"]
+            ],
+        )
 
     assert ctx.value.args[0] == (
         "not all query names in request are distinct: 'p95', 'p95'"

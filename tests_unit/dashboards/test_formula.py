@@ -41,17 +41,11 @@ def test_formula__unresolved_identifier() -> None:
     q1 = query.identifier()
     q2 = Identifier("q2")  # we just made it up
 
-    request = Request(
-        formulas=[
-            Formula(
-                formula=q1 * q2,
-            )
-        ],
-        queries=[query],
-    )
-
     with pytest.raises(UnresolvedFormulaIdentifiers) as ctx:
-        request.as_dict()
+        Request(
+            formulas=[Formula(formula=q1 * q2)],
+            queries=[query],
+        )
 
     assert ctx.value.args[0] == (
         "identifier(s) 'q2' in the formula '(q1 * q2)' not present in any query"

@@ -255,6 +255,13 @@ class Request(Renderable):
         self.style = style or Style()
         self.on_right_yaxis = on_right_yaxis
 
+        # Make sure the Request is valid at this point. It's important to fail
+        # fast while constructing the object, so that the traceback points back
+        # at the call site which introduces the error. We could also validate
+        # later on in 'as_dict', but by then it's harder to report the error and
+        # point it back to the offending Dashboard/Widget/Request.
+        self.validate()
+
     def validate_query_names_are_distinct(self) -> None:
         names = [query._state.name for query in self.queries]
 
@@ -264,6 +271,13 @@ class Request(Renderable):
                 f"not all query names in request are distinct: {fmt_names}"
             )
 
+    def validate(self) -> None:
+        # validate that variables used in formula correspond to query names
+        for formula in self.formulas:
+            formula.validate(self.queries)
+
+        self.validate_query_names_are_distinct()
+
     def as_dict(self) -> JsonDict:
         # if we have only queries but no formulas then synthesize a formula per query
         formulas = self.formulas
@@ -271,12 +285,6 @@ class Request(Renderable):
             for query in self.queries:
                 formula = Formula(formula=query.identifier(), alias=self.title)
                 formulas.append(formula)
-
-        # validate that variables used in formula correspond to query names
-        for formula in formulas:
-            formula.validate(self.queries)
-
-        self.validate_query_names_are_distinct()
 
         formula_dicts = [form.as_dict() for form in formulas]
         query_dicts = [query._state.as_dict() for query in self.queries]
