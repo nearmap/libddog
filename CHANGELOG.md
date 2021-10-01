@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.9 (next)
+
+...
+
 ## 0.0.8
 
 - Added validation to make sure that all query names in a `Request` are unique.
