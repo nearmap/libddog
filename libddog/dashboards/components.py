@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.bases import Renderable
-from libddog.common.errors import UnresolvedFormulaIdentifiers
+from libddog.common.errors import (
+    RequestQueryNamesNotUnique,
+    UnresolvedFormulaIdentifiers,
+)
 from libddog.common.types import JsonDict
 from libddog.dashboards.enums import (
     Comparator,
@@ -252,6 +255,15 @@ class Request(Renderable):
         self.style = style or Style()
         self.on_right_yaxis = on_right_yaxis
 
+    def validate_query_names_are_distinct(self) -> None:
+        names = [query._state.name for query in self.queries]
+
+        if len(names) > len(set(names)):
+            fmt_names = ", ".join(f"{name!r}" for name in names)
+            raise RequestQueryNamesNotUnique(
+                f"not all query names in request are distinct: {fmt_names}"
+            )
+
     def as_dict(self) -> JsonDict:
         # if we have only queries but no formulas then synthesize a formula per query
         formulas = self.formulas
@@ -263,6 +275,8 @@ class Request(Renderable):
         # validate that variables used in formula correspond to query names
         for formula in formulas:
             formula.validate(self.queries)
+
+        self.validate_query_names_are_distinct()
 
         formula_dicts = [form.as_dict() for form in formulas]
         query_dicts = [query._state.as_dict() for query in self.queries]
