@@ -13,7 +13,7 @@ On Ubuntu the `venv` module for Python is packaged separately and you may need
 to install it first. Make sure it matches the version of your system Python:
 
 ```bash
-$ python -V
+$ python3 -V
 Python 3.8.10
 
 $ sudo apt install python3.8-venv
@@ -31,11 +31,12 @@ $ cd monitoring-project
 $ git init
 ```
 
-You will need to install libddog on your system.
+You will need to install libddog on your system. We'll create a virtual
+environment in the directory `.ve/` to manage the dependencies for this project.
 
 ```bash
 $ python3 -m venv .ve
-$ .ve/bin/activate
+$ . .ve/bin/activate
 (.ve) $ pip install -r requirements.txt 
 Successfully installed libddog-0.0.1 ...snip...
 ```
@@ -50,7 +51,7 @@ libddog version 0.0.6
 Next time you return to the project you will just need to activate the virtual environment before you start working on it:
 
 ```bash
-$ .ve/bin/activate
+$ . .ve/bin/activate
 (.ve) $
 ```
 
