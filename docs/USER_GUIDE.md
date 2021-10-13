@@ -4,21 +4,19 @@
 
 ## How to get started
 
-libddog requires **Python 3.8** or later. Using a [virtual environment](https://virtualenv.pypa.io/en/latest/) is not required, but still highly recommended. We will assume you are using `virtualenvwrapper`.
+libddog requires **Python 3.8** or later. Using a [virtual environment](https://virtualenv.pypa.io/en/latest/) is not required, but still highly recommended.
 
 
 ### Installing the pre-requisites
 
-On Ubuntu:
+On Ubuntu the `venv` module for Python is packaged separately and you may need
+to install it first. Make sure it matches the version of your system Python:
 
 ```bash
-$ sudo apt install virtualenvwrapper
+$ python3 -V
+Python 3.8.10
 
-# to source the shell functions `workon`, `mkvirtualenv` etc
-$ . /usr/share/bash-completion/completions/virtualenvwrapper
-
-# make them work in your shell when you log in
-$ echo ". /usr/share/bash-completion/completions/virtualenvwrapper" >> ~/.bashrc
+$ sudo apt install python3.8-venv
 ```
 
 
@@ -33,26 +31,28 @@ $ cd monitoring-project
 $ git init
 ```
 
-You will need to install libddog on your system.
+You will need to install libddog on your system. We'll create a virtual
+environment in the directory `.ve/` to manage the dependencies for this project.
 
 ```bash
-$ mkvirtualenv monitoring-project
-(monitoring-project) $ pip install -r requirements.txt 
+$ python3 -m venv .ve
+$ . .ve/bin/activate
+(.ve) $ pip install -r requirements.txt 
 Successfully installed libddog-0.0.1 ...snip...
 ```
 
 You can now use the `ddog` command line tool to manage your dashboards. To verify that it's working correctly:
 
 ```bash
-(monitoring-project) $ ddog version
+(.ve) $ ddog version
 libddog version 0.0.6
 ```
 
 Next time you return to the project you will just need to activate the virtual environment before you start working on it:
 
 ```bash
-$ workon monitoring-project
-(monitoring-project) $
+$ . .ve/bin/activate
+(.ve) $
 ```
 
 > `libddog` is an actively developed project with [improvements](../CHANGELOG.md) being made frequently. We highly recommend staying close to the [latest version](https://pypi.org/project/libddog/#history). You can update libddog by doing `pip install -U libddog` in your virtual environment.
@@ -94,7 +94,7 @@ One day, the dashboard is no longer needed and it's time to delete it. At this p
 `ddog dash list-defs` gives you a listing of all your dashboard definitions.
 
 ```bash
-(monitoring-project) $ ddog dash list-defs
+(.ve) $ ddog dash list-defs
 GROUPS  WIDGETS  QUERIES  TITLE
      0        1        1  libddog skel: AWS ELB dashboard
 ```
@@ -105,7 +105,7 @@ GROUPS  WIDGETS  QUERIES  TITLE
 `ddog dash list-live` gives you a listing of the dashboards that exist in your organization's account in Datadog, whether they have a corresponding definition in code or not.
 
 ```bash
-(monitoring-project) $ ddog dash list-live
+(.ve) $ ddog dash list-live
          ID                AUTHOR    CREATED   MODIFIED  TITLE
 rmz-br5-j7h       martin.matusiak    18 days    44 mins  libddog QA: exercise metrics queries
 km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise widgets
@@ -119,14 +119,14 @@ When you're developing a new dashboard or redesigning an existing dashboard it's
 The first time you publish a dashboard as a draft it does not exist yet so it's created:
 
 ```bash
-(monitoring-project) $ ddog dash publish-draft -t '*skel*'
+(.ve) $ ddog dash publish-draft -t '*skel*'
 Creating dashboard entitled: '[draft] libddog skel: AWS ELB dashboard'... created with id: '7rf-b25-jht'
 ```
 
 It will then show up in your listing of dashboards:
 
 ```bash
-(monitoring-project) $ ddog dash list-live
+(.ve) $ ddog dash list-live
          ID                AUTHOR    CREATED   MODIFIED  TITLE
 rmz-br5-j7h       martin.matusiak    18 days    44 mins  libddog QA: exercise metrics queries
 km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise widgets
@@ -136,7 +136,7 @@ km5-y3y-4vq       martin.matusiak    1 hours    44 mins  libddog QA: exercise wi
 The next time you publish the draft it will update the draft dashboard that's already there:
 
 ```bash
-(monitoring-project) $ ddog dash publish-draft -t '*skel*'
+(.ve) $ ddog dash publish-draft -t '*skel*'
 Updating dashboard with id: '7rf-b25-jht' entitled: '[draft] libddog skel: AWS ELB dashboard'... done
 ```
 
@@ -148,14 +148,14 @@ Updating dashboard with id: '7rf-b25-jht' entitled: '[draft] libddog skel: AWS E
 Once you are ready to publish your definition as a production dashboard you will use `ddog dash publish-live`. If the dashboard does not exist yet it will be created:
 
 ```bash
-(monitoring-project) $ ddog dash publish-live -t '*skel*'
+(.ve) $ ddog dash publish-live -t '*skel*'
 Creating dashboard entitled: 'libddog skel: AWS ELB dashboard'... created with id: 'm74-ng8-93x'
 ```
 
 It will then show up in your listing of dashboards:
 
 ```bash
-(monitoring-project) $ ddog dash list-live
+(.ve) $ ddog dash list-live
          ID                AUTHOR    CREATED   MODIFIED  TITLE
 rmz-br5-j7h       martin.matusiak    18 days    57 mins  libddog QA: exercise metrics queries
 km5-y3y-4vq       martin.matusiak    1 hours    57 mins  libddog QA: exercise widgets
@@ -168,7 +168,7 @@ Notice that the draft dashboard is still there too.
 Next time you publish the production dashboard again it already exists, so it will be updated. But as a precaution a snapshot is taken first:
 
 ```bash
-(monitoring-project) $ ddog dash publish-live -t '*skel*'
+(.ve) $ ddog dash publish-live -t '*skel*'
 Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:36:52Z.json
 Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashboard'... done
 ```
@@ -183,7 +183,7 @@ Updating dashboard with id: 'm74-ng8-93x' entitled: 'libddog skel: AWS ELB dashb
 Once a dashboard exists in Datadog you can take a snapshot of it any time with `ddog dash snapshot-live`. This is equivalent to the `Export dashboard JSON` option in the Datadog UI. The snapshot is stored on disk as a JSON document and can be used to manually restore the dashboard in the Datadog UI.
 
 ```bash
-(monitoring-project) $ ddog dash snapshot-live -i m74-ng8-93x
+(.ve) $ ddog dash snapshot-live -i m74-ng8-93x
 Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:42:23Z.json
 ```
 
@@ -193,7 +193,7 @@ Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/us
 You can delete a dashboard with `ddog dash delete-live`. Before deletion a snapshot is taken in case you change your mind and want to restore the dashboard later.
 
 ```bash
-(monitoring-project) $ ddog dash delete-live -i m74-ng8-93x
+(.ve) $ ddog dash delete-live -i m74-ng8-93x
 Creating snapshot of live dashboard with id: 'm74-ng8-93x'... saved to: /home/username/src/monitoring-project/_snapshots/m74-ng8-93x--libddog_skel__AWS_ELB_dashboard--2021-08-31T00:46:47Z.json
 Deleting live dashboard with id: 'm74-ng8-93x'... done
 ```
@@ -213,20 +213,20 @@ The skeleton project represents a minimal example of what you can do with libddo
 There are some helpful scripts in the `ci/` directory to run `black` (code formatter) and `mypy` (static type checker) on your project. To get these working first install the development tools:
 
 ```bash
-(monitoring-project) $ pip install -r dev-requirements.txt 
+(.ve) $ pip install -r dev-requirements.txt 
 ```
 
 libddog uses type annotations and we highly recommend that you take advantage of them to keep your code working correctly by running `mypy`. A clean slate execution will look like this:
 
 ```bash
-(monitoring-project) $ ci/typecheck 
+(.ve) $ ci/typecheck 
 Success: no issues found in 5 source files
 ```
 
 If you pass the wrong type of parameter to a function `mypy` will help you fix it:
 
 ```bash
-(monitoring-project) $ ci/typecheck 
+(.ve) $ ci/typecheck 
 dashboards/aws_ec2.py:31: error: Argument "display_type" to "Request" has incompatible type "LineWidth"; expected "DisplayType"
 Found 1 error in 1 file (checked 5 source files)
 ```
