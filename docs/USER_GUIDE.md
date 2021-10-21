@@ -62,7 +62,7 @@ $ . .ve/bin/activate
 ## Datadog credentials
 
 The `ddog` tool communicates with the Datadog API and this requires valid credentials:
-1) An API key which is specific to your organization. You can create one [on this page](https://app.datadoghq.com/account/settings#api).
+1) An API key which is specific to your organization. You can create one [on this page](https://app.datadoghq.com/organization-settings/api-keys).
 2) An application key which is specific to your user account. You can create one [on this page](https://app.datadoghq.com/access/application-keys).
 
 These two keys need to be set in your environment:
