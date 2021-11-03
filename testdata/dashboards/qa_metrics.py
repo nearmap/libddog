@@ -275,6 +275,7 @@ def get_formulas_group() -> Widget:
     cases = [
         (
             "All arithmetic operators",
+            "all_arith",
             (
                 ((abs(cpu) * Int(2)) - reqs)
                 + (Float(3.14) * log2(cpu) / timeshift(reqs, -3600))
@@ -282,14 +283,17 @@ def get_formulas_group() -> Widget:
         ),
         (
             "Comma as binary operator",
+            "comma",
             Comma(cpu, reqs),
         ),
         (
             "Nested function application",
+            "nested_func",
             log2(abs(cpu)),
         ),
         (
             "Function applied to formula",
+            "func_over_formula",
             log2(abs(cpu) / log10(reqs)),
         ),
     ]
@@ -297,12 +301,12 @@ def get_formulas_group() -> Widget:
     widgets = []
     x, y = 0, 0
 
-    for title, formula in cases:
+    for title, alias, formula in cases:
         widget = Timeseries(
             title=title,
             requests=[
                 Request(
-                    formulas=[Formula(formula=formula)],
+                    formulas=[Formula(formula=formula, alias=alias)],
                     queries=[query_cpu, query_reqs],
                 ),
             ],
