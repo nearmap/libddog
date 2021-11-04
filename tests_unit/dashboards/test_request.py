@@ -147,13 +147,12 @@ def test_request__non_distinct_query_names() -> None:
     )
 
 
-
 def test_request__title_attribute_does_not_populate_formula_alias() -> None:
     query_cpu = Query("aws.ec2.cpuutilization", name="cpu").agg("avg")
     cpu = query_cpu.identifier()
 
     request = Request(
-        title='this title should be unused',
+        title="this title should be unused",
         queries=[query_cpu],
     )
 
@@ -170,5 +169,9 @@ def test_request__title_attribute_does_not_populate_formula_alias() -> None:
                 "query": "avg:aws.ec2.cpuutilization{*}",
             }
         ],
-        "style": {"line_type": "solid", "line_width": "normal", "palette": "dog_classic"},
+        "style": {
+            "line_type": "solid",
+            "line_width": "normal",
+            "palette": "dog_classic",
+        },
     }
