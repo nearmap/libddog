@@ -1,8 +1,13 @@
 # Changelog
 
-## 0.0.9 (next)
+## 0.1.0
 
-...
+- Deprecated the `title` parameter to `Request` as a way to set a label for a
+  query. From now on the `title` parameter can still be set, but is a noop. It
+  will eventually be removed. Passing `title` also raises a `DeprecationWarning`
+  which is printed to stderr. Issue #50.
+- Added a cookbook with an entry that explains how to set the label for a query
+  using a `Formula`.
 
 ## 0.0.8
 
