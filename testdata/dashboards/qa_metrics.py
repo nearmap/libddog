@@ -238,11 +238,13 @@ def get_queries_group() -> Widget:
     widgets = []
 
     for title, query in QUERY_CASES:
+        varname = query.identifier()
         widget = Timeseries(
             title=title,
             requests=[
                 Request(
                     queries=[query],
+                    formulas=[Formula(formula=varname, alias=title)],
                 ),
             ],
             position=Position(x=x, y=y),
