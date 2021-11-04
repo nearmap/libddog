@@ -40,7 +40,7 @@ This gives you the widget you want, with all the parameters supported by the Dat
 
 ![ELB request count](docs/assets/elb-reqs-graph.png)
 
-Learn more in the **[User guide](docs/USER_GUIDE.md)**. There is also a **[Cookbook](COOKBOOK.md)**.
+Learn more in the **[User guide](docs/USER_GUIDE.md)**. There is also a **[Cookbook](docs/COOKBOOK.md)**.
 
 
 
