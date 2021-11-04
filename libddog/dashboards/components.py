@@ -293,7 +293,7 @@ class Request(Renderable):
         formulas = self.formulas
         if not formulas:
             for query in self.queries:
-                formula = Formula(formula=query.identifier(), alias=self.title)
+                formula = Formula(formula=query.identifier())
                 formulas.append(formula)
 
         formula_dicts = [form.as_dict() for form in formulas]
