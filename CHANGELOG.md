@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (next)
+
+- ...
+
 ## 0.1.0
 
 - Deprecated the `title` parameter to `Request` as a way to set a label for a
