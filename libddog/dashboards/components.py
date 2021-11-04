@@ -251,8 +251,8 @@ class Request(Renderable):
         if title is not None:
             warnings.warn(
                 "`title` parameter is deprecated and will be removed in the future. "
-                "See https://github.com/nearmap/libddog/issues/50 for "
-                "how to set a label for each query.",
+                "See https://github.com/nearmap/libddog/blob/master/docs/COOKBOOK.md "
+                "for how to set a label for each query.",
                 DeprecationWarning,
                 stacklevel=2,
             )
