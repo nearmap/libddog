@@ -145,3 +145,30 @@ def test_request__non_distinct_query_names() -> None:
     assert ctx.value.args[0] == (
         "not all query names in request are distinct: 'p95', 'p95'"
     )
+
+
+
+def test_request__title_attribute_does_not_populate_formula_alias() -> None:
+    query_cpu = Query("aws.ec2.cpuutilization", name="cpu").agg("avg")
+    cpu = query_cpu.identifier()
+
+    request = Request(
+        title='this title should be unused',
+        queries=[query_cpu],
+    )
+
+    assert request.as_dict() == {
+        "conditional_formats": [],
+        "display_type": "line",
+        "formulas": [{"formula": "cpu"}],
+        "on_right_yaxis": False,
+        "queries": [
+            {
+                "aggregator": "avg",
+                "data_source": "metrics",
+                "name": "cpu",
+                "query": "avg:aws.ec2.cpuutilization{*}",
+            }
+        ],
+        "style": {"line_type": "solid", "line_width": "normal", "palette": "dog_classic"},
+    }
