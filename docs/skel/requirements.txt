@@ -1,1 +1,5 @@
+## libddog uses semantic versioning. You can consider locking libddog to 
+## anything preceding the next significant version bump, eg:
+# libddog<0.1.0
+
 libddog

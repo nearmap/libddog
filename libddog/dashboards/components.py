@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.bases import Renderable
@@ -247,6 +248,15 @@ class Request(Renderable):
         style: Optional[Style] = None,
         on_right_yaxis: bool = False,
     ) -> None:
+        if title is not None:
+            warnings.warn(
+                "`title` parameter is deprecated and will be removed in the future. "
+                "See https://github.com/nearmap/libddog/blob/master/docs/COOKBOOK.md "
+                "for how to set a label for each query.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         self.title = title
         self.queries = queries
         self.formulas = formulas or []
@@ -283,7 +293,7 @@ class Request(Renderable):
         formulas = self.formulas
         if not formulas:
             for query in self.queries:
-                formula = Formula(formula=query.identifier(), alias=self.title)
+                formula = Formula(formula=query.identifier())
                 formulas.append(formula)
 
         formula_dicts = [form.as_dict() for form in formulas]

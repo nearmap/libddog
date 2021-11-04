@@ -9,6 +9,7 @@ PATCHES: List[PatchInstruction] = [
     assign('.["created_at"]', "created-at"),
     assign('.["id"]', "id"),
     assign('.["modified_at"]', "modified-at"),
+    assign('.["restricted_roles"]', []),
     assign('.["url"]', "url"),
     # group id -or- widget id outside group
     assign('.["widgets"][]["id"]', "id"),

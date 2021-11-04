@@ -8,6 +8,8 @@ except ImportError:
     sys.path.append(".")
 
 # isort: split
+import warnings
+
 import click
 
 import libddog
@@ -182,4 +184,7 @@ dash.add_command(snapshot_live)
 attach_help_option(cli)
 
 if __name__ == "__main__":
+    # make sure deprecation warnings are displayed
+    warnings.filterwarnings("default", category=DeprecationWarning)
+
     cli()
