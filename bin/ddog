@@ -8,8 +8,9 @@ except ImportError:
     sys.path.append(".")
 
 # isort: split
-import click
 import warnings
+
+import click
 
 import libddog
 from libddog.command_line.dashboards import ConsoleWriter, DashboardManagerCli
