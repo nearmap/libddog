@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.bases import Renderable
@@ -247,6 +248,15 @@ class Request(Renderable):
         style: Optional[Style] = None,
         on_right_yaxis: bool = False,
     ) -> None:
+        if title is not None:
+            warnings.warn(
+                "`title` parameter is deprecated and will be removed in the future. "
+                "See https://github.com/nearmap/libddog/issues/50 for "
+                "how to set a label for each query.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         self.title = title
         self.queries = queries
         self.formulas = formulas or []

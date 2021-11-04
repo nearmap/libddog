@@ -9,6 +9,7 @@ except ImportError:
 
 # isort: split
 import click
+import warnings
 
 import libddog
 from libddog.command_line.dashboards import ConsoleWriter, DashboardManagerCli
@@ -182,4 +183,7 @@ dash.add_command(snapshot_live)
 attach_help_option(cli)
 
 if __name__ == "__main__":
+    # make sure deprecation warnings are displayed
+    warnings.filterwarnings("default", category=DeprecationWarning)
+
     cli()
