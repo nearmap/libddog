@@ -14,7 +14,7 @@ If we deem that breaking changes are necessary **this must be reflected in the v
 
 ## Semantic versioning
 
-libddog is still a young project and this is the reflected in the current version being in the `0.0.x` series. At some point we will bump to `1.0.0` to reflect that it has become quite a mature project.
+libddog is still a young project and this is reflected in the current version being in the `0.0.x` series. At some point we will bump to `1.0.0` to reflect that it has become quite a mature project.
 
 When making changes to the public API this must be reflected in the version:
 - A bug fix or a small incremental feature (like a new kwarg added to an existing method) warrants a patch version bump: ```1.2.3 -> 1.2.4```.
@@ -94,7 +94,7 @@ QA steps to run to make sure `master` is in a releasable state:
 
 1. Make sure the API is in a consistent state (there are no half implemented features).
 2. Make sure that all CI jobs are green.
-3. Run the integration tests.
+3. Run the integration tests and visually inspect the dashboards.
 
 Create a commit for the release:
 
