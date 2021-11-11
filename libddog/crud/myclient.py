@@ -26,7 +26,7 @@ class MyDatadogClient:
         self.api_key: Optional[str] = None
         self.app_key: Optional[str] = None
 
-        self.baseurl = "https://api.datadoghq.com/api/v1"
+        self.baseurl = "https://api.atadoghq.com/api/v1"
 
         self.session = requests.Session()
 
@@ -89,14 +89,24 @@ class MyDatadogClient:
         expected_code: int,
         exc_cls: Type[AbstractCrudError],
     ) -> Optional[JsonDict]:
+        response: Optional[requests.Response] = None
+        payload: Optional[JsonDict] = None
+        errors: List[str] = []
+
         prepared_request = request.prepare()
-        response = self.session.send(prepared_request)
 
-        payload = self.try_parse_json_payload(response)
-        errors = self.try_parse_payload_errors(payload) or []
+        try:
+            response = self.session.send(prepared_request)
+        except requests.exceptions.RequestException as exc:
+            errors.append(str(exc))
 
-        if response.status_code != expected_code or errors:
-            raise exc_cls(errors=errors, http_status_code=response.status_code)
+        if response is not None:
+            payload = self.try_parse_json_payload(response)
+            errors = self.try_parse_payload_errors(payload) or []
+
+        if response is None or response.status_code != expected_code or errors:
+            status_code = response.status_code if response is not None else None
+            raise exc_cls(errors=errors, http_status_code=status_code)
 
         return payload
 
