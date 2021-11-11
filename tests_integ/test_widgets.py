@@ -48,3 +48,18 @@ def test_put_and_get_widgets() -> None:
     actual = mgr.manager.get_dashboard(id=dash_id)
 
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
+
+
+def test_dashboard_lifecycle() -> None:
+    mgr = QADashboardManager()
+    dashboard = mgr.load_definition_by_title("libddog QA: exercise dashboard lifecycle")
+
+    payload = mgr.manager.find_first_dashboard_with_title(dashboard.title)
+    if payload:
+        dash_id = payload["id"]
+        mgr.manager.delete_dashboard(id=dash_id)
+
+    dash_id = mgr.manager.create_dashboard(dashboard)
+    mgr.manager.get_dashboard(id=dash_id)
+    mgr.manager.update_dashboard(dashboard, id=dash_id)
+    mgr.manager.delete_dashboard(id=dash_id)
