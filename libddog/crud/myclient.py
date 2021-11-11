@@ -28,6 +28,8 @@ class MyDatadogClient:
 
         self.baseurl = "https://api.datadoghq.com/api/v1"
 
+        self.session = requests.Session()
+
     def load_credentials_from_environment(self) -> None:
         var_api_key = self.env_varname_api_key
         var_app_key = self.env_varname_app_key
@@ -80,13 +82,16 @@ class MyDatadogClient:
 
         return []
 
-    def parse_response(
+    def make_request(
         self,
         *,
-        response: requests.Response,
+        request: requests.Request,
         expected_code: int,
         exc_cls: Type[AbstractCrudError],
     ) -> Optional[JsonDict]:
+        prepared_request = request.prepare()
+        response = self.session.send(prepared_request)
+
         payload = self.try_parse_json_payload(response)
         errors = self.try_parse_payload_errors(payload) or []
 
@@ -99,12 +104,14 @@ class MyDatadogClient:
         client_kwargs = dashboard.as_dict()
         client_kwargs.pop("id", None)  # we cannot pass an id when creating
 
-        headers = self.prepare_headers()
         url = self.build_dashboard_url()
+        headers = self.prepare_headers()
+        request = requests.Request(
+            method="POST", url=url, headers=headers, json=client_kwargs
+        )
 
-        response = requests.post(url, headers=headers, json=client_kwargs)
-        payload = self.parse_response(
-            response=response, expected_code=200, exc_cls=DashboardCreateFailed
+        payload = self.make_request(
+            request=request, expected_code=200, exc_cls=DashboardCreateFailed
         )
 
         assert isinstance(payload, dict)  # help mypy
@@ -114,33 +121,33 @@ class MyDatadogClient:
         return id
 
     def delete_dashboard(self, *, id: str) -> None:
-        headers = self.prepare_headers()
         url = self.build_dashboard_url(id=id)
+        headers = self.prepare_headers()
+        request = requests.Request(method="DELETE", url=url, headers=headers)
 
-        response = requests.delete(url, headers=headers)
-        self.parse_response(
-            response=response, expected_code=200, exc_cls=DashboardDeleteFailed
+        self.make_request(
+            request=request, expected_code=200, exc_cls=DashboardDeleteFailed
         )
 
     def get_dashboard(self, *, id: str) -> JsonDict:
-        headers = self.prepare_headers()
         url = self.build_dashboard_url(id=id)
+        headers = self.prepare_headers()
+        request = requests.Request(method="GET", url=url, headers=headers)
 
-        response = requests.get(url, headers=headers)
-        payload = self.parse_response(
-            response=response, expected_code=200, exc_cls=DashboardGetFailed
+        payload = self.make_request(
+            request=request, expected_code=200, exc_cls=DashboardGetFailed
         )
 
         assert isinstance(payload, dict)  # help mypy
         return payload
 
     def list_dashboards(self) -> List[JsonDict]:
-        headers = self.prepare_headers()
         url = self.build_dashboard_url()
+        headers = self.prepare_headers()
+        request = requests.Request(method="GET", url=url, headers=headers)
 
-        response = requests.get(url, headers=headers)
-        payload = self.parse_response(
-            response=response, expected_code=200, exc_cls=DashboardListFailed
+        payload = self.make_request(
+            request=request, expected_code=200, exc_cls=DashboardListFailed
         )
 
         assert isinstance(payload, dict)  # help mypy
@@ -160,10 +167,12 @@ class MyDatadogClient:
         client_kwargs = dashboard.as_dict()
         client_kwargs.pop("id", None)  # we pass it separately
 
-        headers = self.prepare_headers()
         url = self.build_dashboard_url(id=id)
+        headers = self.prepare_headers()
+        request = requests.Request(
+            method="PUT", url=url, headers=headers, json=client_kwargs
+        )
 
-        response = requests.put(url, headers=headers, json=client_kwargs)
-        self.parse_response(
-            response=response, expected_code=200, exc_cls=DashboardUpdateFailed
+        self.make_request(
+            request=request, expected_code=200, exc_cls=DashboardUpdateFailed
         )
