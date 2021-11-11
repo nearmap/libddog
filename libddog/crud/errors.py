@@ -23,7 +23,10 @@ class AbstractCrudError(Exception):
         self.http_status_code = http_status_code
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(http_status_code={self.http_status_code!r}, errors={self.errors!r})"
+        return (
+            f"{self.__class__.__name__}("
+            f"http_status_code={self.http_status_code!r}, errors={self.errors!r})"
+        )
 
     def __str__(self) -> str:
         return self.__repr__()
