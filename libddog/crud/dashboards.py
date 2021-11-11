@@ -14,6 +14,7 @@ from libddog.crud.errors import (
     DashboardDefinitionsImportError,
     DashboardDefinitionsLoadError,
 )
+from libddog.crud.myclient import MyDatadogClient
 from libddog.dashboards.dashboards import Dashboard
 from libddog.tools.git import GitHelper
 from libddog.tools.text import sanitize_title_for_filename
@@ -37,12 +38,12 @@ class DashboardManager:
         self.snapshots_path: Path = Path(self.proj_path) / Path(self._snapshot_dirname)
         self.git = GitHelper()
 
-        self._client: Optional[DatadogClient] = None  # lazy attribute
+        self._client: Optional[MyDatadogClient] = None  # lazy attribute
 
     @property
-    def client(self) -> DatadogClient:
+    def client(self) -> MyDatadogClient:
         if self._client is None:
-            self._client = DatadogClient()
+            self._client = MyDatadogClient()
             self._client.load_credentials_from_environment()
 
         return self._client
