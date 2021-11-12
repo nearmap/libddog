@@ -134,21 +134,21 @@ class DashboardManagerCli:
             id = dct["id"]
             desc = dct.get("description") or ""
             user_handle = dct["author_handle"]
-            user_symbol = 'c'
+            user_symbol = "c"
             tool_ver = "-"
             title = dct["title"]
 
             # try to detect modifying user email in the description
             match = self.manager._rx_desc_user.search(desc)
             if match:
-                user_email = match.group('user')
-                if '@' in user_email:
+                user_email = match.group("user")
+                if "@" in user_email:
                     user_handle = user_email
-                    user_symbol = 'm'
+                    user_symbol = "m"
 
             # user@company.com -> user
             user_handle = user_handle.split("@")[0]
-            user_handle = f'{user_handle} [{user_symbol}]'
+            user_handle = f"{user_handle} [{user_symbol}]"
 
             # detect our own fingerprint in the description
             match = self.manager._rx_desc_version.search(desc)
@@ -159,7 +159,7 @@ class DashboardManagerCli:
                 tool_ver = version
             # there is no version but we know it's libddog at least
             if match is None and self.manager._libddog_proj_name in desc:
-                tool_ver = '?'
+                tool_ver = "?"
 
             cols = (
                 id,
