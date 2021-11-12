@@ -2,9 +2,20 @@
 
 ## 0.1.3 (next)
 
-- Added a `MAINTAINED` column to `ddog dash list-live` which shows whether the
-  dashboard is manintained manually or via `libddog`. This is purely based on
-  the description field of the dashboard. Issue #52.
+- Made a small redesign of `ddog dash list-live`. Issue #52.
+  - The `AUTHOR` column has been renamed to `USER` and now shows either the user
+    who created the dashboard marked with `[c]`, or the user who last modified
+    the dashboard marked with `[m]`. The modifying user is preferred and is
+    detected using the dashboard description. Failing that, the creating user is
+    shown.
+  - The `CREATED` column showing the creation timestamp has been removed since
+    the age of the dashboard is not really that relevant and does not tell us
+    whether it's still used or not.
+  - The `MODIFIED` column has been renamed to `TIME` and has been abbreviated to
+    use less horizontal space.
+  - A `LIBDDOG` column has been added, showing the version of libddog that was
+    used in the last modification of the dashboard. This is detected using the
+    dashboard description.
 
 ## 0.1.2 (next)
 
