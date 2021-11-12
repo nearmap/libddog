@@ -49,6 +49,14 @@ class AbstractCrudError(Exception):
         return f"{prefix}:\n{block}\n"
 
 
+class AppKeyGetFailed(AbstractCrudError):
+    pass
+
+
+class AppKeyListFailed(AbstractCrudError):
+    pass
+
+
 class DashboardCreateFailed(AbstractCrudError):
     pass
 

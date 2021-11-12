@@ -9,6 +9,8 @@ import requests
 from libddog.common.types import JsonDict
 from libddog.crud.errors import (
     AbstractCrudError,
+    AppKeyGetFailed,
+    AppKeyListFailed,
     DashboardCreateFailed,
     DashboardDeleteFailed,
     DashboardGetFailed,
@@ -29,7 +31,7 @@ class DatadogClient:
         self.api_key: Optional[str] = None
         self.app_key: Optional[str] = None
 
-        self.baseurl = "https://api.datadoghq.com/api/v1"
+        self.baseurl = "https://api.datadoghq.com/api"
 
         self.session = requests.Session()
 
@@ -76,8 +78,16 @@ class DatadogClient:
         }
         return headers
 
+    def build_currentuser_appkey_url(self, id: Optional[str] = None) -> str:
+        url = f"{self.baseurl}/v2/current_user/application_keys"
+
+        if id is not None:
+            url = f"{url}/{id}"
+
+        return url
+
     def build_dashboard_url(self, id: Optional[str] = None) -> str:
-        url = f"{self.baseurl}/dashboard"
+        url = f"{self.baseurl}/v1/dashboard"
 
         if id is not None:
             url = f"{url}/{id}"
@@ -159,6 +169,8 @@ class DatadogClient:
 
         return payload
 
+    # Dashboard API
+
     def create_dashboard(self, dashboard: Dashboard) -> str:
         client_kwargs = dashboard.as_dict()
         client_kwargs.pop("id", None)  # we cannot pass an id when creating
@@ -235,3 +247,74 @@ class DatadogClient:
         self.make_request(
             request=request, expected_code=200, exc_cls=DashboardUpdateFailed
         )
+
+    # Key Management API
+
+    def detect_current_user_id(self) -> Optional[str]:
+        """
+        Detects the user id (email address) of the user whose credentials we
+        are using by calling the 'reflection API' current_user in
+        Datadog.
+
+        Algorithm:
+        1. List all the application keys for the current user. This returns a
+           list of objects ordered by most recently created (which is most
+           likely to be the app key we are using). However, these objects are
+           metadata and don't contain any useful information other than the
+           unique identifier of the app key.
+        2. For each of the metadata objects, fetch the actual app key object.
+           This contains both the actual app key (credential we are using to
+           authenticate) and information about the user account (including the
+           email address and full name). If the app key in this object matches
+           the app key we are using for auth then we've found the right key and
+           the right user. If not, try fetching the next one.
+        """
+
+        app_key_in_use: Optional[JsonDict] = None
+
+        app_key_meta_dicts = self.list_current_user_app_keys()
+        for app_key_meta_dct in app_key_meta_dicts:
+            app_key_id = app_key_meta_dct["id"]
+            app_key_dct = self.get_current_user_app_key(id=app_key_id)
+
+            app_key = app_key_dct["data"]["attributes"]["key"]
+            if app_key == self.app_key:
+                app_key_in_use = app_key_dct
+                break
+
+        if app_key_in_use is not None:
+            for included_dct in app_key_in_use["included"]:
+                userid = included_dct["attributes"].get("email")
+                if userid:
+                    assert isinstance(userid, str)  # help mypy
+                    return userid
+
+        return None
+
+    def get_current_user_app_key(self, *, id: str) -> JsonDict:
+        url = self.build_currentuser_appkey_url(id=id)
+        headers = self.prepare_headers()
+        request = requests.Request(method="GET", url=url, headers=headers)
+
+        payload = self.make_request(
+            request=request, expected_code=200, exc_cls=AppKeyGetFailed
+        )
+
+        assert isinstance(payload, dict)  # help mypy
+
+        return payload
+
+    def list_current_user_app_keys(self) -> List[JsonDict]:
+        url = self.build_currentuser_appkey_url()
+        headers = self.prepare_headers()
+        request = requests.Request(method="GET", url=url, headers=headers)
+
+        payload = self.make_request(
+            request=request, expected_code=200, exc_cls=AppKeyListFailed
+        )
+
+        assert isinstance(payload, dict)  # help mypy
+        app_keys = payload["data"]
+        assert isinstance(app_keys, list)  # help mypy
+
+        return app_keys
