@@ -23,30 +23,30 @@ def time_since(delta: timedelta) -> str:
 
     if delta.total_seconds() < 1:
         ms = int(delta.total_seconds() * 1000)
-        fmt = f"{ms} ms"
+        fmt = f"{ms}ms"
 
     elif delta.total_seconds() < 60:
         secs = int(delta.total_seconds())
-        fmt = f"{secs} secs"
+        fmt = f"{secs}s"
 
     elif delta.total_seconds() < 3600:
         mins = int(delta.total_seconds() / 60)
-        fmt = f"{mins} mins"
+        fmt = f"{mins}m"
 
     elif delta.total_seconds() < 86400:
         hours = int(delta.total_seconds() / 3600)
-        fmt = f"{hours} hours"
+        fmt = f"{hours}h"
 
     elif delta.days < 30:
         days = delta.days
-        fmt = f"{days} days"
+        fmt = f"{days}d"
 
     elif delta.days < 365:
         months = int(delta.days / 30)
-        fmt = f"{months} months"
+        fmt = f"{months}mo"
 
     else:
         years = int(delta.days / 365)
-        fmt = f"{years} years"
+        fmt = f"{years}y"
 
     return fmt
