@@ -146,9 +146,9 @@ class DashboardManagerCli:
             # detect our own fingerprint in the description
             match = self.manager._rx_desc_version.search(desc)
             if match:
-                tool = match.group('tool')
-                version = match.group('version')
-                if version.endswith('.'):
+                tool = match.group("tool")
+                version = match.group("version")
+                if version.endswith("."):
                     version = version[:-1]
                 maint = f"{tool}-{version}"
             if match is None and self.manager._libddog_proj_name in desc:
