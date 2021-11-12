@@ -1,4 +1,5 @@
 import importlib
+import re
 import json
 import os
 import sys
@@ -32,6 +33,8 @@ class DashboardManager:
     _libddog_proj_name = "libddog"
     _libddog_proj_version = libddog.__version__
     _libddog_proj_url = "https://github.com/nearmap/libddog"
+
+    _rx_desc_version = re.compile(f'(?P<tool>{_libddog_proj_name}) v(?P<version>[^ ]+)')
 
     def __init__(self, proj_path: str) -> None:
         self.proj_path = proj_path

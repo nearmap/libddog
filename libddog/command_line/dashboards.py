@@ -111,11 +111,11 @@ class DashboardManagerCli:
             self.writer.report_failed(exc)
             return os.EX_UNAVAILABLE
 
-        fmt = "%11s  %20s  %7s  %9s  %9s  %s"
+        fmt = "%11s  %20s  %15s  %9s  %9s  %s"
         header_cols = (
             "ID",
             "AUTHOR",
-            "MAINT",
+            "MAINTAINED",
             "CREATED",
             "MODIFIED",
             "TITLE",
@@ -135,7 +135,7 @@ class DashboardManagerCli:
             id = dct["id"]
             desc = dct.get("description") or ""
             author_handle = dct["author_handle"]
-            maint = "manual"
+            maint = "manually"
             title = dct["title"]
             created_at = parse_date(dct["created_at"])
             created_ago = utcnow() - created_at
@@ -144,8 +144,15 @@ class DashboardManagerCli:
             author_handle = author_handle.split("@")[0]
 
             # detect our own fingerprint in the description
-            if self.manager._libddog_proj_name in desc:
-                maint = "libddog"
+            match = self.manager._rx_desc_version.search(desc)
+            if match:
+                tool = match.group('tool')
+                version = match.group('version')
+                if version.endswith('.'):
+                    version = version[:-1]
+                maint = f"{tool}-{version}"
+            if match is None and self.manager._libddog_proj_name in desc:
+                maint = self.manager._libddog_proj_name
 
             cols = (
                 id,
