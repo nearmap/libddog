@@ -2,7 +2,7 @@
 
 ## 0.1.3 (next)
 
-- Added a `MAINT` column to `ddog dash list-live` which shows whether the
+- Added a `MAINTAINED` column to `ddog dash list-live` which shows whether the
   dashboard is manintained manually or via `libddog`. This is purely based on
   the description field of the dashboard. Issue #52.
 
