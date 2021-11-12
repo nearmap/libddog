@@ -25,7 +25,6 @@ setup(
     # NOTE: also cross check with requirements.txt
     install_requires=[
         "click>=8.0.0",
-        "datadog>=0.41.0",
         "packaging>=21.0",
         "parsimonious>=0.8.0",
         "python-dateutil>=2.0.0",
