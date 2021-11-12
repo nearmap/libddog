@@ -2,7 +2,9 @@
 
 ## 0.1.1 (next)
 
-- ...
+- Swap out datadog client library. This removes the dependency on the `datadog`
+  package, which is now considered legacy by Datadog. The new client is a thin
+  http client using `requests` directly. Issue #40.
 
 ## 0.1.0
 
