@@ -14,6 +14,7 @@ from libddog.crud.errors import (
     DashboardDefinitionsImportError,
     DashboardDefinitionsLoadError,
 )
+from libddog.crud.users import UserIdentity
 from libddog.dashboards.dashboards import Dashboard
 from libddog.tools.git import GitHelper
 from libddog.tools.text import sanitize_title_for_filename
@@ -39,8 +40,8 @@ class DashboardManager:
 
         self._client: Optional[DatadogClient] = None  # lazy attribute
 
-        self._current_user_email: Optional[str] = None
-        self._current_user_email_detect_failed: bool = False
+        self._current_user_identity: Optional[UserIdentity] = None
+        self._current_user_identity_detect_failed: bool = False
 
     @property
     def client(self) -> DatadogClient:
@@ -51,22 +52,23 @@ class DashboardManager:
         return self._client
 
     @property
-    def current_user_email(self) -> Optional[str]:
+    def current_user_identity(self) -> Optional[UserIdentity]:
         if (
-            self._current_user_email is None
-            and not self._current_user_email_detect_failed
+            self._current_user_identity is None
+            and not self._current_user_identity_detect_failed
         ):
-            # Be defensive here with a try/except. Detecting the user id is a
-            # nicety and should not cause an uncaught exception if it fails.
+            # Be defensive here with a try/except. Detecting the user identity
+            # is a nicety and should not cause an uncaught exception if it
+            # fails.
             try:
-                self._current_user_email = self.client.detect_current_user_id()
-                if self._current_user_email is None:
-                    self._current_user_email_detect_failed = True
+                self._current_user_identity = self.client.detect_current_user_identity()
+                if self._current_user_identity is None:
+                    self._current_user_identity_detect_failed = True
 
             except Exception:
-                self._current_user_email_detect_failed = True
+                self._current_user_identity_detect_failed = True
 
-        return self._current_user_email
+        return self._current_user_identity
 
     def load_definitions_module(self) -> ModuleType:
         # add proj_path to sys.path to make 'config' importable
@@ -123,7 +125,7 @@ class DashboardManager:
         return f"[draft] {dashboard.title}"
 
     def insert_libddog_metadata_footer(self, dashboard: Dashboard) -> None:
-        user_email = self.current_user_email
+        user_identity = self.current_user_identity
         opt_project_phrase = ""
         opt_branch_phrase = ""
         opt_by_user = ""
@@ -151,8 +153,10 @@ class DashboardManager:
         if branch:
             opt_branch_phrase = f"from branch **{branch}** "
 
-        if user_email:
-            opt_by_user = f"by {user_email} "
+        if user_identity:
+            opt_by_user = (
+                f"by {user_identity.email} (key **{user_identity.app_key_name}**) "
+            )
 
         content = (
             f"\n\n---\n\n"

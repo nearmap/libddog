@@ -19,6 +19,7 @@ from libddog.crud.errors import (
     MissingDatadogApiKey,
     MissingDatadogAppKey,
 )
+from libddog.crud.users import UserIdentity
 from libddog.dashboards import Dashboard
 from libddog.tools.logs import enable_logging
 
@@ -250,10 +251,10 @@ class DatadogClient:
 
     # Key Management API
 
-    def detect_current_user_id(self) -> Optional[str]:
+    def detect_current_user_identity(self) -> Optional[UserIdentity]:
         """
-        Detects the user id (email address) of the user whose credentials we
-        are using by calling the 'reflection API' current_user in
+        Detects the user identity (handle, email address etc) of the user whose
+        credentials we are using by calling the 'reflection API' current_user in
         Datadog.
 
         Algorithm:
@@ -275,6 +276,7 @@ class DatadogClient:
         app_key_meta_dicts = self.list_current_user_app_keys()
         for app_key_meta_dct in app_key_meta_dicts:
             app_key_id = app_key_meta_dct["id"]
+            app_key_name = app_key_meta_dct["attributes"]["name"]
             app_key_dct = self.get_current_user_app_key(id=app_key_id)
 
             app_key = app_key_dct["data"]["attributes"]["key"]
@@ -284,10 +286,18 @@ class DatadogClient:
 
         if app_key_in_use is not None:
             for included_dct in app_key_in_use["included"]:
-                userid = included_dct["attributes"].get("email")
-                if userid:
-                    assert isinstance(userid, str)  # help mypy
-                    return userid
+                email = included_dct["attributes"].get("email")
+                if email:
+                    handle = included_dct["attributes"].get("handle")
+                    name = included_dct["attributes"].get("name")
+
+                    assert isinstance(email, str)  # help mypy
+                    assert isinstance(handle, str)  # help mypy
+                    assert isinstance(name, str)  # help mypy
+
+                    return UserIdentity(
+                        handle=handle, email=email, name=name, app_key_name=app_key_name
+                    )
 
         return None
 
