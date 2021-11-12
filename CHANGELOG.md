@@ -1,9 +1,15 @@
 # Changelog
 
+## 0.1.3 (next)
+
+- Added a `MAINT` column to `ddog dash list-live` which shows whether the
+  dashboard is manintained manually or via `libddog`. This is purely based on
+  the description field of the dashboard. Issue #52.
+
 ## 0.1.2 (next)
 
 - The dashboard description footer now also includes the userid of the user
-  whose credentials were used in the update.
+  whose credentials were used in the update. Issue #38.
 
 ## 0.1.1 (next)
 
