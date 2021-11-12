@@ -1,5 +1,7 @@
 import json
+import logging
 import os
+import time
 from typing import Dict, List, Optional, Type
 
 import requests
@@ -16,6 +18,7 @@ from libddog.crud.errors import (
     MissingDatadogAppKey,
 )
 from libddog.dashboards import Dashboard
+from libddog.tools.logs import enable_logging
 
 
 class MyDatadogClient:
@@ -26,9 +29,23 @@ class MyDatadogClient:
         self.api_key: Optional[str] = None
         self.app_key: Optional[str] = None
 
-        self.baseurl = "https://api.atadoghq.com/api/v1"
+        self.baseurl = "https://api.datadoghq.com/api/v1"
 
         self.session = requests.Session()
+
+        self.logger = logging.getLogger(__name__)
+
+        # Force enable logging because we want to see our own log messages. This
+        # is not the greatest solution; ideally this should be done at the
+        # entrypoint to the program. But we have different code paths that lead
+        # us here, so doing this purely in bin/ddog would not affect logging in
+        # tests and different tests may wish to consume the client at different
+        # layers. Doing this at the innermost layer where we know logging is
+        # definitely used is the easiest way to avoid missing code paths.
+        # We need to force enable because at this point it's likely that some
+        # other library has init'd logging already with a different set of
+        # parameters.
+        enable_logging(force=True)
 
     def load_credentials_from_environment(self) -> None:
         var_api_key = self.env_varname_api_key
@@ -82,6 +99,17 @@ class MyDatadogClient:
 
         return []
 
+    def try_parse_ratelimit_reset(self, response: requests.Response) -> Optional[float]:
+        value = response.headers.get("X-RateLimit-Reset")
+
+        if value:
+            try:
+                return float(value)
+            except ValueError:
+                pass
+
+        return None
+
     def make_request(
         self,
         *,
@@ -93,12 +121,33 @@ class MyDatadogClient:
         payload: Optional[JsonDict] = None
         errors: List[str] = []
 
+        attempt_no = 1
+        wait_secs_base = 0.5
         prepared_request = request.prepare()
 
-        try:
-            response = self.session.send(prepared_request)
-        except requests.exceptions.RequestException as exc:
-            errors.append(str(exc))
+        while attempt_no < 4:
+            try:
+                response = self.session.send(prepared_request)
+            except requests.exceptions.RequestException as exc:
+                errors.append(str(exc))
+
+            if response is not None and response.status_code == 429:
+                wait_secs = self.try_parse_ratelimit_reset(response)
+                if wait_secs is None:
+                    # there is no jitter here but I don't think it matters
+                    # because this is a fallback code path anyway
+                    wait_secs = wait_secs_base * (2 ** attempt_no)
+
+                # log a warning because we are deliberately pausing execution
+                self.logger.warning(
+                    f"Request was rate limited by the Datadog API, "
+                    f"retrying in {wait_secs} seconds"
+                )
+                time.sleep(wait_secs)
+                attempt_no += 1
+                continue
+
+            break
 
         if response is not None:
             payload = self.try_parse_json_payload(response)
