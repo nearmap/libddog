@@ -14,6 +14,7 @@ from libddog.crud.errors import (
     DashboardDefinitionsImportError,
     DashboardDefinitionsLoadError,
 )
+from libddog.crud.users import UserIdentity
 from libddog.dashboards.dashboards import Dashboard
 from libddog.tools.git import GitHelper
 from libddog.tools.text import sanitize_title_for_filename
@@ -39,6 +40,9 @@ class DashboardManager:
 
         self._client: Optional[DatadogClient] = None  # lazy attribute
 
+        self._current_user_identity: Optional[UserIdentity] = None
+        self._current_user_identity_detect_failed: bool = False
+
     @property
     def client(self) -> DatadogClient:
         if self._client is None:
@@ -46,6 +50,25 @@ class DashboardManager:
             self._client.load_credentials_from_environment()
 
         return self._client
+
+    @property
+    def current_user_identity(self) -> Optional[UserIdentity]:
+        if (
+            self._current_user_identity is None
+            and not self._current_user_identity_detect_failed
+        ):
+            # Be defensive here with a try/except. Detecting the user identity
+            # is a nicety and should not cause an uncaught exception if it
+            # fails.
+            try:
+                self._current_user_identity = self.client.detect_current_user_identity()
+                if self._current_user_identity is None:
+                    self._current_user_identity_detect_failed = True
+
+            except Exception:
+                self._current_user_identity_detect_failed = True
+
+        return self._current_user_identity
 
     def load_definitions_module(self) -> ModuleType:
         # add proj_path to sys.path to make 'config' importable
@@ -102,8 +125,10 @@ class DashboardManager:
         return f"[draft] {dashboard.title}"
 
     def insert_libddog_metadata_footer(self, dashboard: Dashboard) -> None:
+        user_identity = self.current_user_identity
         opt_project_phrase = ""
         opt_branch_phrase = ""
+        opt_by_user = ""
         time_now = datetime.now().ctime()
         libddog_link = f"[{self._libddog_proj_name}]({self._libddog_proj_url})"
 
@@ -128,12 +153,18 @@ class DashboardManager:
         if branch:
             opt_branch_phrase = f"from branch **{branch}** "
 
+        if user_identity:
+            opt_by_user = (
+                f"by {user_identity.email} (key **{user_identity.app_key_name}**) "
+            )
+
         content = (
             f"\n\n---\n\n"
             f"This dashboard {opt_project_phrase}is maintained automatically "
             f"using the {libddog_link} tool. "
             f"If you make manual changes to it your changes may be lost."
-            f"\n\nIt was last updated {opt_branch_phrase}on **{time_now}** "
+            f"\n\nIt was last updated {opt_by_user}{opt_branch_phrase}"
+            f"on **{time_now}** "
             f"using {self._libddog_proj_name} v{self._libddog_proj_version}."
         )
 
@@ -163,6 +194,8 @@ class DashboardManager:
             fl.write("\n")
 
         return fp
+
+    # Dashboard actions
 
     def create_dashboard(self, dashboard: Dashboard) -> str:
         self.insert_libddog_metadata_footer(dashboard)
