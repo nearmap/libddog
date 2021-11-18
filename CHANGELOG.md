@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.3 (next)
+## 0.1.3
 
 - Made a small redesign of `ddog dash list-live`. Issue #52.
   - The `AUTHOR` column has been renamed to `USER` and now shows either the user
@@ -17,12 +17,12 @@
     used in the last modification of the dashboard. This is detected using the
     dashboard description.
 
-## 0.1.2 (next)
+## 0.1.2
 
 - The dashboard description footer now also includes the userid of the user
   whose credentials were used in the update. Issue #38.
 
-## 0.1.1 (next)
+## 0.1.1
 
 - Swap out datadog client library. This removes the dependency on the `datadog`
   package, which is now considered legacy by Datadog. The new client is a thin
