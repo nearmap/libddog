@@ -1,6 +1,7 @@
 import importlib
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -32,6 +33,9 @@ class DashboardManager:
     _libddog_proj_name = "libddog"
     _libddog_proj_version = libddog.__version__
     _libddog_proj_url = "https://github.com/nearmap/libddog"
+
+    _rx_desc_version = re.compile(f"(?P<tool>{_libddog_proj_name}) v(?P<version>[^ ]+)")
+    _rx_desc_user = re.compile(f"last updated by (?P<user>[^ ]+)")
 
     def __init__(self, proj_path: str) -> None:
         self.proj_path = proj_path

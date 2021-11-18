@@ -111,12 +111,12 @@ class DashboardManagerCli:
             self.writer.report_failed(exc)
             return os.EX_UNAVAILABLE
 
-        fmt = "%11s  %20s  %9s  %9s  %s"
+        fmt = "%11s  %24s  %4s  %7s  %s"
         header_cols = (
             "ID",
-            "AUTHOR",
-            "CREATED",
-            "MODIFIED",
+            "USER",
+            "TIME",
+            "LIBDDOG",
             "TITLE",
         )
         self.writer.println(fmt, *header_cols)
@@ -132,19 +132,40 @@ class DashboardManagerCli:
 
         for modified_ago, dct in tuples:
             id = dct["id"]
-            author_handle = dct["author_handle"]
+            desc = dct.get("description") or ""
+            user_handle = dct["author_handle"]
+            user_symbol = "c"
+            tool_ver = "-"
             title = dct["title"]
-            created_at = parse_date(dct["created_at"])
-            created_ago = utcnow() - created_at
+
+            # try to detect modifying user email in the description
+            match = self.manager._rx_desc_user.search(desc)
+            if match:
+                user_email = match.group("user")
+                if "@" in user_email:
+                    user_handle = user_email
+                    user_symbol = "m"
 
             # user@company.com -> user
-            author_handle = author_handle.split("@")[0]
+            user_handle = user_handle.split("@")[0]
+            user_handle = f"{user_handle} [{user_symbol}]"
+
+            # detect our own fingerprint in the description
+            match = self.manager._rx_desc_version.search(desc)
+            if match:
+                version = match.group("version")
+                if version.endswith("."):
+                    version = version[:-1]
+                tool_ver = version
+            # there is no version but we know it's libddog at least
+            if match is None and self.manager._libddog_proj_name in desc:
+                tool_ver = "?"
 
             cols = (
                 id,
-                author_handle,
-                time_since(created_ago),
+                user_handle,
                 time_since(modified_ago),
+                tool_ver,
                 title,
             )
             self.writer.println(fmt, *cols)
