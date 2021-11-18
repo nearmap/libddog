@@ -13,8 +13,23 @@ class AbstractCrudError(Exception):
     explanatory causes.
     """
 
-    def __init__(self, errors: Optional[List[str]] = None) -> None:
+    def __init__(
+        self,
+        *,
+        errors: Optional[List[str]] = None,
+        http_status_code: Optional[int] = None,
+    ) -> None:
         self.errors = errors or []
+        self.http_status_code = http_status_code
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"http_status_code={self.http_status_code!r}, errors={self.errors!r})"
+        )
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def format_expanded(self) -> str:
         prefix = self.__class__.__name__
