@@ -1,11 +1,11 @@
 # Changelog
 
-## 0.1.2 (next)
+## 0.1.2
 
 - The dashboard description footer now also includes the userid of the user
   whose credentials were used in the update.
 
-## 0.1.1 (next)
+## 0.1.1
 
 - Swap out datadog client library. This removes the dependency on the `datadog`
   package, which is now considered legacy by Datadog. The new client is a thin
