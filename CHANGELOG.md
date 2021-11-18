@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4 (next)
+
+- ...
+
 ## 0.1.3
 
 - Made a small redesign of `ddog dash list-live`. Issue #52.
