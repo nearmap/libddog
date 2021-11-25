@@ -19,7 +19,7 @@
 | Timeseries      | :heavy_check_mark: | :100:                  |
 | Query Value     | :heavy_check_mark: | :100:                  |
 | Table           | :x:                |                        |
-| Top List        | :x:                |                        |
+| Top List        | :heavy_check_mark: | :100:                  |
 | SLO Summary     | :x:                |                        |
 | Heat Map        | :x:                |                        |
 | Check Status    | :x:                |                        |
