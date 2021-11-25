@@ -1,6 +1,7 @@
 from libddog.dashboards.components import (
     ConditionalFormat,
     Formula,
+    FormulaLimit,
     LineMarker,
     Marker,
     PopulatedTemplateVariable,
@@ -23,6 +24,7 @@ from libddog.dashboards.enums import (
     LayoutType,
     LegendColumn,
     LegendLayout,
+    LimitOrder,
     LineType,
     LineWidth,
     LiveSpan,
@@ -37,7 +39,14 @@ from libddog.dashboards.enums import (
     VerticalAlign,
 )
 from libddog.dashboards.presets import NotePreset
-from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries, Widget
+from libddog.dashboards.widgets import (
+    Group,
+    Note,
+    QueryValue,
+    Timeseries,
+    Toplist,
+    Widget,
+)
 
 __all__ = (
     "BackgroundColor",
@@ -47,10 +56,12 @@ __all__ = (
     "Dashboard",
     "DisplayType",
     "Formula",
+    "FormulaLimit",
     "Group",
     "LayoutType",
     "LegendColumn",
     "LegendLayout",
+    "LimitOrder",
     "LineMarker",
     "LineType",
     "LineWidth",
@@ -77,6 +88,7 @@ __all__ = (
     "Time",
     "Timeseries",
     "TitleAlign",
+    "Toplist",
     "VerticalAlign",
     "Widget",
     "YAxis",

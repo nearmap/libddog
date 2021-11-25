@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.4 (next)
+## 0.1.4
 
-- ...
+- Added support for Toplist widgets.
 
 ## 0.1.3
 

@@ -10,9 +10,11 @@ from libddog.dashboards import (
     Dashboard,
     DisplayType,
     Formula,
+    FormulaLimit,
     Group,
     LegendColumn,
     LegendLayout,
+    LimitOrder,
     LineMarker,
     LineType,
     LineWidth,
@@ -32,6 +34,7 @@ from libddog.dashboards import (
     TickEdge,
     Time,
     Timeseries,
+    Toplist,
     Widget,
     YAxis,
 )
@@ -147,6 +150,48 @@ def get_query_values() -> List[Widget]:
     return widgets
 
 
+def get_toplist() -> Widget:
+    query_cpu = Query("aws.ec2.cpuutilization").agg("avg").by("availability-zone")
+    cpu = query_cpu.identifier()
+
+    # Exercises most of the properties of a Toplist
+    widget = Toplist(
+        title="EC2: average CPU utilization per az [1 day]",
+        requests=[
+            Request(
+                formulas=[
+                    Formula(
+                        formula=cpu, limit=FormulaLimit(count=10, order=LimitOrder.DESC)
+                    )
+                ],
+                queries=[query_cpu],
+                conditional_formats=[
+                    ConditionalFormat(
+                        comparator=Comparator.LT,
+                        value=3.5,
+                        palette=ConditionalFormatPalette.WHITE_ON_GREEN,
+                    ),
+                    ConditionalFormat(
+                        comparator=Comparator.LT,
+                        value=4,
+                        palette=ConditionalFormatPalette.WHITE_ON_YELLOW,
+                    ),
+                    ConditionalFormat(
+                        comparator=Comparator.LT,
+                        value=7,
+                        palette=ConditionalFormatPalette.WHITE_ON_RED,
+                    ),
+                ],
+            ),
+        ],
+        time=Time(live_span=LiveSpan.LAST_1D),
+        size=Size(height=3, width=6),
+        position=Position(x=0, y=4),
+    )
+
+    return widget
+
+
 def get_notes() -> List[Widget]:
     # Exercises most of the properties of a Note
     note_timeseries = Note(
@@ -177,14 +222,30 @@ def get_notes() -> List[Widget]:
         size=Size(width=3, height=2),
     )
 
-    return [note_timeseries, note_query_value]
+    note_toplist = Note(
+        preset=NotePreset.ANNOTATION,
+        content=(
+            "**Toplist** is a widget often used to show the top N or bottom N "
+            "members in a set, such as tracking disk usage for db servers, or "
+            "showing the most active user accounts."
+        ),
+        font_size=14,
+        background_color=BackgroundColor.ORANGE,
+        text_align=TextAlign.LEFT,
+        tick_edge=TickEdge.LEFT,
+        position=Position(x=6, y=4),
+        size=Size(width=3, height=3),
+    )
+
+    return [note_timeseries, note_query_value, note_toplist]
 
 
 def get_group() -> Widget:
     wid_ec2_cpu = get_timeseries()
     wids_5xx_perc = get_query_values()
     wids_notes = get_notes()
-    widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + wids_notes
+    wid_toplist = get_toplist()
+    widgets: List[Widget] = [wid_ec2_cpu] + wids_5xx_perc + [wid_toplist] + wids_notes
 
     # Exercises most of the properties of a Group
     group = Group(

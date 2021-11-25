@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from libddog.common.types import JsonDict
 from libddog.dashboards.components import (
+    Formula,
     Layout,
     Marker,
     Position,
@@ -325,6 +326,65 @@ class Timeseries(Widget):
                 "title_size": str(self.title_size),
                 "type": "timeseries",
                 "yaxis": self.yaxis.as_dict(),
+            },
+        }
+
+        self.add_layout(dct, size=self.size, position=self.position)
+        return dct
+
+
+class Toplist(Widget):
+    _allowed_atts = {
+        QueryState: [
+            "aggregator",
+            "data_source",
+            "name",
+            "query",
+        ],
+        Formula: [
+            "formula",
+            "limit",
+        ],
+        Request: [
+            "formulas",
+            "conditional_formats",
+            "queries",
+        ],
+    }
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        title_size: int = 16,
+        title_align: TitleAlign = TitleAlign.LEFT,
+        time: Optional[Time] = None,
+        requests: List[Request],
+        size: Optional[Size] = None,
+        position: Optional[Position] = None,
+    ) -> None:
+        self.title = title
+        self.title_size = title_size
+        self.title_align = title_align
+        self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
+        self.requests = requests
+        self.size = Size.backfill(self, size)
+        self.position = position or Position()
+
+    def request_as_dict(self, request: Request) -> JsonDict:
+        dct = super().request_as_dict(request)
+        dct["response_format"] = ResponseFormat.SCALAR.value
+        return dct
+
+    def as_dict(self) -> JsonDict:
+        dct = {
+            "definition": {
+                "requests": [self.request_as_dict(req) for req in self.requests],
+                "time": self.time.as_dict(),
+                "title": self.title,
+                "title_align": self.title_align.value,
+                "title_size": str(self.title_size),
+                "type": "toplist",
             },
         }
 
