@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import sys
+
+try:
+    import libddog
+except ImportError:
+    sys.path.append(".")
+
+# isort: split
+from libddog.command_line.dashboards import DashboardManagerCli
+
+
+def main() -> None:
+    cli = DashboardManagerCli(proj_path=".")
+
+    metas = cli.manager.list_dashboards()
+    for meta in metas:
+        id = meta["id"]
+        cli.snapshot_live(id=id)
+
+
+if __name__ == "__main__":
+    main()

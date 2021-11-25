@@ -58,6 +58,11 @@ class LegendLayout(enum.Enum):
     EXPANDED = "vertical"
 
 
+class LimitOrder(enum.Enum):
+    ASC = "asc"
+    DESC = "desc"
+
+
 class LineType(enum.Enum):
     SOLID = "solid"
     DASHED = "dashed"

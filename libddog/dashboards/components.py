@@ -11,6 +11,7 @@ from libddog.dashboards.enums import (
     Comparator,
     ConditionalFormatPalette,
     DisplayType,
+    LimitOrder,
     LineType,
     LineWidth,
     LiveSpan,
@@ -33,13 +34,20 @@ class Size:
 
     @classmethod
     def get_defaults(cls) -> Dict[Any, Any]:
-        from libddog.dashboards.widgets import Group, Note, QueryValue, Timeseries
+        from libddog.dashboards.widgets import (
+            Group,
+            Note,
+            QueryValue,
+            Timeseries,
+            Toplist,
+        )
 
         return {
             Group: (12, 1),
             Note: (2, 2),
             QueryValue: (2, 2),
             Timeseries: (4, 2),
+            Toplist: (4, 2),
             # add remaining widget types...
         }
 
@@ -192,10 +200,28 @@ class YAxis(Renderable):
         }
 
 
+class FormulaLimit(Renderable):
+    def __init__(self, count: int, order: LimitOrder) -> None:
+        self.count = count
+        self.order = order
+
+    def as_dict(self) -> JsonDict:
+        return {
+            "count": self.count,
+            "order": self.order.value,
+        }
+
+
 class Formula(Renderable):
-    def __init__(self, formula: FormulaNode, alias: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        formula: FormulaNode,
+        alias: Optional[str] = None,
+        limit: Optional[FormulaLimit] = None,
+    ) -> None:
         self.formula = formula
         self.alias = alias
+        self.limit = limit
 
     def validate(self, queries: List[QueryMonad]) -> None:
         identifiers = find_identifiers(self.formula)
@@ -213,9 +239,11 @@ class Formula(Renderable):
             )
 
     def as_dict(self) -> JsonDict:
-        dct = {"formula": self.formula.codegen()}
+        dct: JsonDict = {"formula": self.formula.codegen()}
         if self.alias:
             dct["alias"] = self.alias
+        if self.limit is not None:
+            dct["limit"] = self.limit.as_dict()
 
         return dct
 
