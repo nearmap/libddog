@@ -31,7 +31,10 @@ class HLayout:
         for widget in self.widgets:
             overflow = (cum_width + self.width) - self.page_width
             if overflow > 0:
-                raise HLayoutError("Overflowed page width by %r units" % overflow)
+                raise HLayoutError(
+                    "Overflowed page width (%r) by %r units"
+                    % (self.page_width, overflow)
+                )
 
             widget.size.width = self.width
             widget.size.height = self.height

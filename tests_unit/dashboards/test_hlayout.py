@@ -132,4 +132,4 @@ def test_hlayout__overflows_page_width() -> None:
     with pytest.raises(HLayoutError) as ctx:
         layout.get_widgets()
 
-    assert ctx.value.args[0] == "Overflowed page width by 6 units"
+    assert ctx.value.args[0] == "Overflowed page width (12) by 6 units"
