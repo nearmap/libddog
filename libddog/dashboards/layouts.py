@@ -7,6 +7,16 @@ from libddog.dashboards.widgets import Note, Widget
 
 
 class HLayout:
+    """
+    A horizontal layout of equal sized widgets that always fills the whole row,
+    up to the page width. If the widgets passed in do not fill the row then
+    padding is inserted in the form of a transparent Note which has the
+    appearance of empty space.
+
+    Calling `get_widgets` modifies the `size` and `position` of the widgets
+    contained in the layout before returning them.
+    """
+
     page_width = 12
 
     def __init__(self, width: int, height: int, widgets: List[Widget]) -> None:
@@ -47,6 +57,14 @@ class HLayout:
 
 
 class HLayoutStack:
+    """
+    A vertical layout of `HLayout` rows, which allows stacking `HLayout`s vertically.
+
+    Calling `get_widgets` modifies the `size` and `position` of the widgets
+    contained in the inner `HLayout`s before returning them as one flat list of
+    widgets.
+    """
+
     def __init__(self, layouts: List[HLayout]) -> None:
         self.layouts = layouts
 
