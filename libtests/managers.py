@@ -33,8 +33,7 @@ class QADashboardManager:
                 existing_id = dash["id"]
                 return existing_id
 
-        # TODO: else create a new dash so we can use that id
-        raise NotImplementedError
+        return self.manager.create_dashboard(dashboard=dashboard)
 
     def update_live_dashboard(self, dashboard: Dashboard, id: str) -> None:
         if self.rx_string_template.search(dashboard.desc):
