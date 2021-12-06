@@ -38,6 +38,7 @@ from libddog.dashboards.enums import (
     TitleAlign,
     VerticalAlign,
 )
+from libddog.dashboards.layouts import HLayout, HLayoutStack
 from libddog.dashboards.presets import NotePreset
 from libddog.dashboards.widgets import (
     Group,
@@ -58,6 +59,8 @@ __all__ = (
     "Formula",
     "FormulaLimit",
     "Group",
+    "HLayout",
+    "HLayoutStack",
     "LayoutType",
     "LegendColumn",
     "LegendLayout",
