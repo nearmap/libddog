@@ -50,6 +50,22 @@ def test_put_and_get_widgets() -> None:
     assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
 
 
+def test_put_and_get_layouts() -> None:
+    mgr = QADashboardManager()
+    dashboard = mgr.load_definition_by_title("libddog QA: exercise layouts")
+
+    dash_id = mgr.assign_id_to_dashboard(dashboard)
+
+    # put the dashboard
+    mgr.update_live_dashboard(dashboard, dash_id)
+
+    # now read it back and assert that it matches our model
+    expected = dashboard.as_dict()
+    actual = mgr.manager.get_dashboard(id=dash_id)
+
+    assert obj_matcher(expected, PATCHES) == obj_matcher(actual, PATCHES)
+
+
 def test_dashboard_lifecycle() -> None:
     mgr = QADashboardManager()
     dashboard = mgr.load_definition_by_title("libddog QA: exercise dashboard lifecycle")

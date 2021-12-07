@@ -1,0 +1,2 @@
+class HLayoutError(Exception):
+    pass

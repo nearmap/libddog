@@ -28,11 +28,20 @@ from libddog.metrics.query import QueryState
 
 
 class Widget:
-    _allowed_atts: Dict[Any, Sequence[str]] = {}
-
     """
     A visual component on a dashboard.
     """
+
+    _allowed_atts: Dict[Any, Sequence[str]] = {}
+
+    def __init__(
+        self,
+        *,
+        size: Optional[Size] = None,
+        position: Optional[Position] = None,
+    ) -> None:
+        self.size = Size.backfill(self, size)
+        self.position = position or Position()
 
     def as_dict(self) -> JsonDict:
         raise NotImplementedError
@@ -112,6 +121,8 @@ class Note(Widget):
         size: Optional[Size] = None,
         position: Optional[Position] = None,
     ) -> None:
+        super().__init__(size=size, position=position)
+
         self.preset = preset
         self.content = content
         self.background_color = background_color
@@ -121,8 +132,6 @@ class Note(Widget):
         self.show_tick = show_tick
         self.tick_edge = tick_edge
         self.has_padding = has_padding
-        self.size = Size.backfill(self, size)
-        self.position = position or Position()
 
     def apply_preset(self) -> "Note":
         """
@@ -221,6 +230,8 @@ class QueryValue(Widget):
         size: Optional[Size] = None,
         position: Optional[Position] = None,
     ) -> None:
+        super().__init__(size=size, position=position)
+
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
@@ -229,8 +240,6 @@ class QueryValue(Widget):
         self.custom_unit = custom_unit
         self.precision = precision
         self.requests = requests
-        self.size = Size.backfill(self, size)
-        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> Dict[str, Any]:
         dct = super().request_as_dict(request)
@@ -290,6 +299,8 @@ class Timeseries(Widget):
         size: Optional[Size] = None,
         position: Optional[Position] = None,
     ) -> None:
+        super().__init__(size=size, position=position)
+
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
@@ -305,8 +316,6 @@ class Timeseries(Widget):
         self.requests = requests
         self.yaxis = yaxis or YAxis()
         self.markers = markers or []
-        self.size = Size.backfill(self, size)
-        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
@@ -363,13 +372,13 @@ class Toplist(Widget):
         size: Optional[Size] = None,
         position: Optional[Position] = None,
     ) -> None:
+        super().__init__(size=size, position=position)
+
         self.title = title
         self.title_size = title_size
         self.title_align = title_align
         self.time = time or Time(live_span=LiveSpan.GLOBAL_TIME)
         self.requests = requests
-        self.size = Size.backfill(self, size)
-        self.position = position or Position()
 
     def request_as_dict(self, request: Request) -> JsonDict:
         dct = super().request_as_dict(request)
@@ -405,12 +414,12 @@ class Group(Widget):
         size: Optional[Size] = None,
         position: Optional[Position] = None,
     ) -> None:
+        super().__init__(size=size, position=position)
+
         self.title = title
         self.layout_type = layout_type
         self.background_color = background_color
         self.widgets = widgets or []
-        self.size = Size.backfill(self, size)
-        self.position = position or Position()
 
     def as_dict(self) -> JsonDict:
         dct = {
