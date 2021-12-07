@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.5 (next)
+## 0.1.5
 
 - Added HLayout and HLayoutStack to allow managed laying out of widgets
   horizontally.
