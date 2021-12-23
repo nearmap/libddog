@@ -2,7 +2,9 @@
 
 ## 0.1.6 (next)
 
-- ...
+- Added HLayoutWrapping to allow managed laying out of widgets that overflow a
+  single row over multiple rows.
+- Added support for mixing HLayout and HLayoutWrapping in HLayoutStack.
 
 ## 0.1.5
 
