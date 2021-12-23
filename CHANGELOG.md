@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7 (next)
+
+- ...
+
 ## 0.1.6
 
 - Added HLayoutWrapping to allow managed laying out of widgets that overflow a
