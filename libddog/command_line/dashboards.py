@@ -86,6 +86,9 @@ class DashboardManagerCli:
         fmt = "%6s  %7s  %7s  %s"
         self.writer.println(fmt, "GROUPS", "WIDGETS", "QUERIES", "TITLE")
 
+        # sort by title
+        dashes = sorted(dashes, key=lambda dash: dash.title.lower())
+
         for dash in dashes:
             n_widgets = count_widgets(dash)
             n_groups = count_groups(dash)
