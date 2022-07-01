@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8 (next)
+
+- 
+
 ## 0.1.7
 
 - `ddog dash list-defs` now shows dashboards sorted by title.
